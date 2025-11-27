@@ -1,0 +1,280 @@
+:root {
+    --bs-primary: #579157;
+    --bs-primary-rgb: 87, 145, 87;
+    --bs-primary-hover: #4a7c4a;
+
+    /* 覆蓋 info 顏色用於表格操作按鈕 */
+    --bs-info: #91A595;
+    --bs-info-rgb: 145, 165, 149;
+    --bs-info-hover: #7d9180;
+
+    /* 定義自訂的灰綠色用於 danger 按鈕，但保留原本的紅色用於文字 */
+    --custom-btn-danger: #91A595;
+    --custom-btn-danger-hover: #7d9180;
+}
+
+/* ===== 基本布局樣式 ===== */
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+#wrapper {
+    display: flex;
+    width: 100%;
+    flex-grow: 1;
+    /* Make wrapper take remaining height */
+    transition: all 0.3s ease-in-out;
+    /* For smooth transition of content area */
+}
+
+#page-content-wrapper {
+    flex-grow: 1;
+    /* Allow content to expand */
+    padding: 20px;
+}
+
+/* ===== 側邊欄樣式 ===== */
+#sidebar-wrapper {
+    width: 250px;
+    /* Initial width */
+    background: #5C695E;
+    /* Dark background for sidebar */
+    color: #fff;
+    transition: all 0.3s ease-in-out;
+    flex-shrink: 0;
+    /* Prevent sidebar from shrinking */
+    overflow: hidden;
+    /* 隱藏所有溢出內容，避免捲軸 */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    width: 0;
+    /* Hide sidebar when toggled */
+}
+
+.sidebar-heading {
+    padding: 1.5rem 1.25rem 1rem 1.25rem;
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 0.5rem;
+}
+
+.list-group-item {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border: none;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+    margin: 2px 8px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateX(3px);
+    text-decoration: none;
+}
+
+.list-group-item.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.list-group-item i {
+    margin-right: 10px;
+    width: 16px;
+    text-align: center;
+}
+
+/* ===== 響應式設計 ===== */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        width: 0;
+        /* Hidden by default on mobile */
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        width: 250px;
+        /* Show sidebar when toggled on mobile */
+    }
+}
+
+/* ===== 導航列樣式 ===== */
+.navbar-brand img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    display: block;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #708C7D !important;
+    font-size: 50px;
+    line-height: 1;
+}
+
+.navbar-bg-color {
+    background-color: #ebf1ec;
+}
+
+/* ===== 表格樣式 ===== */
+/* 客製化所有 index 頁面的 table thead 背景顏色 */
+.table-light th {
+    background-color: #EBF1EC !important;
+    border-color: #dee2e6 !important;
+}
+
+/* ===== 按鈕樣式 ===== */
+/* Bootstrap CSS 變數已在 :root 中設定，自動套用到所有相關按鈕 */
+/* 包括 .btn-primary, .btn-outline-primary, .btn-outline-info, .btn-outline-danger 等 */
+
+/* ===== 備用方案：確保 CDN 環境下也能正確顯示 ===== */
+/* 如果 CSS 變數被 CDN 覆蓋，這些樣式會作為備用 */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--bs-primary-hover);
+    border-color: var(--bs-primary-hover);
+}
+
+.btn-outline-primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-info {
+    color: var(--bs-info);
+    border-color: var(--bs-info);
+}
+
+.btn-outline-info:hover {
+    background-color: var(--bs-info-hover);
+    border-color: var(--bs-info-hover);
+    color: #fff;
+}
+
+.btn-outline-danger {
+    color: var(--custom-btn-danger);
+    border-color: var(--custom-btn-danger);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--custom-btn-danger-hover);
+    border-color: var(--custom-btn-danger-hover);
+    color: #fff;
+}
+
+/* ===== Sidebar 子選單樣式 ===== */
+/* 重新設計的 hover 子選單樣式 */
+.nav-dropdown {
+    position: relative;
+}
+
+.dropdown-menu-custom {
+    position: fixed;
+    left: 250px;
+    background: #ebf1ec;
+    /* 與導航列和表格標題相同的淺綠色 */
+    border: 1px solid #91A595;
+    /* 使用配色方案中的綠灰色邊框 */
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(87, 145, 87, 0.15);
+    /* 使用主要綠色的陰影 */
+    min-width: 220px;
+    z-index: 1050;
+    display: none;
+    padding: 0.5rem 0;
+}
+
+.nav-dropdown:hover .dropdown-menu-custom {
+    display: block;
+}
+
+.dropdown-item-custom {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    clear: both;
+    font-weight: 400;
+    color: #5C695E;
+    /* 使用側邊欄背景色作為文字顏色 */
+    text-align: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item-custom:hover {
+    color: #fff;
+    /* hover 時文字變白色 */
+    background-color: #579157;
+    /* hover 時背景使用主要綠色 */
+    text-decoration: none;
+}
+
+.dropdown-item-custom i {
+    margin-right: 0.75rem;
+    width: 16px;
+    text-align: center;
+}
+
+/* 調整主選單項目樣式 */
+.nav-dropdown .list-group-item {
+    cursor: pointer;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .dropdown-menu-custom {
+        left: 0;
+        position: absolute;
+        top: 100%;
+    }
+}
+
+/* ===== 表單欄位樣式 ===== */
+/* Readonly 欄位樣式 */
+.form-control[readonly] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* ===== Select2 自定義樣式 ===== */
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: 38px;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single {
+    padding: 0.375rem 0.75rem;
+}
+
+/* Select2 下拉選單在表格中的樣式調整 */
+.select2-container--bootstrap-5 .select2-dropdown {
+    z-index: 1056;
+}
+
+/* Select2 搜尋框樣式 */
+.select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+}
+
+/* Select2 選項 hover 樣式 */
+.select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: var(--bs-primary);
+    color: white;
+}

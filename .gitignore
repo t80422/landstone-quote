@@ -1,0 +1,159 @@
+# LandStone Quote System - Git Ignore
+
+#-------------------------
+# Operating Specific Junk Files
+#-------------------------
+
+# OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# OS X Thumbnails
+._*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+#-------------------------
+# Environment Files
+#-------------------------
+
+.env
+.env.backup
+.env.production
+
+#-------------------------
+# Temporary Files
+#-------------------------
+
+writable/cache/*
+!writable/cache/index.html
+
+writable/logs/*
+!writable/logs/index.html
+
+writable/session/*
+!writable/session/index.html
+
+writable/uploads/*
+!writable/uploads/index.html
+
+writable/debugbar/*
+!writable/debugbar/index.html
+
+php_errors.log
+
+#-------------------------
+# IDE Files
+#-------------------------
+
+# PhpStorm
+.idea/
+*.iml
+*.ipr
+*.iws
+.phpstorm.meta.php
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Eclipse
+.project
+.buildpath
+.settings/
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+#-------------------------
+# Composer
+#-------------------------
+
+vendor/
+composer.lock
+composer.phar
+
+#-------------------------
+# Node / NPM
+#-------------------------
+
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+#-------------------------
+# Build Files
+#-------------------------
+
+/public/build/
+/public/hot
+
+#-------------------------
+# Test Files
+#-------------------------
+
+/phpunit.xml
+.phpunit.result.cache
+/coverage/
+
+#-------------------------
+# Database
+#-------------------------
+
+*.sql
+*.sqlite
+*.db
+
+#-------------------------
+# Backup Files
+#-------------------------
+
+*.bak
+*.backup
+*~
+
+#-------------------------
+# Custom
+#-------------------------
+
+# 上傳的檔案
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# 臨時檔案
+/temp/*
+/tmp/*
+
+# 文件備份
+*.old
+
+# 壓縮檔
+*.zip
+*.tar
+*.gz
+*.rar

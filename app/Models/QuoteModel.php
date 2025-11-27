@@ -1,0 +1,322 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class QuoteModel extends Model
+{
+    protected $table = 'quotes';
+    protected $primaryKey = 'q_id';
+    protected $useAutoIncrement = true;
+    protected $returnType = 'array';
+    protected $useSoftDeletes = false;
+    protected $protectFields = true;
+    protected $allowedFields = [
+        'q_number',
+        'q_date',
+        'q_valid_date',
+        'q_c_id',
+        'q_subtotal',
+        'q_discount',
+        'q_tax_rate',
+        'q_tax_amount',
+        'q_total_amount',
+        'q_notes',
+        'q_o_id',
+    ];
+
+    // Dates
+    protected $useTimestamps = true;
+    protected $dateFormat = 'datetime';
+    protected $createdField = 'q_created_at';
+    protected $updatedField = 'q_updated_at';
+
+    // Validation
+    protected $validationRules = [
+        'q_number' => 'required|max_length[50]',
+        'q_date' => 'required|valid_date',
+        'q_c_id' => 'required|integer',
+        'q_subtotal' => 'permit_empty|numeric',
+        'q_discount' => 'permit_empty|decimal',
+        'q_tax_rate' => 'permit_empty|decimal',
+    ];
+
+    protected $validationMessages = [
+        'q_number' => [
+            'required' => '報價單號為必填',
+            'is_unique' => '報價單號已存在',
+        ],
+        'q_date' => [
+            'required' => '報價日期為必填',
+        ],
+        'q_c_id' => [
+            'required' => '客戶為必填',
+        ],
+    ];
+
+    protected $skipValidation = false;
+    protected $cleanValidationRules = true;
+
+    // Callbacks
+    protected $allowCallbacks = true;
+    protected $beforeInsert = [];
+    protected $afterInsert = [];
+    protected $beforeUpdate = [];
+    protected $afterUpdate = [];
+    protected $beforeFind = [];
+    protected $afterFind = [];
+    protected $beforeDelete = [];
+    protected $afterDelete = [];
+
+    /**
+     * 取得報價單及客戶資料
+     */
+    public function getWithCustomer($id = null)
+    {
+        $builder = $this->select('quotes.*, customers.c_name as customer_name, customers.c_contact_person, customers.c_phone')
+            ->join('customers', 'customers.c_id = quotes.q_c_id', 'left');
+
+        if ($id !== null) {
+            return $builder->where('quotes.q_id', $id)->first();
+        }
+
+        return $builder->findAll();
+    }
+
+    /**
+     * 分頁查詢報價單（含客戶資訊）
+     * 
+     * @param string|null $keyword 搜尋關鍵字
+     * @param int $page 頁碼
+     * @param int $perPage 每頁筆數
+     * @return array ['data' => 資料陣列, 'total' => 總筆數, 'totalPages' => 總頁數]
+     */
+    public function getQuotesWithPagination(?string $keyword = null, int $page = 1, int $perPage = 10): array
+    {
+        $builder = $this->builder()
+            ->select('quotes.*, customers.c_name as customer_name')
+            ->join('customers', 'customers.c_id = quotes.q_c_id', 'left');
+
+        if ($keyword) {
+            $builder->groupStart()
+                ->like('q_number', $keyword)
+                ->orLike('c_name', $keyword)
+                ->groupEnd();
+        }
+
+        $builder->orderBy('q_created_at', 'DESC');
+
+        $total = $builder->countAllResults(false);
+        $totalPages = ceil($total / $perPage);
+        $data = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'totalPages' => $totalPages,
+        ];
+    }
+
+    /**
+     * 生成新的報價單號
+     * 格式：Q + 年月日 + 流水號(3位)
+     * 例如：Q202501270001
+     * 
+     * @return string
+     */
+    public function generateQuoteNumber(): string
+    {
+        $date = date('Ymd');
+        $prefix = 'Q' . $date;
+
+        $lastQuote = $this->like('q_number', $prefix, 'after')
+            ->orderBy('q_number', 'DESC')
+            ->first();
+
+        if ($lastQuote) {
+            $lastNumber = intval(substr($lastQuote['q_number'], -3));
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * 儲存報價單（含項目）
+     * 使用事務確保資料一致性
+     * 
+     * @param array $quoteData 報價單資料
+     * @param array $items 報價單項目
+     * @return array ['success' => bool, 'message' => string, 'quoteId' => int|null]
+     */
+    public function saveQuoteWithItems(array $quoteData, array $items): array
+    {
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            $quoteItemModel = new QuoteItemModel();
+            $quoteId = $quoteData['q_id'] ?? null;
+
+            if ($quoteId) {
+                // 更新報價單
+                $this->update($quoteId, $quoteData);
+
+                // 刪除舊的項目
+                $quoteItemModel->where('qi_q_id', $quoteId)->delete();
+            } else {
+                // 新增報價單
+                $quoteId = $this->insert($quoteData);
+            }
+
+            // 計算並新增項目
+            $calculatedTotals = $this->calculateAndInsertItems($quoteId, $items, $quoteData);
+
+            if (!$calculatedTotals['success']) {
+                throw new \Exception($calculatedTotals['message']);
+            }
+
+            // 更新報價單金額
+            $this->update($quoteId, [
+                'q_subtotal' => $calculatedTotals['subtotal'],
+                'q_tax_amount' => $calculatedTotals['taxAmount'],
+                'q_total_amount' => $calculatedTotals['totalAmount'],
+            ]);
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return [
+                    'success' => false,
+                    'message' => '儲存失敗，請稍後再試',
+                    'quoteId' => null,
+                ];
+            }
+
+            return [
+                'success' => true,
+                'message' => '儲存成功',
+                'quoteId' => $quoteId,
+            ];
+        } catch (\Exception $e) {
+            $db->transRollback();
+            return [
+                'success' => false,
+                'message' => '儲存失敗：' . $e->getMessage(),
+                'quoteId' => null,
+            ];
+        }
+    }
+
+    /**
+     * 計算並新增報價單項目
+     * 
+     * @param int $quoteId 報價單 ID
+     * @param array $items 項目陣列
+     * @param array $quoteData 報價單資料（含折扣、稅率）
+     * @return array ['success' => bool, 'message' => string, 'subtotal' => float, 'taxAmount' => float, 'totalAmount' => float]
+     */
+    private function calculateAndInsertItems(int $quoteId, array $items, array $quoteData): array
+    {
+        $quoteItemModel = new QuoteItemModel();
+        $subtotal = 0;
+
+        foreach ($items as $item) {
+            if (empty($item['qi_p_id']) || empty($item['qi_quantity'])) {
+                continue;
+            }
+
+            $item['qi_q_id'] = $quoteId;
+
+            // 計算單項金額
+            $quantity = floatval($item['qi_quantity']);
+            $unitPrice = floatval($item['qi_unit_price']);
+            $discount = floatval($item['qi_discount'] ?? 0);
+
+            $amount = $quantity * $unitPrice * (1 - $discount / 100);
+            $item['qi_amount'] = $amount;
+
+            $quoteItemModel->insert($item);
+            $subtotal += $amount;
+        }
+
+        if ($subtotal == 0) {
+            return [
+                'success' => false,
+                'message' => '至少需要新增一個有效的商品項目',
+                'subtotal' => 0,
+                'taxAmount' => 0,
+                'totalAmount' => 0,
+            ];
+        }
+
+        // 計算整單折扣和稅額
+        $discount = floatval($quoteData['q_discount'] ?? 0);
+        $taxRate = floatval($quoteData['q_tax_rate'] ?? 5) / 100;
+
+        $discountedSubtotal = $subtotal * (1 - $discount / 100);
+        $taxAmount = $discountedSubtotal * $taxRate;
+        $totalAmount = $discountedSubtotal + $taxAmount;
+
+        return [
+            'success' => true,
+            'message' => '',
+            'subtotal' => $subtotal,
+            'taxAmount' => $taxAmount,
+            'totalAmount' => $totalAmount,
+        ];
+    }
+
+    /**
+     * 驗證項目資料
+     * 
+     * @param array $items 項目陣列
+     * @return array ['valid' => bool, 'message' => string]
+     */
+    public function validateItems(array $items): array
+    {
+        if (empty($items)) {
+            return [
+                'valid' => false,
+                'message' => '至少需要新增一個商品項目',
+            ];
+        }
+
+        $validItemCount = count(array_filter($items, function ($item) {
+            return !empty($item['qi_p_id']) && !empty($item['qi_quantity']);
+        }));
+
+        if ($validItemCount === 0) {
+            return [
+                'valid' => false,
+                'message' => '至少需要新增一個有效的商品項目',
+            ];
+        }
+
+        return [
+            'valid' => true,
+            'message' => '',
+        ];
+    }
+
+    /**
+     * 檢查報價單號是否唯一
+     * 
+     * @param string $quoteNumber 報價單號
+     * @param int|null $excludeId 要排除的報價單 ID（用於更新時）
+     * @return bool
+     */
+    public function isQuoteNumberUnique(string $quoteNumber, ?int $excludeId = null): bool
+    {
+        $builder = $this->where('q_number', $quoteNumber);
+
+        if ($excludeId !== null) {
+            $builder->where('q_id !=', $excludeId);
+        }
+
+        return $builder->countAllResults() === 0;
+    }
+}
