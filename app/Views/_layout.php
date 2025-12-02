@@ -39,6 +39,9 @@
                 <a href="<?= url_to('QuoteController::index') ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-file-text"></i> 報價單管理
                 </a>
+                <a href="<?= url_to('OrderController::index') ?>" class="list-group-item list-group-item-action">
+                    <i class="bi bi-receipt"></i> 訂單管理
+                </a>
             </div>
         </div>
         <!-- Page Content -->

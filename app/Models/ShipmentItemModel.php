@@ -59,6 +59,14 @@ class ShipmentItemModel extends Model
     protected $afterDelete = [];
 
     /**
+     * 取得出貨單的所有項目
+     */
+    public function getItemsByShipmentId($shipmentId)
+    {
+        return $this->where('si_s_id', $shipmentId)->findAll();
+    }
+
+    /**
      * 取得出貨明細及訂單明細、商品資料
      */
     public function getItemsWithDetails($shipmentId)

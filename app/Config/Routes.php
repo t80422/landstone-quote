@@ -31,3 +31,20 @@ $routes->group('quote', function ($routes) {
     $routes->get('delete/(:num)', 'QuoteController::delete/$1');
     $routes->get('get-product/(:num)', 'QuoteController::getProduct/$1');
 });
+
+$routes->group('order', function ($routes) {
+    $routes->get('/', 'OrderController::index');
+    $routes->get('create', 'OrderController::create');
+    $routes->get('edit/(:num)', 'OrderController::edit/$1');
+    $routes->post('save', 'OrderController::save');
+    $routes->get('delete/(:num)', 'OrderController::delete/$1');
+    $routes->get('create-from-quote/(:num)', 'OrderController::createFromQuote/$1');
+});
+
+$routes->group('shipment', function ($routes) {
+    $routes->get('/', 'ShipmentController::index');
+    $routes->get('create/(:num)', 'ShipmentController::create/$1');
+    $routes->get('edit/(:num)', 'ShipmentController::edit/$1');
+    $routes->post('save', 'ShipmentController::save');
+    $routes->get('delete/(:num)', 'ShipmentController::delete/$1');
+});

@@ -89,6 +89,12 @@ dist/
 nbdist/
 .nb-gradle/
 
+# Cursor
+.cursor/
+
+# Antigravity
+.agent
+
 #-------------------------
 # Composer
 #-------------------------

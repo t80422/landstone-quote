@@ -14,11 +14,11 @@ class CreateOrders extends Migration
                 'constraint' => 11,
                 'unsigned' => true,
                 'auto_increment' => true,
+                'comment' => '訂單ID',
             ],
             'o_number' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
-                'unique' => true,
+                'constraint' => 12,
                 'comment' => '訂單編號',
             ],
             'o_date' => [
@@ -53,13 +53,19 @@ class CreateOrders extends Migration
                 'type' => 'ENUM',
                 'constraint' => ['unpaid', 'partial', 'paid'],
                 'default' => 'unpaid',
-                'comment' => '收款狀態',
+                'comment' => '付款狀態',
             ],
             'o_invoice_number' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
+                'constraint' => 20,
                 'null' => true,
                 'comment' => '發票號碼',
+            ],
+            'o_shipment_status' => [
+                'type' => 'ENUM',
+                'constraint' => ['preparing', 'partial', 'shipped'],
+                'default' => 'preparing',
+                'comment' => '出貨狀態',
             ],
             'o_status' => [
                 'type' => 'ENUM',
@@ -68,13 +74,13 @@ class CreateOrders extends Migration
                 'comment' => '訂單狀態',
             ],
             'o_notes' => [
-                'type' => 'TEXT',
+                'type' => 'VARCHAR',
+                'constraint' => 255,
                 'null' => true,
                 'comment' => '備註',
             ],
             'o_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'o_updated_at' => [
@@ -86,8 +92,8 @@ class CreateOrders extends Migration
 
         $this->forge->addKey('o_id', true);
         $this->forge->addForeignKey('o_c_id', 'customers', 'c_id', 'CASCADE', 'CASCADE');
-        $this->forge->addForeignKey('o_q_id', 'quotes', 'q_id', 'SET NULL', 'CASCADE');
-        $this->forge->createTable('orders');
+        $this->forge->addForeignKey('o_q_id', 'quotes', 'q_id', 'CASCADE', 'CASCADE');
+        $this->forge->createTable('orders',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

@@ -69,27 +69,33 @@ function getFieldClass($fieldName)
                                 readonly>
                             <?= showFieldError('q_number') ?>
                         </div>
+                        <!-- 報價日期 -->
                         <div class="col-md-4 mb-3">
                             <label for="quoteDate" class="form-label">
                                 報價日期 <span class="text-danger">*</span>
                             </label>
-                            <input
-                                type="date"
-                                class="form-control <?= getFieldClass('q_date') ?>"
-                                id="quoteDate"
-                                name="q_date"
-                                value="<?= old('q_date', $data['q_date'] ?? date('Y-m-d')) ?>"
-                                required>
+                            <div class="input-group">
+                                <input
+                                    type="date"
+                                    class="form-control <?= getFieldClass('q_date') ?>"
+                                    id="quoteDate"
+                                    name="q_date"
+                                    value="<?= old('q_date', $data['q_date'] ?? date('Y-m-d')) ?>"
+                                    required>
+                            </div>
                             <?= showFieldError('q_date') ?>
                         </div>
+                        <!-- 有效日期 -->
                         <div class="col-md-4 mb-3">
                             <label for="validDate" class="form-label">有效日期</label>
-                            <input
-                                type="date"
-                                class="form-control <?= getFieldClass('q_valid_date') ?>"
-                                id="validDate"
-                                name="q_valid_date"
-                                value="<?= old('q_valid_date', $data['q_valid_date'] ?? '') ?>">
+                            <div class="input-group">
+                                <input
+                                    type="date"
+                                    class="form-control <?= getFieldClass('q_valid_date') ?>"
+                                    id="validDate"
+                                    name="q_valid_date"
+                                    value="<?= old('q_valid_date', $data['q_valid_date'] ?? '') ?>">
+                            </div>
                             <?= showFieldError('q_valid_date') ?>
                         </div>
                     </div>
@@ -251,6 +257,7 @@ function getFieldClass($fieldName)
         </div>
     </div>
 </div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

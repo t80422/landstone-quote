@@ -14,6 +14,7 @@ class CreateCustomerDeliveryAddresses extends Migration
                 'constraint' => 11,
                 'unsigned' => true,
                 'auto_increment' => true,
+                'comment' => '送貨地址ID',
             ],
             'cda_c_id' => [
                 'type' => 'INT',
@@ -23,7 +24,7 @@ class CreateCustomerDeliveryAddresses extends Migration
             ],
             'cda_name' => [
                 'type' => 'VARCHAR',
-                'constraint' => 100,
+                'constraint' => 50,
                 'comment' => '地址名稱（如：總公司、分公司A）',
             ],
             'cda_contact_person' => [
@@ -50,13 +51,13 @@ class CreateCustomerDeliveryAddresses extends Migration
                 'comment' => '是否為預設地址',
             ],
             'cda_notes' => [
-                'type' => 'TEXT',
+                'type' => 'VARCHAR',
+                'constraint' => 255,
                 'null' => true,
                 'comment' => '備註',
             ],
             'cda_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'cda_updated_at' => [
@@ -67,9 +68,8 @@ class CreateCustomerDeliveryAddresses extends Migration
         ]);
 
         $this->forge->addKey('cda_id', true);
-        $this->forge->addKey('cda_c_id');
         $this->forge->addForeignKey('cda_c_id', 'customers', 'c_id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('customer_delivery_addresses');
+        $this->forge->createTable('customer_delivery_addresses',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

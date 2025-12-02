@@ -8,10 +8,6 @@ class QuoteModel extends Model
 {
     protected $table = 'quotes';
     protected $primaryKey = 'q_id';
-    protected $useAutoIncrement = true;
-    protected $returnType = 'array';
-    protected $useSoftDeletes = false;
-    protected $protectFields = true;
     protected $allowedFields = [
         'q_number',
         'q_date',
@@ -27,47 +23,8 @@ class QuoteModel extends Model
     ];
 
     // Dates
-    protected $useTimestamps = true;
-    protected $dateFormat = 'datetime';
     protected $createdField = 'q_created_at';
     protected $updatedField = 'q_updated_at';
-
-    // Validation
-    protected $validationRules = [
-        'q_number' => 'required|max_length[50]',
-        'q_date' => 'required|valid_date',
-        'q_c_id' => 'required|integer',
-        'q_subtotal' => 'permit_empty|numeric',
-        'q_discount' => 'permit_empty|decimal',
-        'q_tax_rate' => 'permit_empty|decimal',
-    ];
-
-    protected $validationMessages = [
-        'q_number' => [
-            'required' => '報價單號為必填',
-            'is_unique' => '報價單號已存在',
-        ],
-        'q_date' => [
-            'required' => '報價日期為必填',
-        ],
-        'q_c_id' => [
-            'required' => '客戶為必填',
-        ],
-    ];
-
-    protected $skipValidation = false;
-    protected $cleanValidationRules = true;
-
-    // Callbacks
-    protected $allowCallbacks = true;
-    protected $beforeInsert = [];
-    protected $afterInsert = [];
-    protected $beforeUpdate = [];
-    protected $afterUpdate = [];
-    protected $beforeFind = [];
-    protected $afterFind = [];
-    protected $beforeDelete = [];
-    protected $afterDelete = [];
 
     /**
      * 取得報價單及客戶資料
@@ -86,7 +43,7 @@ class QuoteModel extends Model
 
     /**
      * 分頁查詢報價單（含客戶資訊）
-     * 
+     *
      * @param string|null $keyword 搜尋關鍵字
      * @param int $page 頁碼
      * @param int $perPage 每頁筆數
@@ -95,7 +52,7 @@ class QuoteModel extends Model
     public function getQuotesWithPagination(?string $keyword = null, int $page = 1, int $perPage = 10): array
     {
         $builder = $this->builder()
-            ->select('quotes.*, customers.c_name as customer_name')
+            ->select('quotes.*, quotes.q_o_id, customers.c_name as customer_name')
             ->join('customers', 'customers.c_id = quotes.q_c_id', 'left');
 
         if ($keyword) {
@@ -304,7 +261,7 @@ class QuoteModel extends Model
 
     /**
      * 檢查報價單號是否唯一
-     * 
+     *
      * @param string $quoteNumber 報價單號
      * @param int|null $excludeId 要排除的報價單 ID（用於更新時）
      * @return bool
@@ -318,5 +275,24 @@ class QuoteModel extends Model
         }
 
         return $builder->countAllResults() === 0;
+    }
+
+    /**
+     * 取得報價單及其項目
+     *
+     * @param int $quoteId 報價單ID
+     * @return array|null
+     */
+    public function getQuoteWithItems($quoteId)
+    {
+        $quote = $this->find($quoteId);
+        if (!$quote) {
+            return null;
+        }
+
+        $quoteItemModel = new QuoteItemModel();
+        $quote['items'] = $quoteItemModel->getItemsWithProduct($quoteId);
+
+        return $quote;
     }
 }

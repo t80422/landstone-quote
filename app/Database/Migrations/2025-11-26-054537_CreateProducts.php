@@ -18,18 +18,17 @@ class CreateProducts extends Migration
             'p_code' => [
                 'type' => 'VARCHAR',
                 'constraint' => 50,
-                'unique' => true,
                 'comment' => '產品編號',
             ],
             'p_barcode' => [
                 'type' => 'VARCHAR',
-                'constraint' => 100,
+                'constraint' => 50,
                 'null' => true,
                 'comment' => '條碼',
             ],
             'p_name' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 50,
                 'comment' => '產品名稱',
             ],
             'p_image' => [
@@ -39,7 +38,8 @@ class CreateProducts extends Migration
                 'comment' => '產品圖片',
             ],
             'p_specifications' => [
-                'type' => 'TEXT',
+                'type' => 'VARCHAR',
+                'constraint' => 255,
                 'null' => true,
                 'comment' => '規格',
             ],
@@ -51,13 +51,12 @@ class CreateProducts extends Migration
             ],
             'p_unit' => [
                 'type' => 'VARCHAR',
-                'constraint' => 20,
+                'constraint' => 10,
                 'null' => true,
                 'comment' => '單位',
             ],
             'p_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'p_updated_at' => [
@@ -68,7 +67,7 @@ class CreateProducts extends Migration
         ]);
 
         $this->forge->addKey('p_id', true);
-        $this->forge->createTable('products');
+        $this->forge->createTable('products',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

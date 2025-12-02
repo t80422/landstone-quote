@@ -30,7 +30,7 @@ class CreateQuoteItems extends Migration
             'qi_quantity' => [
                 'type' => 'INT',
                 'constraint' => 11,
-                'default' => 1,
+                'default' => 0,
                 'comment' => '數量',
             ],
             'qi_unit_price' => [
@@ -53,7 +53,6 @@ class CreateQuoteItems extends Migration
             ],
             'qi_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'qi_updated_at' => [
@@ -66,7 +65,7 @@ class CreateQuoteItems extends Migration
         $this->forge->addKey('qi_id', true);
         $this->forge->addForeignKey('qi_q_id', 'quotes', 'q_id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('qi_p_id', 'products', 'p_id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('quote_items');
+        $this->forge->createTable('quote_items',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

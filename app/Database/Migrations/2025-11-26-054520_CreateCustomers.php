@@ -17,64 +17,65 @@ class CreateCustomers extends Migration
             ],
             'c_name' => [
                 'type' => 'VARCHAR',
-                'constraint' => 255,
+                'constraint' => 50,
                 'comment' => '客戶名稱',
             ],
             'c_manager' => [
                 'type' => 'VARCHAR',
-                'constraint' => 100,
-                'null' => false,
+                'constraint' => 50,
+                'null' => true,
                 'comment' => '負責人',
             ],
             'c_contact_person' => [
                 'type' => 'VARCHAR',
-                'constraint' => 100,
+                'constraint' => 50,
                 'null' => true,
                 'comment' => '聯絡人',
             ],
             'c_phone' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
+                'constraint' => 20,
                 'null' => true,
                 'comment' => '電話',
             ],
             'c_fax' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
+                'constraint' => 20,
                 'null' => true,
                 'comment' => '傳真號碼',
             ],
             'c_email' => [
                 'type' => 'VARCHAR',
-                'constraint' => 100,
+                'constraint' => 50,
                 'null' => true,
                 'comment' => 'Email',
             ],
             'c_address' => [
-                'type' => 'TEXT',
+                'type' => 'VARCHAR',
+                'constraint' => 255,
                 'null' => true,
                 'comment' => '地址',
             ],
             'c_tax_id' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
+                'constraint' => 10,
                 'null' => true,
                 'comment' => '統一編號',
             ],
             'c_payment_method' => [
                 'type' => 'VARCHAR',
-                'constraint' => 100,
+                'constraint' => 10,
                 'null' => true,
                 'comment' => '結帳方式',
             ],
             'c_notes' => [
-                'type' => 'TEXT',
+                'type' => 'VARCHAR',
+                'constraint' => 255,
                 'null' => true,
                 'comment' => '備註',
             ],
             'c_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'c_updated_at' => [
@@ -85,7 +86,7 @@ class CreateCustomers extends Migration
         ]);
 
         $this->forge->addKey('c_id', true);
-        $this->forge->createTable('customers');
+        $this->forge->createTable('customers',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

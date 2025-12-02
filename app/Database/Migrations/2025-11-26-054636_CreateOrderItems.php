@@ -14,6 +14,7 @@ class CreateOrderItems extends Migration
                 'constraint' => 11,
                 'unsigned' => true,
                 'auto_increment' => true,
+                'comment' => '訂單明細ID',
             ],
             'oi_o_id' => [
                 'type' => 'INT',
@@ -30,7 +31,7 @@ class CreateOrderItems extends Migration
             'oi_quantity' => [
                 'type' => 'INT',
                 'constraint' => 11,
-                'default' => 1,
+                'default' => 0,
                 'comment' => '訂購數量',
             ],
             'oi_unit_price' => [
@@ -38,6 +39,12 @@ class CreateOrderItems extends Migration
                 'constraint' => 11,
                 'default' => 0,
                 'comment' => '單價',
+            ],
+            'oi_discount' => [
+                'type' => 'FLOAT',
+                'constraint' => 11,
+                'default' => 0,
+                'comment' => '折扣(%)',
             ],
             'oi_amount' => [
                 'type' => 'FLOAT',
@@ -53,7 +60,6 @@ class CreateOrderItems extends Migration
             ],
             'oi_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'oi_updated_at' => [
@@ -66,7 +72,7 @@ class CreateOrderItems extends Migration
         $this->forge->addKey('oi_id', true);
         $this->forge->addForeignKey('oi_o_id', 'orders', 'o_id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('oi_p_id', 'products', 'p_id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('order_items');
+        $this->forge->createTable('order_items',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

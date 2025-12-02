@@ -14,6 +14,7 @@ class CreateShipments extends Migration
                 'constraint' => 11,
                 'unsigned' => true,
                 'auto_increment' => true,
+                'comment' => '出貨單ID',
             ],
             's_o_id' => [
                 'type' => 'INT',
@@ -23,7 +24,7 @@ class CreateShipments extends Migration
             ],
             's_number' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
+                'constraint' => 12,
                 'comment' => '出貨單號',
             ],
             's_date' => [
@@ -37,13 +38,13 @@ class CreateShipments extends Migration
                 'comment' => '出貨狀態',
             ],
             's_notes' => [
-                'type' => 'TEXT',
+                'type' => 'VARCHAR',
+                'constraint' => 255,
                 'null' => true,
                 'comment' => '備註',
             ],
             's_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             's_updated_at' => [
@@ -55,7 +56,7 @@ class CreateShipments extends Migration
 
         $this->forge->addKey('s_id', true);
         $this->forge->addForeignKey('s_o_id', 'orders', 'o_id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('shipments');
+        $this->forge->createTable('shipments',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

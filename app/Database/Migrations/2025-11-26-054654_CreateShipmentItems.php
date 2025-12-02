@@ -14,6 +14,7 @@ class CreateShipmentItems extends Migration
                 'constraint' => 11,
                 'unsigned' => true,
                 'auto_increment' => true,
+                'comment' => '出貨明細ID',
             ],
             'si_s_id' => [
                 'type' => 'INT',
@@ -31,11 +32,10 @@ class CreateShipmentItems extends Migration
                 'type' => 'INT',
                 'constraint' => 11,
                 'default' => 0,
-                'comment' => '本次出貨數量',
+                'comment' => '數量',
             ],
             'si_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'si_updated_at' => [
@@ -48,7 +48,7 @@ class CreateShipmentItems extends Migration
         $this->forge->addKey('si_id', true);
         $this->forge->addForeignKey('si_s_id', 'shipments', 's_id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('si_oi_id', 'order_items', 'oi_id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('shipment_items');
+        $this->forge->createTable('shipment_items',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()

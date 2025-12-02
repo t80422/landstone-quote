@@ -17,8 +17,7 @@ class CreateQuotes extends Migration
             ],
             'q_number' => [
                 'type' => 'VARCHAR',
-                'constraint' => 50,
-                'unique' => true,
+                'constraint' => 12,
                 'comment' => '報價單號',
             ],
             'q_date' => [
@@ -67,7 +66,8 @@ class CreateQuotes extends Migration
                 'comment' => '總金額',
             ],
             'q_notes' => [
-                'type' => 'TEXT',
+                'type' => 'VARCHAR',
+                'constraint' => 255,
                 'null' => true,
                 'comment' => '備註',
             ],
@@ -80,7 +80,6 @@ class CreateQuotes extends Migration
             ],
             'q_created_at' => [
                 'type' => 'DATETIME',
-                'null' => true,
                 'comment' => '建立時間',
             ],
             'q_updated_at' => [
@@ -92,7 +91,7 @@ class CreateQuotes extends Migration
 
         $this->forge->addKey('q_id', true);
         $this->forge->addForeignKey('q_c_id', 'customers', 'c_id', 'CASCADE', 'CASCADE');
-        $this->forge->createTable('quotes');
+        $this->forge->createTable('quotes',false,['ENGINE' => 'InnoDB']);
     }
 
     public function down()
