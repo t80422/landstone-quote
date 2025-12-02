@@ -43,6 +43,14 @@
                     <i class="bi bi-receipt"></i> 訂單管理
                 </a>
             </div>
+
+            <!-- 設定區塊 -->
+            <div class="sidebar-heading mt-3">設定</div>
+            <div class="list-group list-group-flush">
+                <a href="<?= url_to('PaymentMethodController::index') ?>" class="list-group-item list-group-item-action">
+                    <i class="bi bi-cash-coin"></i> 結帳方式管理
+                </a>
+            </div>
         </div>
         <!-- Page Content -->
         <div id="page-content-wrapper">

@@ -56,10 +56,25 @@ function getFieldClass($fieldName)
                     <h5 class="border-bottom pb-2 mb-3">
                         <i class="bi bi-building me-2 text-primary"></i>基本資料
                     </h5>
+
+                    <!-- 客戶編號 (僅編輯時顯示) -->
+                    <?php if (!empty($isEdit) && isset($data['c_code'])): ?>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label text-muted">
+                                    <i class="bi bi-hash me-1"></i>客戶編號
+                                </label>
+                                <div class="p-2 bg-light rounded">
+                                    <strong class="text-primary"><?= esc($data['c_code']) ?></strong>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="customerName" class="form-label">
-                                公司行號名稱 <span class="text-danger">*</span>
+                                公司行號名稱
                             </label>
                             <input
                                 type="text"
@@ -68,13 +83,12 @@ function getFieldClass($fieldName)
                                 name="c_name"
                                 value="<?= old('c_name', $data['c_name'] ?? '') ?>"
                                 placeholder="請輸入公司行號名稱"
-                                required
                                 aria-describedby="customerNameError">
                             <?= showFieldError('c_name') ?>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="manager" class="form-label">
-                                負責人 <span class="text-danger">*</span>
+                                負責人
                             </label>
                             <input
                                 type="text"
@@ -83,7 +97,6 @@ function getFieldClass($fieldName)
                                 name="c_manager"
                                 value="<?= old('c_manager', $data['c_manager'] ?? '') ?>"
                                 placeholder="請輸入負責人姓名"
-                                required
                                 aria-describedby="managerError">
                             <?= showFieldError('c_manager') ?>
                         </div>
@@ -102,19 +115,22 @@ function getFieldClass($fieldName)
                                 pattern="[0-9]{8}"
                                 aria-describedby="taxIdError">
                             <?= showFieldError('c_tax_id') ?>
-                            <div class="form-text">請輸入 8 位數字</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="paymentMethod" class="form-label">結帳方式</label>
-                            <input
-                                type="text"
-                                class="form-control <?= getFieldClass('c_payment_method') ?>"
+                            <select
+                                class="form-select <?= getFieldClass('c_pm_id') ?>"
                                 id="paymentMethod"
-                                name="c_payment_method"
-                                value="<?= old('c_payment_method', $data['c_payment_method'] ?? '') ?>"
-                                placeholder="例如：現金、月結30天、月結60天"
+                                name="c_pm_id"
                                 aria-describedby="paymentMethodError">
-                            <?= showFieldError('c_payment_method') ?>
+                                <option value="">請選擇結帳方式</option>
+                                <?php foreach ($paymentMethods as $pm): ?>
+                                    <option value="<?= $pm['pm_id'] ?>" <?= old('c_pm_id', $data['c_pm_id'] ?? '') == $pm['pm_id'] ? 'selected' : '' ?>>
+                                        <?= esc($pm['pm_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?= showFieldError('c_pm_id') ?>
                         </div>
                     </div>
                     <div class="row">
@@ -134,7 +150,7 @@ function getFieldClass($fieldName)
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="contactPerson" class="form-label">
-                                主要聯絡人 <span class="text-danger">*</span>
+                                主要聯絡人
                             </label>
                             <input
                                 type="text"
@@ -143,13 +159,12 @@ function getFieldClass($fieldName)
                                 name="c_contact_person"
                                 value="<?= old('c_contact_person', $data['c_contact_person'] ?? '') ?>"
                                 placeholder="請輸入聯絡人姓名"
-                                required
                                 aria-describedby="contactPersonError">
                             <?= showFieldError('c_contact_person') ?>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">
-                                聯絡電話 <span class="text-danger">*</span>
+                                聯絡電話
                             </label>
                             <input
                                 type="tel"
@@ -158,7 +173,6 @@ function getFieldClass($fieldName)
                                 name="c_phone"
                                 value="<?= old('c_phone', $data['c_phone'] ?? '') ?>"
                                 placeholder="例如：02-12345678 或 0912-345678"
-                                required
                                 aria-describedby="phoneError">
                             <?= showFieldError('c_phone') ?>
                         </div>
@@ -190,15 +204,39 @@ function getFieldClass($fieldName)
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="address" class="form-label">地址</label>
+                        <div class="col-md-4 mb-3">
+                            <label for="city" class="form-label">縣市</label>
+                            <select
+                                class="form-select <?= getFieldClass('c_city') ?>"
+                                id="city"
+                                name="c_city"
+                                aria-describedby="cityError">
+                                <option value="">請選擇縣市</option>
+                                <?php
+                                $cities = [
+                                    '台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市',
+                                    '基隆市', '新竹市', '嘉義市', '新竹縣', '苗栗縣', '彰化縣',
+                                    '南投縣', '雲林縣', '嘉義縣', '屏東縣', '宜蘭縣', '花蓮縣',
+                                    '台東縣', '澎湖縣', '金門縣', '連江縣'
+                                ];
+                                foreach ($cities as $city):
+                                ?>
+                                    <option value="<?= $city ?>" <?= old('c_city', $data['c_city'] ?? '') == $city ? 'selected' : '' ?>>
+                                        <?= $city ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?= showFieldError('c_city') ?>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="address" class="form-label">詳細地址</label>
                             <input
                                 type="text"
                                 class="form-control <?= getFieldClass('c_address') ?>"
                                 id="address"
                                 name="c_address"
                                 value="<?= old('c_address', $data['c_address'] ?? '') ?>"
-                                placeholder="請輸入公司地址"
+                                placeholder="請輸入詳細地址"
                                 aria-describedby="addressError">
                             <?= showFieldError('c_address') ?>
                         </div>
@@ -208,22 +246,21 @@ function getFieldClass($fieldName)
                 <!-- 送貨地址區塊 -->
                 <div class="mb-4">
                     <h5 class="border-bottom pb-2 mb-3">
-                        <i class="bi bi-truck me-2 text-primary"></i>送貨地址 <span class="text-danger">*</span>
+                        <i class="bi bi-truck me-2 text-primary"></i>送貨地址
                     </h5>
                     <div id="deliveryAddressContainer">
                         <?php
                         $deliveryAddresses = $data['delivery_addresses'] ?? [];
-                        if (empty($deliveryAddresses)) {
-                            $deliveryAddresses = [['cda_id' => '', 'cda_name' => '', 'cda_contact_person' => '', 'cda_phone' => '', 'cda_address' => '', 'cda_is_default' => 1, 'cda_notes' => '']];
-                        }
                         $addressCount = count($deliveryAddresses);
-                        foreach ($deliveryAddresses as $index => $address):
-                            echo view('components/delivery_address_item', [
-                                'index' => $index,
-                                'address' => $address,
-                                'totalCount' => $addressCount
-                            ]);
-                        endforeach;
+                        if (!empty($deliveryAddresses)) {
+                            foreach ($deliveryAddresses as $index => $address):
+                                echo view('components/delivery_address_item', [
+                                    'index' => $index,
+                                    'address' => $address,
+                                    'totalCount' => $addressCount
+                                ]);
+                            endforeach;
+                        }
                         ?>
                     </div>
 
@@ -270,11 +307,6 @@ function getFieldClass($fieldName)
                     </div>
                 <?php endif; ?>
 
-                <!-- 必填欄位說明 -->
-                <div class="alert alert-info py-2 mb-4">
-                    <i class="bi bi-info-circle me-2"></i>
-                    標示 <span class="text-danger">*</span> 為必填欄位
-                </div>
 
                 <!-- 表單按鈕 -->
                 <div class="d-flex gap-2 justify-content-end">
@@ -299,13 +331,6 @@ function getFieldClass($fieldName)
     document.getElementById('customerForm').addEventListener('submit', function(e) {
         const submitBtn = document.getElementById('submitBtn');
 
-        // 檢查是否至少有一個送貨地址
-        const addressItems = document.querySelectorAll('.address-item');
-        if (addressItems.length === 0) {
-            e.preventDefault();
-            alert('至少需要新增一個送貨地址');
-            return false;
-        }
 
         // 檢查表單驗證
         if (!this.checkValidity()) {
@@ -375,12 +400,6 @@ function getFieldClass($fieldName)
             const addressItem = e.target.closest('.address-item');
             const addressId = addressItem.querySelector('input[name*="[cda_id]"]').value;
 
-            // 檢查是否至少保留一個地址
-            const addressCount = document.querySelectorAll('.address-item').length;
-            if (addressCount <= 1) {
-                alert('至少需要保留一個送貨地址');
-                return;
-            }
 
             if (confirm('確定要刪除這個送貨地址嗎？')) {
                 // 如果是已存在的地址（有 ID），記錄到刪除列表
@@ -409,13 +428,6 @@ function getFieldClass($fieldName)
                         checkbox.checked = false;
                     }
                 });
-            } else {
-                // 如果取消預設，確保至少有一個預設
-                const hasDefault = Array.from(document.querySelectorAll('.default-address-checkbox')).some(cb => cb.checked);
-                if (!hasDefault) {
-                    e.target.checked = true;
-                    alert('至少需要一個預設地址');
-                }
             }
         }
     });
@@ -433,20 +445,11 @@ function getFieldClass($fieldName)
 
     // 更新刪除按鈕狀態
     function updateRemoveButtons() {
-        const addressItems = document.querySelectorAll('.address-item');
         const removeButtons = document.querySelectorAll('.remove-address');
-
-        if (addressItems.length === 1) {
-            removeButtons.forEach(btn => {
-                btn.disabled = true;
-                btn.title = '至少需要一個送貨地址';
-            });
-        } else {
-            removeButtons.forEach(btn => {
-                btn.disabled = false;
-                btn.title = '';
-            });
-        }
+        removeButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.title = '';
+        });
     }
 
     // 確保至少有一個預設地址

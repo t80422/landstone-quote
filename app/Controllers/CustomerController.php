@@ -5,16 +5,19 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\CustomerModel;
 use App\Models\CustomerDeliveryAddressModel;
+use App\Models\PaymentMethodModel;
 
 class CustomerController extends BaseController
 {
     private $customerModel;
     private $deliveryAddressModel;
+    private $paymentMethodModel;
 
     public function __construct()
     {
         $this->customerModel = new CustomerModel();
         $this->deliveryAddressModel = new CustomerDeliveryAddressModel();
+        $this->paymentMethodModel = new PaymentMethodModel();
     }
 
     public function index()
@@ -38,6 +41,7 @@ class CustomerController extends BaseController
     {
         return view('customer/form', [
             'isEdit' => false,
+            'paymentMethods' => $this->paymentMethodModel->getAllForDropdown(),
         ]);
     }
 
@@ -47,6 +51,7 @@ class CustomerController extends BaseController
         return view('customer/form', [
             'isEdit' => true,
             'data' => $data,
+            'paymentMethods' => $this->paymentMethodModel->getAllForDropdown(),
         ]);
     }
 
@@ -55,13 +60,6 @@ class CustomerController extends BaseController
         $data = $this->request->getPost();
         $deliveryAddresses = $this->request->getPost('delivery_addresses');
 
-        // 驗證至少要有一個送貨地址
-        if (empty($deliveryAddresses) || count(array_filter($deliveryAddresses, function($addr) {
-            return !empty($addr['cda_address']);
-        })) === 0) {
-            return redirect()->back()->withInput()->with('error', '至少需要新增一個送貨地址');
-        }
-
         // 開始事務
         $db = \Config\Database::connect();
         $db->transStart();
@@ -69,12 +67,13 @@ class CustomerController extends BaseController
         try {
             // 儲存客戶基本資料
             $customerId = $data['c_id'] ?? null;
-            
+
             if ($customerId) {
                 // 更新
                 $this->customerModel->update($customerId, $data);
             } else {
-                // 新增
+                // 新增時自動產生客戶編號
+                $data['c_code'] = $this->customerModel->generateCustomerCode();
                 $customerId = $this->customerModel->insert($data);
             }
 

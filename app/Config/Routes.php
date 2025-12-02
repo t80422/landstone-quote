@@ -48,3 +48,12 @@ $routes->group('shipment', function ($routes) {
     $routes->post('save', 'ShipmentController::save');
     $routes->get('delete/(:num)', 'ShipmentController::delete/$1');
 });
+
+$routes->group('payment-method', function ($routes) {
+    $routes->get('/', 'PaymentMethodController::index');
+    $routes->get('create', 'PaymentMethodController::create');
+    $routes->get('edit/(:num)', 'PaymentMethodController::edit/$1');
+    $routes->post('store', 'PaymentMethodController::store');
+    $routes->post('update/(:num)', 'PaymentMethodController::update/$1');
+    $routes->get('delete/(:num)', 'PaymentMethodController::delete/$1');
+});

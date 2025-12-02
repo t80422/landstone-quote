@@ -51,8 +51,7 @@ $canDelete = $totalCount > 1 || $isTemplate;
                 <i class="bi bi-geo-alt-fill text-primary me-1"></i>
                 送貨地址 #<span class="address-number"><?= $addressNumber ?></span>
             </h6>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-address" 
-                    <?= !$canDelete ? 'disabled title="至少需要一個送貨地址"' : '' ?>>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-address">
                 <i class="bi bi-trash me-1"></i>刪除
             </button>
         </div>
@@ -61,39 +60,39 @@ $canDelete = $totalCount > 1 || $isTemplate;
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label">地址名稱 <span class="text-danger">*</span></label>
+                <label class="form-label">地址名稱</label>
                 <input type="text" class="form-control" 
                        name="delivery_addresses[<?= $index ?>][cda_name]" 
                        value="<?= esc($address['cda_name']) ?>" 
-                       placeholder="例如：總公司、台北辦公室、新竹廠區" required>
+                       placeholder="例如：總公司、台北辦公室、新竹廠區">
                 <div class="form-text">用於識別不同的送貨地點</div>
             </div>
             <div class="col-md-6 mb-3">
-                <label class="form-label">收件人 <span class="text-danger">*</span></label>
+                <label class="form-label">收件人</label>
                 <input type="text" class="form-control" 
                        name="delivery_addresses[<?= $index ?>][cda_contact_person]" 
                        value="<?= esc($address['cda_contact_person']) ?>" 
-                       placeholder="請輸入收件人姓名" required>
+                       placeholder="請輸入收件人姓名">
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-12 mb-3">
-                <label class="form-label">送貨地址 <span class="text-danger">*</span></label>
+                <label class="form-label">送貨地址</label>
                 <input type="text" class="form-control" 
                        name="delivery_addresses[<?= $index ?>][cda_address]" 
                        value="<?= esc($address['cda_address']) ?>" 
-                       placeholder="請輸入完整送貨地址" required>
+                       placeholder="請輸入完整送貨地址">
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label">收件電話 <span class="text-danger">*</span></label>
+                <label class="form-label">收件電話</label>
                 <input type="tel" class="form-control" 
                        name="delivery_addresses[<?= $index ?>][cda_phone]" 
                        value="<?= esc($address['cda_phone']) ?>" 
-                       placeholder="例如：02-12345678 或 0912-345678" required>
+                       placeholder="例如：02-12345678 或 0912-345678">
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label">備註</label>
