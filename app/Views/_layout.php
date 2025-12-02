@@ -47,6 +47,9 @@
             <!-- 設定區塊 -->
             <div class="sidebar-heading mt-3">設定</div>
             <div class="list-group list-group-flush">
+                <a href="<?= url_to('ProductCategoryController::index') ?>" class="list-group-item list-group-item-action">
+                    <i class="bi bi-tags"></i> 產品分類管理
+                </a>
                 <a href="<?= url_to('PaymentMethodController::index') ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-cash-coin"></i> 結帳方式管理
                 </a>

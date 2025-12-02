@@ -32,7 +32,7 @@
             <form action="<?= url_to('ProductController::index') ?>" method="get" class="row g-3">
                 <div class="col-md-10">
                     <input type="text" class="form-control" name="keyword"
-                        placeholder="搜尋產品編號、產品名稱或條碼..."
+                        placeholder="搜尋產品編號、產品名稱、供應商或分類..."
                         value="<?= esc($keyword ?? '') ?>">
                 </div>
                 <div class="col-md-2">
@@ -60,11 +60,10 @@
                                 <th style="width: 80px;">圖片</th>
                                 <th>產品編號</th>
                                 <th>產品名稱</th>
-                                <th>條碼</th>
-                                <th class="text-end">標準價格</th>
-                                <th>單位</th>
-                                <th>建立時間</th>
-                                <th style="width: 150px;" class="text-center">操作</th>
+                                <th>分類</th>
+                                <th>供應商</th>
+                                <th class="text-end">售價</th>
+                                <th style="width: 120px;" class="text-center">操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,19 +88,52 @@
                                         <?php endif; ?>
                                     </td>
                                     <td><strong><?= esc($item['p_code']) ?></strong></td>
-                                    <td><?= esc($item['p_name']) ?></td>
-                                    <td><?= esc($item['p_barcode'] ?? '-') ?></td>
-                                    <td class="text-end">
-                                        <?php if ($item['p_standard_price']): ?>
-                                            <span class="text-primary fw-bold">
-                                                <?= number_format($item['p_standard_price']) ?>
+                                    <td>
+                                        <div>
+                                            <div class="fw-bold"><?= esc($item['p_name']) ?></div>
+                                            <?php if (!empty($item['p_type']) || !empty($item['p_style']) || !empty($item['p_color']) || !empty($item['p_size'])): ?>
+                                                <small class="text-muted">
+                                                    <?php
+                                                    $specs = [];
+                                                    if (!empty($item['p_type'])) $specs[] = esc($item['p_type']);
+                                                    if (!empty($item['p_style'])) $specs[] = esc($item['p_style']);
+                                                    if (!empty($item['p_color'])) $specs[] = esc($item['p_color']);
+                                                    if (!empty($item['p_size'])) $specs[] = esc($item['p_size']);
+                                                    echo implode(' / ', $specs);
+                                                    ?>
+                                                </small>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($item['pc_name'])): ?>
+                                            <span class="badge bg-info">
+                                                <i class="bi bi-tag me-1"></i>
+                                                <?= esc($item['pc_name']) ?>
                                             </span>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= esc($item['p_unit'] ?? '-') ?></td>
-                                    <td><small class="text-muted"><?= esc($item['p_created_at']) ?></small></td>
+                                    <td>
+                                        <?php if (!empty($item['p_supplier'])): ?>
+                                            <small class="text-muted"><?= esc($item['p_supplier']) ?></small>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end">
+                                        <?php if ($item['p_standard_price']): ?>
+                                            <span class="text-primary fw-bold">
+                                                <?= number_format($item['p_standard_price']) ?>
+                                            </span>
+                                            <?php if (!empty($item['p_unit'])): ?>
+                                                <small class="text-muted ms-1">/ <?= esc($item['p_unit']) ?></small>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="<?= url_to('ProductController::edit', $item['p_id']) ?>"

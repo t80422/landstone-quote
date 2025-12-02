@@ -23,6 +23,15 @@ $routes->group('product', function ($routes) {
     $routes->get('delete/(:num)', 'ProductController::delete/$1');
 });
 
+// 產品分類管理
+$routes->group('product-category', function ($routes) {
+    $routes->get('/', 'ProductCategoryController::index');
+    $routes->get('create', 'ProductCategoryController::create');
+    $routes->get('edit/(:num)', 'ProductCategoryController::edit/$1');
+    $routes->post('save', 'ProductCategoryController::save');
+    $routes->get('delete/(:num)', 'ProductCategoryController::delete/$1');
+});
+
 $routes->group('quote', function ($routes) {
     $routes->get('/', 'QuoteController::index');
     $routes->get('create', 'QuoteController::create');

@@ -4,116 +4,152 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\ProductModel;
+use App\Models\ProductCategoryModel;
 
 class ProductController extends BaseController
 {
     private $productModel;
+    private $productCategoryModel;
 
     public function __construct()
     {
         $this->productModel = new ProductModel();
+        $this->productCategoryModel = new ProductCategoryModel();
     }
 
     public function index()
     {
         $keyword = $this->request->getGet('keyword');
         $page = $this->request->getGet('page') ?: 1;
-        
-        $builder = $this->productModel->builder()
-            ->select('p_id, p_code, p_name, p_barcode, p_image, p_standard_price, p_unit, p_created_at, p_updated_at');
 
-        if ($keyword) {
-            $builder->groupStart()
-                ->like('p_code', $keyword)
-                ->orLike('p_name', $keyword)
-                ->orLike('p_barcode', $keyword)
-                ->groupEnd();
-        }
-
-        $builder->orderBy('p_created_at', 'DESC');
-
-        $total = $builder->countAllResults(false);
-        $perPage = 10;
-        $totalPages = ceil($total / $perPage);
-        $data = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+        $result = $this->productModel->getProductsWithCategory($keyword, $page);
 
         return view('product/index', [
-            'data' => $data,
+            'data' => $result['data'],
             'keyword' => $keyword,
             'pager' => [
-                'currentPage' => $page,
-                'totalPages' => $totalPages
+                'currentPage' => $result['currentPage'],
+                'totalPages' => $result['totalPages']
             ]
         ]);
     }
 
     public function create()
     {
+        $categories = $this->productCategoryModel->getAllForDropdown();
+
         return view('product/form', [
             'isEdit' => false,
+            'categories' => $categories,
         ]);
     }
 
     public function edit($id)
     {
-        $data = $this->productModel->find($id);
-        
+        $data = $this->productModel->getProductWithCategory($id);
+
         if (!$data) {
             return redirect()->to(url_to('ProductController::index'))->with('error', '商品不存在');
         }
-        
+
+        $categories = $this->productCategoryModel->getAllForDropdown();
+
         return view('product/form', [
             'isEdit' => true,
             'data' => $data,
+            'categories' => $categories,
         ]);
     }
 
     public function save()
     {
-        $data = $this->request->getPost();
-        
+        $requestData = $this->request->getPost();
+        $productId = $requestData['p_id'] ?? null;
+        $productId = $productId !== null && $productId !== '' ? (int) $productId : null;
+
+        if ($productId && !$this->productModel->find($productId)) {
+            return redirect()->to(url_to('ProductController::index'))->with('error', '商品不存在');
+        }
+
+        $rules = $this->productModel->getValidationRules();
+        $messages = $this->productModel->getValidationMessages();
+
+        if (!$this->validate($rules, $messages)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        $payload = [
+            'p_pc_id' => $requestData['p_pc_id'] ?? null,
+            'p_name' => trim((string) ($requestData['p_name'] ?? '')),
+            'p_supplier' => trim((string) ($requestData['p_supplier'] ?? '')),
+            'p_type' => trim((string) ($requestData['p_type'] ?? '')),
+            'p_style' => trim((string) ($requestData['p_style'] ?? '')),
+            'p_color' => trim((string) ($requestData['p_color'] ?? '')),
+            'p_size' => trim((string) ($requestData['p_size'] ?? '')),
+            'p_specifications' => trim((string) ($requestData['p_specifications'] ?? '')),
+            'p_standard_price' => $requestData['p_standard_price'] ?? 0,
+            'p_cost_price' => $requestData['p_cost_price'] ?? 0,
+            'p_unit' => trim((string) ($requestData['p_unit'] ?? '')),
+        ];
+
         // 處理圖片上傳
         $image = $this->request->getFile('p_image');
         if ($image && $image->isValid() && !$image->hasMoved()) {
-            $newName = $image->getRandomName();
-            $image->move(ROOTPATH . 'public/uploads/products', $newName);
-            $data['p_image'] = 'uploads/products/' . $newName;
+            try {
+                $newName = $image->getRandomName();
+                $image->move(ROOTPATH . 'public/uploads/products', $newName);
+                $payload['p_image'] = 'uploads/products/' . $newName;
+            } catch (\Exception $e) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', '圖片上傳失敗：' . $e->getMessage());
+            }
         }
-        
-        $productId = $data['p_id'] ?? null;
-        
-        if ($productId) {
-            // 更新
-            if ($this->productModel->update($productId, $data)) {
-                return redirect()->to(url_to('ProductController::index'))->with('success', '更新成功');
+
+        try {
+            if ($productId) {
+                $this->productModel->update($productId, $payload);
             } else {
-                return redirect()->back()->withInput()->with('errors', $this->productModel->errors());
+                $this->productModel->insert($payload);
             }
-        } else {
-            // 新增
-            if ($this->productModel->insert($data)) {
-                return redirect()->to(url_to('ProductController::index'))->with('success', '新增成功');
-            } else {
-                return redirect()->back()->withInput()->with('errors', $this->productModel->errors());
-            }
+
+            return redirect()->to(url_to('ProductController::index'));
+        } catch (\Throwable $th) {
+            log_message('error', 'Product save failed: {message}', [
+                'message' => $th->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '儲存失敗：' . $th->getMessage());
         }
     }
 
     public function delete($id)
     {
         $product = $this->productModel->find($id);
-        
+
         if (!$product) {
             return redirect()->to(url_to('ProductController::index'))->with('error', '商品不存在');
         }
-        
-        // 刪除圖片檔案
-        if (!empty($product['p_image']) && file_exists(ROOTPATH . 'public/' . $product['p_image'])) {
-            unlink(ROOTPATH . 'public/' . $product['p_image']);
+
+        try {
+            // 刪除圖片檔案
+            if (!empty($product['p_image']) && file_exists(ROOTPATH . 'public/' . $product['p_image'])) {
+                unlink(ROOTPATH . 'public/' . $product['p_image']);
+            }
+
+            $this->productModel->delete($id);
+
+            return redirect()->to(url_to('ProductController::index'));
+        } catch (\Throwable $th) {
+            log_message('error', 'Product delete failed: {message}', [
+                'message' => $th->getMessage(),
+            ]);
+
+            return redirect()->to(url_to('ProductController::index'))->with('error', '刪除失敗：' . $th->getMessage());
         }
-        
-        $this->productModel->delete($id);
-        return redirect()->to(url_to('ProductController::index'))->with('success', '刪除成功');
     }
 }
-

@@ -57,38 +57,20 @@ function getFieldClass($fieldName)
                         <i class="bi bi-box me-2 text-primary"></i>基本資料
                     </h5>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="productCode" class="form-label">
-                                產品編號 <span class="text-danger">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control <?= getFieldClass('p_code') ?>"
-                                id="productCode"
-                                name="p_code"
-                                value="<?= old('p_code', $data['p_code'] ?? '') ?>"
-                                placeholder="請輸入產品編號"
-                                required
-                                aria-describedby="productCodeError">
-                            <?= showFieldError('p_code') ?>
-                            <div class="form-text">產品唯一識別碼</div>
+                        <div class="col-md-4 mb-3">
+                            <label for="productCode" class="form-label">產品編號</label>
+                            <div class="input-group">
+                                <input
+                                    type="text"
+                                    class="form-control bg-light"
+                                    id="productCode"
+                                    value="<?= old('p_code', $data['p_code'] ?? '系統自動產生') ?>"
+                                    readonly>
+                            </div>
+                            <div class="form-text">產品編號由系統自動產生</div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="barcode" class="form-label">條碼</label>
-                            <input
-                                type="text"
-                                class="form-control <?= getFieldClass('p_barcode') ?>"
-                                id="barcode"
-                                name="p_barcode"
-                                value="<?= old('p_barcode', $data['p_barcode'] ?? '') ?>"
-                                placeholder="請輸入商品條碼"
-                                aria-describedby="barcodeError">
-                            <?= showFieldError('p_barcode') ?>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="productName" class="form-label">
+                        <div class="col-md-4 mb-3">
+                             <label for="productName" class="form-label">
                                 產品名稱 <span class="text-danger">*</span>
                             </label>
                             <input
@@ -102,45 +84,70 @@ function getFieldClass($fieldName)
                                 aria-describedby="productNameError">
                             <?= showFieldError('p_name') ?>
                         </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="category" class="form-label">產品分類</label>
+                            <select
+                                class="form-select <?= getFieldClass('p_pc_id') ?>"
+                                id="category"
+                                name="p_pc_id"
+                                aria-describedby="categoryError">
+                                <option value="">請選擇分類</option>
+                                <?php if (isset($categories) && is_array($categories)): ?>
+                                    <?php foreach ($categories as $category): ?>
+                                        <option value="<?= esc($category['pc_id']) ?>"
+                                                <?= (old('p_pc_id', $data['p_pc_id'] ?? '') == $category['pc_id']) ? 'selected' : '' ?>>
+                                            <?= esc($category['pc_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            <?= showFieldError('p_pc_id') ?>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 規格與價格區塊 -->
+                <!-- 屬性規格區塊 -->
                 <div class="mb-4">
                     <h5 class="border-bottom pb-2 mb-3">
-                        <i class="bi bi-tags me-2 text-primary"></i>規格與價格
+                        <i class="bi bi-tags me-2 text-primary"></i>屬性與規格
                     </h5>
+                    
+                    <!-- 第一行：主要屬性 -->
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="specifications" class="form-label">產品規格</label>
-                            <textarea
-                                class="form-control <?= getFieldClass('p_specifications') ?>"
-                                id="specifications"
-                                name="p_specifications"
-                                rows="4"
-                                placeholder="請輸入產品規格說明"
-                                aria-describedby="specificationsError"><?= old('p_specifications', $data['p_specifications'] ?? '') ?></textarea>
-                            <?= showFieldError('p_specifications') ?>
-                            <div class="form-text">詳細的產品規格描述</div>
+                        <div class="col-md-3 mb-3">
+                            <label for="supplier" class="form-label">供應商</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('p_supplier') ?>"
+                                id="supplier"
+                                name="p_supplier"
+                                value="<?= old('p_supplier', $data['p_supplier'] ?? '') ?>"
+                                placeholder="供應商名稱">
+                            <?= showFieldError('p_supplier') ?>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="standardPrice" class="form-label">標準價格</label>
-                            <div class="input-group">
-                                <input
-                                    type="number"
-                                    class="form-control <?= getFieldClass('p_standard_price') ?>"
-                                    id="standardPrice"
-                                    name="p_standard_price"
-                                    value="<?= old('p_standard_price', $data['p_standard_price'] ?? '') ?>"
-                                    placeholder="0"
-                                    min="0"
-                                    aria-describedby="standardPriceError">
-                            </div>
-                            <?= showFieldError('p_standard_price') ?>
+                        <div class="col-md-3 mb-3">
+                            <label for="type" class="form-label">種類</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('p_type') ?>"
+                                id="type"
+                                name="p_type"
+                                value="<?= old('p_type', $data['p_type'] ?? '') ?>"
+                                placeholder="產品種類">
+                            <?= showFieldError('p_type') ?>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
+                            <label for="style" class="form-label">款式</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('p_style') ?>"
+                                id="style"
+                                name="p_style"
+                                value="<?= old('p_style', $data['p_style'] ?? '') ?>"
+                                placeholder="產品款式">
+                            <?= showFieldError('p_style') ?>
+                        </div>
+                         <div class="col-md-3 mb-3">
                             <label for="unit" class="form-label">單位</label>
                             <input
                                 type="text"
@@ -148,9 +155,83 @@ function getFieldClass($fieldName)
                                 id="unit"
                                 name="p_unit"
                                 value="<?= old('p_unit', $data['p_unit'] ?? '') ?>"
-                                placeholder="例如：個、組、箱"
-                                aria-describedby="unitError">
+                                placeholder="例如：個、組">
                             <?= showFieldError('p_unit') ?>
+                        </div>
+                    </div>
+
+                    <!-- 第二行：次要屬性 -->
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="color" class="form-label">顏色/花色</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('p_color') ?>"
+                                id="color"
+                                name="p_color"
+                                value="<?= old('p_color', $data['p_color'] ?? '') ?>"
+                                placeholder="顏色或花色">
+                            <?= showFieldError('p_color') ?>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="size" class="form-label">尺寸</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('p_size') ?>"
+                                id="size"
+                                name="p_size"
+                                value="<?= old('p_size', $data['p_size'] ?? '') ?>"
+                                placeholder="產品尺寸">
+                            <?= showFieldError('p_size') ?>
+                        </div>
+                         <div class="col-md-3 mb-3">
+                            <label for="sellingPrice" class="form-label">
+                                售價 <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input
+                                    type="number"
+                                    class="form-control <?= getFieldClass('p_standard_price') ?>"
+                                    id="sellingPrice"
+                                    name="p_standard_price"
+                                    value="<?= old('p_standard_price', $data['p_standard_price'] ?? '') ?>"
+                                    placeholder="0"
+                                    min="0"
+                                    step="0.01"
+                                    required>
+                                <span class="input-group-text">元</span>
+                            </div>
+                            <?= showFieldError('p_standard_price') ?>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="costPrice" class="form-label">進貨成本</label>
+                            <div class="input-group">
+                                <input
+                                    type="number"
+                                    class="form-control <?= getFieldClass('p_cost_price') ?>"
+                                    id="costPrice"
+                                    name="p_cost_price"
+                                    value="<?= old('p_cost_price', $data['p_cost_price'] ?? '') ?>"
+                                    placeholder="0"
+                                    min="0"
+                                    step="0.01">
+                                <span class="input-group-text">元</span>
+                            </div>
+                            <?= showFieldError('p_cost_price') ?>
+                        </div>
+                    </div>
+
+                    <!-- 第三行：詳細規格 -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="specifications" class="form-label">詳細規格說明</label>
+                            <textarea
+                                class="form-control <?= getFieldClass('p_specifications') ?>"
+                                id="specifications"
+                                name="p_specifications"
+                                rows="3"
+                                placeholder="請輸入產品的詳細規格描述..."><?= old('p_specifications', $data['p_specifications'] ?? '') ?></textarea>
+                            <?= showFieldError('p_specifications') ?>
                         </div>
                     </div>
                 </div>
