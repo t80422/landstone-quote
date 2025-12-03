@@ -6,6 +6,20 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', 'HomeController::index');
+$routes->get('login', 'AuthController::showLogin');
+$routes->post('login', 'AuthController::login');
+$routes->get('logout', 'AuthController::logout');
+$routes->group('profile', function ($routes) {
+    $routes->get('/', 'ProfileController::edit');
+    $routes->post('update', 'ProfileController::update');
+});
+$routes->group('user', ['filter' => 'admin'], function ($routes) {
+    $routes->get('/', 'UserController::index');
+    $routes->get('create', 'UserController::create');
+    $routes->get('edit/(:num)', 'UserController::edit/$1');
+    $routes->post('save', 'UserController::save');
+    $routes->get('delete/(:num)', 'UserController::delete/$1');
+});
 
 $routes->group('customer', function ($routes) {
     $routes->get('/', 'CustomerController::index');

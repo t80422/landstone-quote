@@ -15,13 +15,21 @@
 <body>
     <!-- header -->
     <nav class="navbar navbar-expand-lg navbar-light navbar-bg-color">
-        <div class="container-fluid">
+        <div class="container-fluid d-flex align-items-center">
             <button class="btn btn-outline-dark" id="sidebarToggle">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <a class="navbar-brand d-flex align-items-center gap-2 ms-3" href="<?= url_to('HomeController::index') ?>">
-            Land Stone 報價系統
+                Land Stone 報價系統
             </a>
+            <?php if (session()->get('isLoggedIn')) : ?>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="fw-semibold">
+                        <?= esc(session()->get('displayName') ?? session()->get('username')) ?>
+                    </span>
+                    <a href="<?= site_url('logout') ?>" class="btn btn-outline-danger btn-sm">登出</a>
+                </div>
+            <?php endif; ?>
         </div>
     </nav>
     <!-- content -->
@@ -52,6 +60,14 @@
                 </a>
                 <a href="<?= url_to('PaymentMethodController::index') ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-cash-coin"></i> 結帳方式管理
+                </a>
+                <?php if (session()->get('isAdmin')) : ?>
+                    <a href="<?= site_url('user') ?>" class="list-group-item list-group-item-action">
+                        <i class="bi bi-people-fill"></i> 使用者管理
+                    </a>
+                <?php endif; ?>
+                <a href="<?= site_url('profile') ?>" class="list-group-item list-group-item-action">
+                    <i class="bi bi-person"></i> 個人資料
                 </a>
             </div>
         </div>
