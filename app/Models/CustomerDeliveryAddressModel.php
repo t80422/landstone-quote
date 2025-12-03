@@ -57,21 +57,24 @@ class CustomerDeliveryAddressModel extends Model
      */
     protected function setDefaultAddress(array $data)
     {
-        if (isset($data['data']['cda_c_id'])) {
-            $customerId = $data['data']['cda_c_id'];
-            $existingCount = $this->where('cda_c_id', $customerId)->countAllResults();
-            
-            // 如果是第一筆地址，自動設為預設
-            if ($existingCount === 0) {
-                $data['data']['cda_is_default'] = 1;
-            }
-            
-            // 如果設定為預設，取消其他預設
-            if (isset($data['data']['cda_is_default']) && $data['data']['cda_is_default'] == 1) {
-                $this->where('cda_c_id', $customerId)
-                    ->set(['cda_is_default' => 0])
-                    ->update();
-            }
+        // 確保 cda_c_id 存在
+        if (!isset($data['data']['cda_c_id']) || empty($data['data']['cda_c_id'])) {
+            return $data;
+        }
+
+        $customerId = $data['data']['cda_c_id'];
+        $existingCount = $this->where('cda_c_id', $customerId)->countAllResults();
+        
+        // 如果是第一筆地址，自動設為預設
+        if ($existingCount === 0) {
+            $data['data']['cda_is_default'] = 1;
+        }
+        
+        // 如果設定為預設，取消其他預設
+        if (isset($data['data']['cda_is_default']) && $data['data']['cda_is_default'] == 1) {
+            $this->where('cda_c_id', $customerId)
+                ->set(['cda_is_default' => 0])
+                ->update();
         }
         
         return $data;
@@ -84,9 +87,9 @@ class CustomerDeliveryAddressModel extends Model
     {
         if (isset($data['data']['cda_is_default']) && $data['data']['cda_is_default'] == 1) {
             // 取得要更新的記錄
-            if (isset($data['id'])) {
+            if (isset($data['id']) && !empty($data['id'])) {
                 $record = $this->find($data['id']);
-                if ($record) {
+                if ($record && isset($record['cda_c_id'])) {
                     // 取消同一客戶的其他預設地址
                     $this->where('cda_c_id', $record['cda_c_id'])
                         ->where('cda_id !=', $data['id'])

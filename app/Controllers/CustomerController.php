@@ -92,8 +92,9 @@ class CustomerController extends BaseController
 
                 // 儲存或更新送貨地址
                 foreach ($deliveryAddresses as $index => $address) {
-                    // 過濾空地址
-                    if (empty($address['cda_address'])) {
+                    // 過濾完全空白的地址（名稱、收件人、地址都為空）
+                    if (empty($address['cda_name']) && empty($address['cda_contact_person']) && 
+                        empty($address['cda_address']) && empty($address['cda_city'])) {
                         continue;
                     }
 
@@ -114,14 +115,11 @@ class CustomerController extends BaseController
 
             $db->transComplete();
 
-            if ($db->transStatus() === false) {
-                return redirect()->back()->withInput()->with('error', '儲存失敗，請稍後再試');
-            }
-
             return redirect()->to(url_to('CustomerController::index'));
 
         } catch (\Exception $e) {
             $db->transRollback();
+            log_message('error', $e->getMessage());
             return redirect()->back()->withInput()->with('error', '儲存失敗：' . $e->getMessage());
         }
     }
