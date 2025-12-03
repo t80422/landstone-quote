@@ -99,7 +99,7 @@ class ProductController extends BaseController
         if ($image && $image->isValid() && !$image->hasMoved()) {
             try {
                 $newName = $image->getRandomName();
-                $image->move(ROOTPATH . 'public/uploads/products', $newName);
+                $image->move(ROOTPATH . 'uploads/products', $newName);
                 $payload['p_image'] = 'uploads/products/' . $newName;
             } catch (\Exception $e) {
                 return redirect()->back()

@@ -90,7 +90,8 @@ function getFieldClass($fieldName)
                                 class="form-select <?= getFieldClass('p_pc_id') ?>"
                                 id="category"
                                 name="p_pc_id"
-                                aria-describedby="categoryError">
+                                aria-describedby="categoryError"
+                                required>
                                 <option value="">請選擇分類</option>
                                 <?php if (isset($categories) && is_array($categories)): ?>
                                     <?php foreach ($categories as $category): ?>
@@ -244,10 +245,16 @@ function getFieldClass($fieldName)
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <?php if (!empty($data['p_image'])): ?>
+                                <?php
+                                    $currentImagePath = $data['p_image'];
+                                    if (strpos($currentImagePath, 'http://') !== 0 && strpos($currentImagePath, 'https://') !== 0) {
+                                        $currentImagePath = base_url(ltrim($currentImagePath, '/'));
+                                    }
+                                ?>
                                 <div class="mb-3">
                                     <label class="form-label">目前圖片</label>
                                     <div>
-                                        <img src="/<?= esc($data['p_image']) ?>"
+                                        <img src="<?= esc($currentImagePath) ?>"
                                             alt="產品圖片"
                                             class="img-thumbnail"
                                             style="max-width: 300px; max-height: 300px;">

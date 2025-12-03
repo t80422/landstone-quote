@@ -71,7 +71,13 @@
                                 <tr>
                                     <td>
                                         <?php if (!empty($item['p_image'])): ?>
-                                            <img src="/<?= esc($item['p_image']) ?>"
+                                            <?php
+                                                $imagePath = $item['p_image'];
+                                                if (strpos($imagePath, 'http://') !== 0 && strpos($imagePath, 'https://') !== 0) {
+                                                    $imagePath = base_url(ltrim($imagePath, '/'));
+                                                }
+                                            ?>
+                                            <img src="<?= esc($imagePath) ?>"
                                                 alt="<?= esc($item['p_name']) ?>"
                                                 class="img-thumbnail"
                                                 style="width: 60px; height: 60px; object-fit: cover;"
