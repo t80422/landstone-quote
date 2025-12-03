@@ -13,6 +13,7 @@ class QuoteModel extends Model
         'q_date',
         'q_valid_date',
         'q_c_id',
+        'q_cda_id',
         'q_subtotal',
         'q_discount',
         'q_tax_rate',
@@ -23,6 +24,8 @@ class QuoteModel extends Model
     ];
 
     // Dates
+    protected $useTimestamps = true;
+    protected $dateFormat = 'datetime';
     protected $createdField = 'q_created_at';
     protected $updatedField = 'q_updated_at';
 

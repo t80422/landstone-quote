@@ -79,14 +79,11 @@
                                     <td><small class="text-muted"><?= esc($item['q_created_at']) ?></small></td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="<?= url_to('QuoteController::edit', $item['q_id']) ?>" class="btn btn-outline-primary" title="編輯">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
                                             <?php if (empty($item['q_o_id'])): ?>
                                                 <a href="<?= url_to('OrderController::createFromQuote', $item['q_id']) ?>"
-                                                   class="btn btn-outline-success"
-                                                   title="轉成訂單"
-                                                   onclick="return confirm('確定要將此報價單轉換為訂單嗎？')">
+                                                    class="btn btn-outline-success"
+                                                    title="轉成訂單"
+                                                    onclick="return confirm('確定要將此報價單轉換為訂單嗎？')">
                                                     <i class="bi bi-arrow-right-circle"></i>
                                                 </a>
                                             <?php else: ?>
@@ -94,6 +91,9 @@
                                                     <i class="bi bi-check-circle"></i>
                                                 </span>
                                             <?php endif; ?>
+                                            <a href="<?= url_to('QuoteController::edit', $item['q_id']) ?>" class="btn btn-outline-primary" title="編輯">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
                                             <button type="button" class="btn btn-outline-danger"
                                                 onclick="confirmDelete('<?= url_to('QuoteController::delete', $item['q_id']) ?>')"
                                                 title="刪除">

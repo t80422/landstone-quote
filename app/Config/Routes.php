@@ -13,6 +13,7 @@ $routes->group('customer', function ($routes) {
     $routes->get('edit/(:num)', 'CustomerController::edit/$1');
     $routes->post('save', 'CustomerController::save');
     $routes->get('delete/(:num)', 'CustomerController::delete/$1');
+    $routes->get('delivery-addresses/(:num)', 'CustomerController::getDeliveryAddresses/$1');
 });
 
 $routes->group('product', function ($routes) {

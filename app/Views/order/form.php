@@ -19,6 +19,13 @@ function getFieldClass($fieldName)
     $errors = session()->getFlashdata('errors');
     return isset($errors[$fieldName]) ? 'is-invalid' : '';
 }
+
+$productCategories = $productCategories ?? [];
+$deliveryAddressMissing = $deliveryAddressMissing ?? false;
+$selectedCustomerId = old('o_c_id', $data['o_c_id'] ?? '');
+$selectedDeliveryAddressId = old('o_cda_id', $data['o_cda_id'] ?? '');
+
+$productCategories = $productCategories ?? [];
 ?>
 
 <?= $this->extend('_layout') ?>
@@ -112,6 +119,52 @@ function getFieldClass($fieldName)
                         </div>
                     </div>
 
+                    <div class="row align-items-start mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="deliveryAddressSelect" class="form-label">
+                                送貨地址 <span class="text-danger">*</span>
+                            </label>
+                            <select
+                                class="form-select <?= getFieldClass('o_cda_id') ?>"
+                                id="deliveryAddressSelect"
+                                name="o_cda_id"
+                                required
+                                data-endpoint="<?= base_url('customer/delivery-addresses') ?>"
+                                data-initial-customer="<?= esc($selectedCustomerId) ?>"
+                                data-selected-id="<?= esc($selectedDeliveryAddressId) ?>">
+                                <option value=""></option>
+                            </select>
+                            <?= showFieldError('o_cda_id') ?>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <?php if ($deliveryAddressMissing): ?>
+                                <div class="alert alert-warning mb-2">
+                                    原送貨地址已被刪除，請重新選擇。
+                                </div>
+                            <?php endif; ?>
+                            <div id="deliveryAddressNotice" class="alert alert-warning d-none mb-0"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">地址名稱</label>
+                            <input type="text" class="form-control" id="deliveryAddressName" value="" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">收件人</label>
+                            <input type="text" class="form-control" id="deliveryContact" value="" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">連絡電話</label>
+                            <input type="text" class="form-control" id="deliveryPhone" value="" readonly>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">送貨地址</label>
+                            <textarea class="form-control" id="deliveryAddressText" rows="2" readonly></textarea>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label for="status" class="form-label">訂單狀態</label>
@@ -177,7 +230,7 @@ function getFieldClass($fieldName)
                         <table class="table" id="itemsTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 30%;">商品</th>
+                                    <th style="width: 35%;">商品分類 / 商品</th>
                                     <th style="width: 10%;">數量</th>
                                     <th style="width: 15%;">單價</th>
                                     <th style="width: 10%;">單位</th>
@@ -193,20 +246,40 @@ function getFieldClass($fieldName)
                                 foreach ($items as $index => $item):
                                     $shippedQty = $item['oi_shipped_quantity'] ?? 0;
                                     $hasShipped = $shippedQty > 0;
+                                    $selectedCategoryId = '';
+                                    if (!empty($item['oi_p_id'])) {
+                                        foreach ($products as $product) {
+                                            if ($product['p_id'] == $item['oi_p_id']) {
+                                                $selectedCategoryId = $product['p_pc_id'] ?? '';
+                                                break;
+                                            }
+                                        }
+                                    }
                                 ?>
                                     <tr class="item-row" data-shipped-qty="<?= $shippedQty ?>">
                                         <td>
-                                            <select class="form-select product-select" name="items[<?= $index ?>][oi_p_id]" required>
-                                                <option value=""></option>
-                                                <?php foreach ($products as $product): ?>
-                                                    <option value="<?= $product['p_id'] ?>"
-                                                        data-price="<?= $product['p_standard_price'] ?>"
-                                                        data-unit="<?= $product['p_unit'] ?>"
-                                                        <?= (isset($item['oi_p_id']) && $item['oi_p_id'] == $product['p_id']) ? 'selected' : '' ?>>
-                                                        <?= esc($product['p_name']) ?> (<?= esc($product['p_code']) ?>)
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                            <div class="d-flex flex-column flex-lg-row gap-2 align-items-start align-items-lg-center">
+                                                <select class="form-select category-select" data-index="<?= $index ?>">
+                                                    <option value="">全部分類</option>
+                                                    <?php foreach ($productCategories as $category): ?>
+                                                        <option value="<?= $category['pc_id'] ?>" <?= ($selectedCategoryId == $category['pc_id']) ? 'selected' : '' ?>>
+                                                            <?= esc($category['pc_name']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <select class="form-select product-select" name="items[<?= $index ?>][oi_p_id]" required>
+                                                    <option value=""></option>
+                                                    <?php foreach ($products as $product): ?>
+                                                        <option value="<?= $product['p_id'] ?>"
+                                                            data-price="<?= $product['p_standard_price'] ?>"
+                                                            data-unit="<?= $product['p_unit'] ?>"
+                                                            data-category="<?= $product['p_pc_id'] ?? '' ?>"
+                                                            <?= (isset($item['oi_p_id']) && $item['oi_p_id'] == $product['p_id']) ? 'selected' : '' ?>>
+                                                            <?= esc($product['p_name']) ?> (<?= esc($product['p_code']) ?>)
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
                                             <?php if ($hasShipped): ?>
                                                 <small class="text-muted">已出貨：<?= $shippedQty ?></small>
                                             <?php endif; ?>
@@ -252,16 +325,27 @@ function getFieldClass($fieldName)
                 <template id="itemRowTemplate">
                     <tr class="item-row">
                         <td>
-                            <select class="form-select product-select" name="items[__INDEX__][oi_p_id]" required>
-                                <option value=""></option>
-                                <?php foreach ($products as $product): ?>
-                                    <option value="<?= $product['p_id'] ?>"
-                                        data-price="<?= $product['p_standard_price'] ?>"
-                                        data-unit="<?= $product['p_unit'] ?>">
-                                        <?= esc($product['p_name']) ?> (<?= esc($product['p_code']) ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div class="d-flex flex-column flex-lg-row gap-2 align-items-start align-items-lg-center">
+                                <select class="form-select category-select" data-index="__INDEX__">
+                                    <option value="">全部分類</option>
+                                    <?php foreach ($productCategories as $category): ?>
+                                        <option value="<?= $category['pc_id'] ?>">
+                                            <?= esc($category['pc_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <select class="form-select product-select" name="items[__INDEX__][oi_p_id]" required>
+                                    <option value=""></option>
+                                    <?php foreach ($products as $product): ?>
+                                        <option value="<?= $product['p_id'] ?>"
+                                            data-price="<?= $product['p_standard_price'] ?>"
+                                            data-unit="<?= $product['p_unit'] ?>"
+                                            data-category="<?= $product['p_pc_id'] ?? '' ?>">
+                                            <?= esc($product['p_name']) ?> (<?= esc($product['p_code']) ?>)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                         </td>
                         <td>
                             <input type="number" class="form-control quantity-input" name="items[__INDEX__][oi_quantity]" value="1" min="1" required>
@@ -345,12 +429,20 @@ function getFieldClass($fieldName)
         // --- State ---
         let itemIndex = <?= count($items) ?>;
         const products = <?= json_encode($products) ?>;
+        let deliveryAddressManager = null;
 
         // --- Initialization ---
         initCustomerSelect();
         initProductTomSelect(document.querySelectorAll('.product-select'));
+        document.querySelectorAll('.item-row').forEach(row => {
+            const categorySelect = row.querySelector('.category-select');
+            if (categorySelect && categorySelect.value) {
+                applyCategoryFilter(row, true);
+            }
+        });
         initCalculations();
         updateRemoveButtons();
+        initDeliveryAddressSection();
 
         // --- Event Listeners ---
         bindEvents();
@@ -391,6 +483,182 @@ function getFieldClass($fieldName)
                     }
                 });
             });
+        }
+
+        function initDeliveryAddressSection() {
+            const select = document.getElementById('deliveryAddressSelect');
+            if (!select) {
+                return;
+            }
+
+            deliveryAddressManager = {
+                select,
+                notice: document.getElementById('deliveryAddressNotice'),
+                nameInput: document.getElementById('deliveryAddressName'),
+                contactInput: document.getElementById('deliveryContact'),
+                phoneInput: document.getElementById('deliveryPhone'),
+                addressInput: document.getElementById('deliveryAddressText'),
+                endpoint: select.dataset.endpoint,
+                cache: new Map(),
+                currentAddresses: [],
+                selectedCustomerId: select.dataset.initialCustomer || '',
+                selectedAddressId: select.dataset.selectedId || '',
+                defaultId: null,
+            };
+
+            const customerSelect = document.getElementById('customer');
+            if (customerSelect) {
+                customerSelect.addEventListener('change', function() {
+                    deliveryAddressManager.selectedCustomerId = this.value;
+                    deliveryAddressManager.selectedAddressId = '';
+                    loadDeliveryAddresses(false);
+                });
+            }
+
+            select.addEventListener('change', function() {
+                deliveryAddressManager.selectedAddressId = this.value;
+                populateDeliveryAddressDetails();
+            });
+
+            if (deliveryAddressManager.selectedCustomerId) {
+                loadDeliveryAddresses(true);
+            } else {
+                disableDeliveryAddressSelect();
+                showDeliveryAddressNotice('請先選擇客戶以載入送貨地址', 'info');
+            }
+        }
+
+        function loadDeliveryAddresses(preserveSelection) {
+            if (!deliveryAddressManager || !deliveryAddressManager.endpoint) {
+                return;
+            }
+
+            const customerId = deliveryAddressManager.selectedCustomerId;
+            if (!customerId) {
+                disableDeliveryAddressSelect();
+                return;
+            }
+
+            if (deliveryAddressManager.cache.has(customerId)) {
+                const cached = deliveryAddressManager.cache.get(customerId);
+                deliveryAddressManager.currentAddresses = cached.data;
+                deliveryAddressManager.defaultId = cached.defaultId;
+                renderDeliveryAddressOptions(preserveSelection);
+                return;
+            }
+
+            showDeliveryAddressNotice('正在載入送貨地址...', 'info');
+
+            fetch(`${deliveryAddressManager.endpoint}/${customerId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error();
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (!result.success) {
+                        throw new Error(result.message || '載入送貨地址失敗');
+                    }
+                    const data = result.data || [];
+                    const defaultId = result.defaultId || null;
+                    deliveryAddressManager.cache.set(customerId, { data, defaultId });
+                    deliveryAddressManager.currentAddresses = data;
+                    deliveryAddressManager.defaultId = defaultId;
+                    renderDeliveryAddressOptions(preserveSelection);
+                })
+                .catch(() => {
+                    disableDeliveryAddressSelect();
+                    showDeliveryAddressNotice('載入送貨地址失敗，請重新選擇客戶或稍後再試', 'danger');
+                });
+        }
+
+        function renderDeliveryAddressOptions(preserveSelection) {
+            if (!deliveryAddressManager) {
+                return;
+            }
+
+            const select = deliveryAddressManager.select;
+            const addresses = deliveryAddressManager.currentAddresses;
+            select.innerHTML = '<option value=""></option>';
+
+            if (!addresses.length) {
+                select.setAttribute('disabled', 'disabled');
+                deliveryAddressManager.selectedAddressId = '';
+                populateDeliveryAddressDetails();
+                showDeliveryAddressNotice('此客戶尚未設定送貨地址，請至客戶管理新增', 'warning');
+                return;
+            }
+
+            select.removeAttribute('disabled');
+            addresses.forEach(address => {
+                const option = document.createElement('option');
+                option.value = address.cda_id;
+                const label = address.cda_name ? `${address.cda_name} - ${address.cda_address}` : address.cda_address;
+                option.textContent = label;
+                select.appendChild(option);
+            });
+
+            let targetId = preserveSelection ? deliveryAddressManager.selectedAddressId : null;
+            if (targetId && !addresses.some(address => String(address.cda_id) === String(targetId))) {
+                targetId = null;
+            }
+
+            if (!targetId && deliveryAddressManager.defaultId) {
+                targetId = deliveryAddressManager.defaultId;
+            }
+
+            if (!targetId) {
+                targetId = addresses[0].cda_id;
+            }
+
+            deliveryAddressManager.selectedAddressId = targetId ? String(targetId) : '';
+            select.value = deliveryAddressManager.selectedAddressId;
+            hideDeliveryAddressNotice();
+            populateDeliveryAddressDetails();
+        }
+
+        function populateDeliveryAddressDetails() {
+            if (!deliveryAddressManager) {
+                return;
+            }
+
+            const selected = deliveryAddressManager.currentAddresses.find(address => String(address.cda_id) === String(deliveryAddressManager.selectedAddressId));
+
+            deliveryAddressManager.nameInput.value = selected ? (selected.cda_name || '') : '';
+            deliveryAddressManager.contactInput.value = selected ? (selected.cda_contact_person || '') : '';
+            deliveryAddressManager.phoneInput.value = selected ? (selected.cda_phone || '') : '';
+            deliveryAddressManager.addressInput.value = selected ? (selected.cda_address || '') : '';
+        }
+
+        function showDeliveryAddressNotice(message, type = 'warning') {
+            if (!deliveryAddressManager || !deliveryAddressManager.notice) {
+                return;
+            }
+
+            const notice = deliveryAddressManager.notice;
+            notice.textContent = message;
+            notice.classList.remove('d-none', 'alert-warning', 'alert-info', 'alert-danger', 'alert-success');
+            notice.classList.add(`alert-${type}`);
+        }
+
+        function hideDeliveryAddressNotice() {
+            if (!deliveryAddressManager || !deliveryAddressManager.notice) {
+                return;
+            }
+            deliveryAddressManager.notice.classList.add('d-none');
+        }
+
+        function disableDeliveryAddressSelect() {
+            if (!deliveryAddressManager) {
+                return;
+            }
+
+            deliveryAddressManager.select.value = '';
+            deliveryAddressManager.select.setAttribute('disabled', 'disabled');
+            deliveryAddressManager.currentAddresses = [];
+            deliveryAddressManager.selectedAddressId = '';
+            populateDeliveryAddressDetails();
         }
 
         function initCalculations() {
@@ -448,6 +716,12 @@ function getFieldClass($fieldName)
         }
 
         function handleItemChange(e) {
+            if (e.target.classList.contains('category-select')) {
+                const row = e.target.closest('.item-row');
+                applyCategoryFilter(row, true);
+                return;
+            }
+
             if (e.target.classList.contains('product-select')) {
                 const selectedValue = e.target.value;
                 const row = e.target.closest('.item-row');
@@ -479,7 +753,12 @@ function getFieldClass($fieldName)
             container.insertAdjacentHTML('beforeend', html);
 
             const newRow = container.lastElementChild;
-            initProductTomSelect([newRow.querySelector('.product-select')]);
+            const productSelect = newRow.querySelector('.product-select');
+            initProductTomSelect([productSelect]);
+            const categorySelect = newRow.querySelector('.category-select');
+            if (categorySelect && categorySelect.value) {
+                applyCategoryFilter(newRow, true);
+            }
             updateRemoveButtons();
         }
 
@@ -506,6 +785,56 @@ function getFieldClass($fieldName)
                 calculateTotal();
                 updateRemoveButtons();
             }
+        }
+
+        function applyCategoryFilter(row, preserveValue = true) {
+            const categorySelect = row.querySelector('.category-select');
+            const categoryId = categorySelect ? categorySelect.value : '';
+            const productSelect = row.querySelector('.product-select');
+
+            if (!productSelect) {
+                return;
+            }
+
+            const tomInstance = productSelect.tomselect ?? null;
+            const currentValue = tomInstance ? tomInstance.getValue() : productSelect.value;
+            const filteredProducts = getProductsByCategory(categoryId);
+            const shouldPreserveValue = preserveValue && currentValue && filteredProducts.some(product => String(product.p_id) === String(currentValue));
+
+            if (tomInstance) {
+                tomInstance.destroy();
+                delete productSelect.tomselect;
+            }
+
+            productSelect.innerHTML = '<option value=""></option>';
+            filteredProducts.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.p_id;
+                option.dataset.price = product.p_standard_price;
+                option.dataset.unit = product.p_unit || '';
+                option.dataset.category = product.p_pc_id || '';
+                option.textContent = `${product.p_name} (${product.p_code})`;
+                productSelect.appendChild(option);
+            });
+
+            initProductTomSelect([productSelect]);
+
+            if (shouldPreserveValue && productSelect.tomselect) {
+                productSelect.tomselect.setValue(currentValue, true);
+            } else if (productSelect.tomselect) {
+                productSelect.tomselect.clear();
+                row.querySelector('.price-input').value = 0;
+                row.querySelector('.unit-display').value = '';
+                calculateItemAmount(row);
+            }
+        }
+
+        function getProductsByCategory(categoryId) {
+            if (!categoryId) {
+                return products;
+            }
+
+            return products.filter(product => String(product.p_pc_id || '') === String(categoryId));
         }
 
         function calculateItemAmount(row) {

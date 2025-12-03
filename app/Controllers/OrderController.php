@@ -6,18 +6,24 @@ use App\Controllers\BaseController;
 use App\Models\OrderModel;
 use App\Models\CustomerModel;
 use App\Models\ProductModel;
+use App\Models\ProductCategoryModel;
+use App\Models\CustomerDeliveryAddressModel;
 
 class OrderController extends BaseController
 {
     private $orderModel;
     private $customerModel;
     private $productModel;
+    private $productCategoryModel;
+    private $deliveryAddressModel;
 
     public function __construct()
     {
         $this->orderModel = new OrderModel();
         $this->customerModel = new CustomerModel();
         $this->productModel = new ProductModel();
+        $this->productCategoryModel = new ProductCategoryModel();
+        $this->deliveryAddressModel = new CustomerDeliveryAddressModel();
     }
 
     public function index()
@@ -44,6 +50,8 @@ class OrderController extends BaseController
             'isEdit' => false,
             'customers' => $this->customerModel->findAll(),
             'products' => $this->productModel->findAll(),
+            'productCategories' => $this->productCategoryModel->getAllForDropdown(),
+            'deliveryAddressMissing' => false,
             'orderNumber' => $this->orderModel->generateOrderNumber()
         ]);
     }
@@ -66,11 +74,19 @@ class OrderController extends BaseController
             return redirect()->to(url_to('OrderController::index'))->with('error', '訂單不存在');
         }
 
+        $deliveryAddressMissing = false;
+        if (!empty($data['o_cda_id']) && !$this->deliveryAddressModel->find($data['o_cda_id'])) {
+            $deliveryAddressMissing = true;
+            $data['o_cda_id'] = null;
+        }
+
         return view('order/form', [
             'isEdit' => true,
             'data' => $data,
             'customers' => $this->customerModel->findAll(),
             'products' => $this->productModel->findAll(),
+            'productCategories' => $this->productCategoryModel->getAllForDropdown(),
+            'deliveryAddressMissing' => $deliveryAddressMissing,
         ]);
     }
 
@@ -78,6 +94,22 @@ class OrderController extends BaseController
     {
         $data = $this->request->getPost();
         $items = $this->request->getPost('items');
+
+        $customerId = $data['o_c_id'] ?? null;
+        $deliveryAddressId = $data['o_cda_id'] ?? null;
+
+        if (empty($customerId) || empty($deliveryAddressId)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '請選擇送貨地址');
+        }
+
+        $address = $this->deliveryAddressModel->find($deliveryAddressId);
+        if (!$address || intval($address['cda_c_id']) !== intval($customerId)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '送貨地址無效，請重新選擇');
+        }
 
         $result = $this->orderModel->saveOrderWithItems($data, $items);
 

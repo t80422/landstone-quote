@@ -134,6 +134,39 @@ class CustomerController extends BaseController
     }
 
     /**
+     * AJAX: 取得送貨地址
+     */
+    public function getDeliveryAddresses($customerId)
+    {
+        if (empty($customerId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => '客戶不存在',
+                'data' => [],
+            ])->setStatusCode(400);
+        }
+
+        $addresses = $this->deliveryAddressModel->getByCustomerId($customerId);
+        $defaultId = null;
+        foreach ($addresses as $address) {
+            if (!empty($address['cda_is_default'])) {
+                $defaultId = $address['cda_id'];
+                break;
+            }
+        }
+
+        if (!$defaultId && !empty($addresses)) {
+            $defaultId = $addresses[0]['cda_id'];
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $addresses,
+            'defaultId' => $defaultId,
+        ]);
+    }
+
+    /**
      * AJAX: 刪除送貨地址
      */
     public function deleteDeliveryAddress($id)

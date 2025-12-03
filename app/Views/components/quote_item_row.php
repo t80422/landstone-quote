@@ -28,6 +28,7 @@
 $index = $index ?? 0;
 $item = $item ?? [];
 $products = $products ?? [];
+$productCategories = $productCategories ?? [];
 $isTemplate = $isTemplate ?? false;
 
 // 預設值
@@ -41,12 +42,14 @@ $defaults = [
 
 $item = array_merge($defaults, $item);
 
-// 找出選中商品的單位（用於初始顯示）
+// 找出選中商品的單位與分類
 $selectedUnit = '';
+$selectedCategoryId = '';
 if (!empty($item['qi_p_id'])) {
     foreach ($products as $p) {
         if ($p['p_id'] == $item['qi_p_id']) {
             $selectedUnit = $p['p_unit'] ?? '';
+            $selectedCategoryId = $p['p_pc_id'] ?? '';
             break;
         }
     }
@@ -56,20 +59,31 @@ if (!empty($item['qi_p_id'])) {
 <tr class="item-row">
     <td>
         <input type="hidden" name="items[<?= $index ?>][qi_id]" value="<?= esc($item['qi_id']) ?>">
-        <select class="form-select form-select-sm product-select"
-            name="items[<?= $index ?>][qi_p_id]"
-            data-index="<?= $index ?>"
-            required>
-            <option value=""></option>
-            <?php foreach ($products as $product): ?>
-                <option value="<?= $product['p_id'] ?>"
-                    data-price="<?= $product['p_standard_price'] ?>"
-                    data-unit="<?= $product['p_unit'] ?? '' ?>"
-                    <?= ($item['qi_p_id'] == $product['p_id']) ? 'selected' : '' ?>>
-                    <?= esc($product['p_code']) ?> - <?= esc($product['p_name']) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        <div class="d-flex flex-column flex-lg-row gap-2 align-items-start align-items-lg-center">
+            <select class="form-select form-select-sm category-select" data-index="<?= $index ?>">
+                <option value="">全部分類</option>
+                <?php foreach ($productCategories as $category): ?>
+                    <option value="<?= $category['pc_id'] ?>" <?= ($selectedCategoryId == $category['pc_id']) ? 'selected' : '' ?>>
+                        <?= esc($category['pc_name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <select class="form-select form-select-sm product-select"
+                name="items[<?= $index ?>][qi_p_id]"
+                data-index="<?= $index ?>"
+                required>
+                <option value=""></option>
+                <?php foreach ($products as $product): ?>
+                    <option value="<?= $product['p_id'] ?>"
+                        data-price="<?= $product['p_standard_price'] ?>"
+                        data-unit="<?= $product['p_unit'] ?? '' ?>"
+                        data-category="<?= $product['p_pc_id'] ?? '' ?>"
+                        <?= ($item['qi_p_id'] == $product['p_id']) ? 'selected' : '' ?>>
+                        <?= esc($product['p_code']) ?> - <?= esc($product['p_name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
     </td>
     <td>
         <input type="number" class="form-control form-control-sm quantity-input"

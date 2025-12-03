@@ -14,6 +14,7 @@ class CustomerDeliveryAddressModel extends Model
         'cda_name',
         'cda_contact_person',
         'cda_phone',
+        'cda_city',
         'cda_address',
         'cda_is_default',
         'cda_notes',

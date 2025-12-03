@@ -34,6 +34,7 @@ $defaults = [
     'cda_name' => '',
     'cda_contact_person' => '',
     'cda_phone' => '',
+    'cda_city' => '',
     'cda_address' => '',
     'cda_is_default' => 0,
     'cda_notes' => ''
@@ -77,12 +78,32 @@ $canDelete = $totalCount > 1 || $isTemplate;
         </div>
 
         <div class="row">
-            <div class="col-md-12 mb-3">
-                <label class="form-label">送貨地址</label>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">縣市</label>
+                <select class="form-select" 
+                        name="delivery_addresses[<?= $index ?>][cda_city]">
+                    <option value="">請選擇縣市</option>
+                    <?php
+                    $cities = [
+                        '台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市',
+                        '基隆市', '新竹市', '嘉義市', '新竹縣', '苗栗縣', '彰化縣',
+                        '南投縣', '雲林縣', '嘉義縣', '屏東縣', '宜蘭縣', '花蓮縣',
+                        '台東縣', '澎湖縣', '金門縣', '連江縣'
+                    ];
+                    foreach ($cities as $city):
+                    ?>
+                        <option value="<?= $city ?>" <?= ($address['cda_city'] ?? '') == $city ? 'selected' : '' ?>>
+                            <?= $city ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label class="form-label">詳細地址</label>
                 <input type="text" class="form-control" 
                        name="delivery_addresses[<?= $index ?>][cda_address]" 
                        value="<?= esc($address['cda_address']) ?>" 
-                       placeholder="請輸入完整送貨地址">
+                       placeholder="請輸入詳細地址">
             </div>
         </div>
 

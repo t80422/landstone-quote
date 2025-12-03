@@ -7,6 +7,8 @@ use App\Models\QuoteModel;
 use App\Models\QuoteItemModel;
 use App\Models\CustomerModel;
 use App\Models\ProductModel;
+use App\Models\ProductCategoryModel;
+use App\Models\CustomerDeliveryAddressModel;
 
 class QuoteController extends BaseController
 {
@@ -14,6 +16,8 @@ class QuoteController extends BaseController
     private $quoteItemModel;
     private $customerModel;
     private $productModel;
+    private $productCategoryModel;
+    private $deliveryAddressModel;
 
     public function __construct()
     {
@@ -21,6 +25,8 @@ class QuoteController extends BaseController
         $this->quoteItemModel = new QuoteItemModel();
         $this->customerModel = new CustomerModel();
         $this->productModel = new ProductModel();
+        $this->productCategoryModel = new ProductCategoryModel();
+        $this->deliveryAddressModel = new CustomerDeliveryAddressModel();
     }
 
     /**
@@ -52,12 +58,15 @@ class QuoteController extends BaseController
     {
         $customers = $this->customerModel->findAll();
         $products = $this->productModel->findAll();
+        $productCategories = $this->productCategoryModel->getAllForDropdown();
         $quoteNumber = $this->quoteModel->generateQuoteNumber();
 
         return view('quote/form', [
             'isEdit' => false,
             'customers' => $customers,
             'products' => $products,
+            'productCategories' => $productCategories,
+            'deliveryAddressMissing' => false,
             'quoteNumber' => $quoteNumber,
         ]);
     }
@@ -80,12 +89,21 @@ class QuoteController extends BaseController
 
         $customers = $this->customerModel->findAll();
         $products = $this->productModel->findAll();
+        $productCategories = $this->productCategoryModel->getAllForDropdown();
+
+        $deliveryAddressMissing = false;
+        if (!empty($quote['q_cda_id']) && !$this->deliveryAddressModel->find($quote['q_cda_id'])) {
+            $deliveryAddressMissing = true;
+            $quote['q_cda_id'] = null;
+        }
 
         return view('quote/form', [
             'isEdit' => true,
             'data' => $quote,
             'customers' => $customers,
             'products' => $products,
+            'productCategories' => $productCategories,
+            'deliveryAddressMissing' => $deliveryAddressMissing,
         ]);
     }
 
@@ -113,6 +131,23 @@ class QuoteController extends BaseController
             return redirect()->back()
                 ->withInput()
                 ->with('error', $validation['message']);
+        }
+
+        // 驗證送貨地址
+        $customerId = $quoteData['q_c_id'] ?? null;
+        $deliveryAddressId = $quoteData['q_cda_id'] ?? null;
+
+        if (empty($customerId) || empty($deliveryAddressId)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '請選擇送貨地址');
+        }
+
+        $address = $this->deliveryAddressModel->find($deliveryAddressId);
+        if (!$address || intval($address['cda_c_id']) !== intval($customerId)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', '送貨地址無效，請重新選擇');
         }
 
         // 使用 Model 儲存（含事務處理）
