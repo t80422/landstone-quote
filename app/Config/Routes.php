@@ -23,11 +23,11 @@ $routes->group('user', ['filter' => 'admin'], function ($routes) {
 
 $routes->group('customer', function ($routes) {
     $routes->get('/', 'CustomerController::index');
+    $routes->get('show/(:num)', 'CustomerController::show/$1');
     $routes->get('create', 'CustomerController::create');
     $routes->get('edit/(:num)', 'CustomerController::edit/$1');
     $routes->post('save', 'CustomerController::save');
     $routes->get('delete/(:num)', 'CustomerController::delete/$1');
-    $routes->get('delivery-addresses/(:num)', 'CustomerController::getDeliveryAddresses/$1');
 });
 
 $routes->group('product', function ($routes) {

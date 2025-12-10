@@ -8,11 +8,10 @@ class CustomerModel extends Model
 {
     protected $table = 'customers';
     protected $primaryKey = 'c_id';
-    protected $returnType = 'array';
+
     protected $allowedFields = [
         'c_code',
         'c_name',
-        'c_contact_person',
         'c_manager',
         'c_phone',
         'c_fax',
@@ -36,14 +35,13 @@ class CustomerModel extends Model
     public function getList($keyword = null, $page = 1)
     {
         $builder = $this->builder()
-            ->select('c_id, c_code, c_name, c_contact_person, c_phone, c_created_at, c_updated_at');
+            ->select('c_id, c_code, c_name, c_phone, c_created_at, c_updated_at');
 
         if ($keyword) {
             $builder->groupStart()
                 ->like('c_code', $keyword)
                 ->orLike('c_name', $keyword)
                 ->orLike('c_manager', $keyword)
-                ->orLike('c_contact_person', $keyword)
                 ->orLike('c_phone', $keyword)
                 ->orLike('c_email', $keyword)
                 ->orLike('c_city', $keyword)
@@ -65,42 +63,6 @@ class CustomerModel extends Model
             'currentPage' => $page,
             'totalPages' => $totalPages,
         ];
-    }
-
-    /**
-     * 取得客戶及其送貨地址
-     */
-    public function getCustomerWithAddresses($customerId)
-    {
-        $customer = $this->select('customers.*, payment_methods.pm_name')
-            ->join('payment_methods', 'customers.c_pm_id = payment_methods.pm_id', 'left')
-            ->find($customerId);
-
-        if ($customer) {
-            $addressModel = new \App\Models\CustomerDeliveryAddressModel();
-            $customer['delivery_addresses'] = $addressModel->getByCustomerId($customerId);
-        }
-
-        return $customer;
-    }
-
-    /**
-     * 取得客戶的預設送貨地址
-     */
-    public function getDefaultDeliveryAddress($customerId)
-    {
-        $addressModel = new \App\Models\CustomerDeliveryAddressModel();
-        return $addressModel->getDefaultAddress($customerId);
-    }
-
-    /**
-     * 驗證客戶至少有一個送貨地址
-     */
-    public function validateHasDeliveryAddress($customerId)
-    {
-        $addressModel = new \App\Models\CustomerDeliveryAddressModel();
-        $addresses = $addressModel->getByCustomerId($customerId);
-        return count($addresses) > 0;
     }
 
     /**
@@ -126,5 +88,15 @@ class CustomerModel extends Model
 
         // 格式化為 5 位數
         return 'C' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * 取得客戶詳細（含結帳方式名稱）
+     */
+    public function getDetailWithPayment($customerId)
+    {
+        return $this->select('customers.*, payment_methods.pm_name')
+            ->join('payment_methods', 'payment_methods.pm_id = customers.c_pm_id', 'left')
+            ->find($customerId);
     }
 }

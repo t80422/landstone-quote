@@ -13,7 +13,6 @@ class QuoteModel extends Model
         'q_date',
         'q_valid_date',
         'q_c_id',
-        'q_cda_id',
         'q_subtotal',
         'q_discount',
         'q_tax_rate',
@@ -75,6 +74,28 @@ class QuoteModel extends Model
             'data' => $data,
             'total' => $total,
             'totalPages' => $totalPages,
+        ];
+    }
+
+    /**
+     * 取得指定客戶的報價單列表（分頁）
+     */
+    public function getByCustomer(int $customerId, int $page = 1, int $perPage = 10): array
+    {
+        $builder = $this->builder()
+            ->select('q_id, q_number, q_date, q_total_amount, q_created_at')
+            ->where('q_c_id', $customerId)
+            ->orderBy('q_created_at', 'DESC');
+
+        $total = $builder->countAllResults(false);
+        $totalPages = ceil($total / $perPage);
+        $data = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
         ];
     }
 

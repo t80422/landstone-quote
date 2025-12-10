@@ -11,12 +11,13 @@
  */
 
 // 建立 URL 參數的函數
-function buildPagingUrl($baseUrl, $page, $params = []) {
+function buildPagingUrl($baseUrl, $page, $params = [], $pageParam = 'page') {
     // 移除原有的 page 參數，避免重複
     unset($params['page']);
+    unset($params[$pageParam]);
     
     // 加入新的 page 參數
-    $params['page'] = $page;
+    $params[$pageParam] = $page;
     
     // 過濾空值參數
     $params = array_filter($params, function($value) {
@@ -28,6 +29,7 @@ function buildPagingUrl($baseUrl, $page, $params = []) {
 
 // 取得當前的 GET 參數
 $currentParams = $params ?? $_GET ?? [];
+$pageParam = $pageParam ?? 'page';
 ?>
 
 <?php if ($pager['totalPages'] > 1): ?>
@@ -36,7 +38,7 @@ $currentParams = $params ?? $_GET ?? [];
             <!-- 上一頁 -->
             <li class="page-item <?= $pager['currentPage'] <= 1 ? 'disabled' : '' ?>">
                 <?php if ($pager['currentPage'] > 1): ?>
-                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, $pager['currentPage'] - 1, $currentParams) ?>" aria-label="Previous">
+                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, $pager['currentPage'] - 1, $currentParams, $pageParam) ?>" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 <?php else: ?>
@@ -87,7 +89,7 @@ $currentParams = $params ?? $_GET ?? [];
             <!-- 首頁 -->
             <?php if ($showFirstPage): ?>
                 <li class="page-item">
-                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, 1, $currentParams) ?>">1</a>
+                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, 1, $currentParams, $pageParam) ?>">1</a>
                 </li>
                 <?php if ($showFirstEllipsis): ?>
                     <li class="page-item disabled">
@@ -104,7 +106,7 @@ $currentParams = $params ?? $_GET ?? [];
                     </li>
                 <?php else: ?>
                     <li class="page-item">
-                        <a class="page-link" href="<?= buildPagingUrl($baseUrl, $i, $currentParams) ?>"><?= $i ?></a>
+                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, $i, $currentParams, $pageParam) ?>"><?= $i ?></a>
                     </li>
                 <?php endif; ?>
             <?php endfor; ?>
@@ -117,14 +119,14 @@ $currentParams = $params ?? $_GET ?? [];
                     </li>
                 <?php endif; ?>
                 <li class="page-item">
-                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, $totalPages, $currentParams) ?>"><?= $totalPages ?></a>
+                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, $totalPages, $currentParams, $pageParam) ?>"><?= $totalPages ?></a>
                 </li>
             <?php endif; ?>
 
             <!-- 下一頁 -->
             <li class="page-item <?= $pager['currentPage'] >= $pager['totalPages'] ? 'disabled' : '' ?>">
                 <?php if ($pager['currentPage'] < $pager['totalPages']): ?>
-                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, $pager['currentPage'] + 1, $currentParams) ?>" aria-label="Next">
+                    <a class="page-link" href="<?= buildPagingUrl($baseUrl, $pager['currentPage'] + 1, $currentParams, $pageParam) ?>" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 <?php else: ?>

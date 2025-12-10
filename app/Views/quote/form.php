@@ -22,11 +22,6 @@ function getFieldClass($fieldName)
 }
 
 $productCategories = $productCategories ?? [];
-$deliveryAddressMissing = $deliveryAddressMissing ?? false;
-$selectedCustomerId = old('q_c_id', $data['q_c_id'] ?? '');
-$selectedDeliveryAddressId = old('q_cda_id', $data['q_cda_id'] ?? '');
-
-$productCategories = $productCategories ?? [];
 ?>
 
 <?= $this->extend('_layout') ?>
@@ -128,14 +123,6 @@ $productCategories = $productCategories ?? [];
                         </div>
                     </div>
 
-                    <?= view('components/delivery_address_selector', [
-                        'fieldName' => 'q_cda_id',
-                        'selectedCustomerId' => $selectedCustomerId,
-                        'selectedDeliveryAddressId' => $selectedDeliveryAddressId,
-                        'deliveryAddressMissing' => $deliveryAddressMissing,
-                        'fieldClass' => getFieldClass('q_cda_id'),
-                        'fieldError' => showFieldError('q_cda_id')
-                    ]) ?>
                 </div>
 
                 <!-- 商品項目區塊 -->

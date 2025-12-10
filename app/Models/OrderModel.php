@@ -13,7 +13,6 @@ class OrderModel extends Model
         'o_date',
         'o_c_id',
         'o_q_id',
-        'o_cda_id',
         'o_delivery_date',
         'o_total_amount',
         'o_payment_status',
@@ -87,6 +86,28 @@ class OrderModel extends Model
         ];
     }
 
+    /**
+     * 取得指定客戶的訂單列表（分頁）
+     */
+    public function getByCustomer(int $customerId, int $page = 1, int $perPage = 10): array
+    {
+        $builder = $this->builder()
+            ->select('o_id, o_number, o_date, o_total_amount, o_payment_status, o_shipment_status, o_status, o_created_at')
+            ->where('o_c_id', $customerId)
+            ->orderBy('o_created_at', 'DESC');
+
+        $total = $builder->countAllResults(false);
+        $totalPages = ceil($total / $perPage);
+        $data = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+        ];
+    }
+
     // 根據報價單創建訂單
     public function createFromQuote($quoteId)
     {
@@ -108,7 +129,6 @@ class OrderModel extends Model
             'o_date' => date('Y-m-d'),
             'o_c_id' => $quote['q_c_id'],
             'o_q_id' => $quote['q_id'],
-            'o_cda_id' => $quote['q_cda_id'] ?? null,
             'o_total_amount' => $quote['q_total_amount'],
             'o_status' => 'processing',
             'o_payment_status' => 'unpaid',

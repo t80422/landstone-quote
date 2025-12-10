@@ -20,6 +20,14 @@ function getFieldClass($fieldName)
     $errors = session()->getFlashdata('errors');
     return isset($errors[$fieldName]) ? 'is-invalid' : '';
 }
+
+$contacts = $contacts ?? [];
+if (old('contacts') !== null) {
+    $contacts = old('contacts');
+}
+if (empty($contacts)) {
+    $contacts = [['cc_id' => '', 'cc_name' => '', 'cc_phone' => '', 'cc_email' => '']];
+}
 ?>
 
 <?= $this->extend('_layout') ?>
@@ -72,7 +80,7 @@ function getFieldClass($fieldName)
                     <?php endif; ?>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="customerName" class="form-label">
                                 公司行號名稱
                             </label>
@@ -86,7 +94,7 @@ function getFieldClass($fieldName)
                                 aria-describedby="customerNameError">
                             <?= showFieldError('c_name') ?>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="manager" class="form-label">
                                 負責人
                             </label>
@@ -100,9 +108,7 @@ function getFieldClass($fieldName)
                                 aria-describedby="managerError">
                             <?= showFieldError('c_manager') ?>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="taxId" class="form-label">統一編號</label>
                             <input
                                 type="text"
@@ -116,7 +122,7 @@ function getFieldClass($fieldName)
                                 aria-describedby="taxIdError">
                             <?= showFieldError('c_tax_id') ?>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="paymentMethod" class="form-label">結帳方式</label>
                             <select
                                 class="form-select <?= getFieldClass('c_pm_id') ?>"
@@ -134,35 +140,7 @@ function getFieldClass($fieldName)
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="notes" class="form-label">備註</label>
-                            <textarea class="form-control <?= getFieldClass('c_notes') ?>" id="notes" name="c_notes" rows="3"><?= old('c_notes', $data['c_notes'] ?? '') ?></textarea>
-                            <?= showFieldError('c_notes') ?>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 聯絡資訊區塊 -->
-                <div class="mb-4">
-                    <h5 class="border-bottom pb-2 mb-3">
-                        <i class="bi bi-person-lines-fill me-2 text-primary"></i>聯絡資訊
-                    </h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="contactPerson" class="form-label">
-                                主要聯絡人
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control <?= getFieldClass('c_contact_person') ?>"
-                                id="contactPerson"
-                                name="c_contact_person"
-                                value="<?= old('c_contact_person', $data['c_contact_person'] ?? '') ?>"
-                                placeholder="請輸入聯絡人姓名"
-                                aria-describedby="contactPersonError">
-                            <?= showFieldError('c_contact_person') ?>
-                        </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="phone" class="form-label">
                                 聯絡電話
                             </label>
@@ -176,9 +154,7 @@ function getFieldClass($fieldName)
                                 aria-describedby="phoneError">
                             <?= showFieldError('c_phone') ?>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="fax" class="form-label">傳真號碼</label>
                             <input
                                 type="tel"
@@ -190,7 +166,7 @@ function getFieldClass($fieldName)
                                 aria-describedby="faxError">
                             <?= showFieldError('c_fax') ?>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input
                                 type="email"
@@ -202,9 +178,23 @@ function getFieldClass($fieldName)
                                 aria-describedby="emailError">
                             <?= showFieldError('c_email') ?>
                         </div>
+                        <!-- <div class="col-md-3 mb-3">
+                            <label for="contactPerson" class="form-label">
+                                主要聯絡人
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('c_contact_person') ?>"
+                                id="contactPerson"
+                                name="c_contact_person"
+                                value="<?= old('c_contact_person', $data['c_contact_person'] ?? '') ?>"
+                                placeholder="請輸入聯絡人姓名"
+                                aria-describedby="contactPersonError">
+                            <?= showFieldError('c_contact_person') ?>
+                        </div> -->
                     </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-2 mb-3">
                             <label for="city" class="form-label">縣市</label>
                             <select
                                 class="form-select <?= getFieldClass('c_city') ?>"
@@ -214,10 +204,28 @@ function getFieldClass($fieldName)
                                 <option value="">請選擇縣市</option>
                                 <?php
                                 $cities = [
-                                    '台北市', '新北市', '桃園市', '台中市', '台南市', '高雄市',
-                                    '基隆市', '新竹市', '嘉義市', '新竹縣', '苗栗縣', '彰化縣',
-                                    '南投縣', '雲林縣', '嘉義縣', '屏東縣', '宜蘭縣', '花蓮縣',
-                                    '台東縣', '澎湖縣', '金門縣', '連江縣'
+                                    '台北市',
+                                    '新北市',
+                                    '桃園市',
+                                    '台中市',
+                                    '台南市',
+                                    '高雄市',
+                                    '基隆市',
+                                    '新竹市',
+                                    '嘉義市',
+                                    '新竹縣',
+                                    '苗栗縣',
+                                    '彰化縣',
+                                    '南投縣',
+                                    '雲林縣',
+                                    '嘉義縣',
+                                    '屏東縣',
+                                    '宜蘭縣',
+                                    '花蓮縣',
+                                    '台東縣',
+                                    '澎湖縣',
+                                    '金門縣',
+                                    '連江縣'
                                 ];
                                 foreach ($cities as $city):
                                 ?>
@@ -228,7 +236,7 @@ function getFieldClass($fieldName)
                             </select>
                             <?= showFieldError('c_city') ?>
                         </div>
-                        <div class="col-md-8 mb-3">
+                        <div class="col-md-10 mb-3">
                             <label for="address" class="form-label">詳細地址</label>
                             <input
                                 type="text"
@@ -241,44 +249,123 @@ function getFieldClass($fieldName)
                             <?= showFieldError('c_address') ?>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="notes" class="form-label">備註</label>
+                            <textarea class="form-control <?= getFieldClass('c_notes') ?>" id="notes" name="c_notes" rows="3"><?= old('c_notes', $data['c_notes'] ?? '') ?></textarea>
+                            <?= showFieldError('c_notes') ?>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 送貨地址區塊 -->
+                <!-- 聯絡人區塊 -->
                 <div class="mb-4">
                     <h5 class="border-bottom pb-2 mb-3">
-                        <i class="bi bi-truck me-2 text-primary"></i>送貨地址
+                        <i class="bi bi-person-lines-fill me-2 text-primary"></i>聯絡人
                     </h5>
-                    <div id="deliveryAddressContainer">
-                        <?php
-                        $deliveryAddresses = $data['delivery_addresses'] ?? [];
-                        $addressCount = count($deliveryAddresses);
-                        if (!empty($deliveryAddresses)) {
-                            foreach ($deliveryAddresses as $index => $address):
-                                echo view('components/delivery_address_item', [
-                                    'index' => $index,
-                                    'address' => $address,
-                                    'totalCount' => $addressCount
-                                ]);
-                            endforeach;
-                        }
-                        ?>
+
+                    <div id="contactContainer">
+                        <?php foreach ($contacts as $index => $contact): ?>
+                            <div class="contact-item card mb-3" data-index="<?= $index ?>">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-person-badge me-1 text-primary"></i>
+                                            聯絡人 #<span class="contact-number"><?= $index + 1 ?></span>
+                                        </h6>
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-contact">
+                                            <i class="bi bi-trash me-1"></i>刪除
+                                        </button>
+                                    </div>
+
+                                    <input type="hidden" name="contacts[<?= $index ?>][cc_id]" value="<?= esc($contact['cc_id'] ?? '') ?>">
+
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">姓名</label>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                name="contacts[<?= $index ?>][cc_name]"
+                                                value="<?= esc($contact['cc_name'] ?? '') ?>"
+                                                placeholder="聯絡人姓名">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">手機</label>
+                                            <input
+                                                type="tel"
+                                                class="form-control"
+                                                name="contacts[<?= $index ?>][cc_phone]"
+                                                value="<?= esc($contact['cc_phone'] ?? '') ?>"
+                                                placeholder="0912-345678">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input
+                                                type="email"
+                                                class="form-control"
+                                                name="contacts[<?= $index ?>][cc_email]"
+                                                value="<?= esc($contact['cc_email'] ?? '') ?>"
+                                                placeholder="example@company.com">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
 
-                    <button type="button" class="btn btn-success" id="addAddressBtn">
-                        <i class="bi bi-plus-circle me-1"></i>新增送貨地址
+                    <button type="button" class="btn btn-success" id="addContactBtn">
+                        <i class="bi bi-plus-circle me-1"></i>新增聯絡人
                     </button>
 
-                    <input type="hidden" id="deletedAddressIds" name="deleted_address_ids" value="">
-                </div>
+                    <input type="hidden" id="deletedContactIds" name="deleted_contact_ids" value="">
 
-                <!-- 送貨地址模板（供 JavaScript 使用） -->
-                <template id="addressTemplate">
-                    <?= view('components/delivery_address_item', [
-                        'index' => '__INDEX__',
-                        'address' => [],
-                        'isTemplate' => true
-                    ]) ?>
-                </template>
+                    <!-- 聯絡人模板（供 JavaScript 使用） -->
+                    <template id="contactTemplate">
+                        <div class="contact-item card mb-3" data-index="__INDEX__">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-person-badge me-1 text-primary"></i>
+                                        聯絡人 #<span class="contact-number">__NUM__</span>
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-contact">
+                                        <i class="bi bi-trash me-1"></i>刪除
+                                    </button>
+                                </div>
+
+                                <input type="hidden" name="contacts[__INDEX__][cc_id]" value="">
+
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">姓名</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            name="contacts[__INDEX__][cc_name]"
+                                            placeholder="聯絡人姓名">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">手機</label>
+                                        <input
+                                            type="tel"
+                                            class="form-control"
+                                            name="contacts[__INDEX__][cc_phone]"
+                                            placeholder="0912-345678">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input
+                                            type="email"
+                                            class="form-control"
+                                            name="contacts[__INDEX__][cc_email]"
+                                            placeholder="example@company.com">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
 
                 <!-- 時間戳記資訊 (僅編輯時顯示) -->
                 <?php if (!empty($isEdit) && isset($data)): ?>
@@ -307,7 +394,6 @@ function getFieldClass($fieldName)
                     </div>
                 <?php endif; ?>
 
-
                 <!-- 表單按鈕 -->
                 <div class="d-flex gap-2 justify-content-end">
                     <a href="<?= url_to('CustomerController::index') ?>" class="btn btn-outline-secondary">
@@ -323,14 +409,49 @@ function getFieldClass($fieldName)
 </div>
 
 <script>
-    // 全域變數
-    let addressIndex = <?= count($deliveryAddresses) ?>;
-    let deletedAddressIds = [];
+    // 聯絡人管理
+    let contactIndex = <?= count($contacts) ?>;
+    let deletedContactIds = [];
+
+    document.getElementById('addContactBtn')?.addEventListener('click', function() {
+        const container = document.getElementById('contactContainer');
+        const template = document.getElementById('contactTemplate');
+        const newIndex = contactIndex++;
+
+        const clone = template.content.cloneNode(true);
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(clone);
+        let html = wrapper.innerHTML;
+        html = html.replace(/__INDEX__/g, newIndex).replace(/__NUM__/g, newIndex + 1);
+
+        container.insertAdjacentHTML('beforeend', html);
+        updateContactNumbers();
+    });
+
+    document.getElementById('contactContainer')?.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-contact')) {
+            const item = e.target.closest('.contact-item');
+            const contactId = item.querySelector('input[name*="[cc_id]"]').value;
+            if (contactId) {
+                deletedContactIds.push(contactId);
+            }
+            item.remove();
+            updateContactNumbers();
+        }
+    });
+
+    function updateContactNumbers() {
+        document.querySelectorAll('.contact-item .contact-number').forEach((el, idx) => {
+            el.textContent = idx + 1;
+        });
+    }
 
     // 表單提交處理 - 防止重複提交
     document.getElementById('customerForm').addEventListener('submit', function(e) {
         const submitBtn = document.getElementById('submitBtn');
 
+        // 更新刪除聯絡人 ID
+        document.getElementById('deletedContactIds').value = deletedContactIds.join(',');
 
         // 檢查表單驗證
         if (!this.checkValidity()) {
@@ -345,9 +466,6 @@ function getFieldClass($fieldName)
             e.preventDefault();
             return false;
         }
-
-        // 更新刪除的地址 ID
-        document.getElementById('deletedAddressIds').value = deletedAddressIds.join(',');
 
         // 禁用提交按鈕並顯示載入狀態
         submitBtn.disabled = true;
@@ -368,104 +486,6 @@ function getFieldClass($fieldName)
         } else {
             this.classList.remove('is-invalid');
         }
-    });
-
-    // ==================== 送貨地址管理 ====================
-
-    // 新增送貨地址
-    document.getElementById('addAddressBtn').addEventListener('click', function() {
-        const container = document.getElementById('deliveryAddressContainer');
-        const newIndex = addressIndex++;
-
-        // 從模板複製內容
-        const template = document.getElementById('addressTemplate');
-        const clone = template.content.cloneNode(true);
-        
-        // 將模板中的 __INDEX__ 替換為實際的索引
-        const tempDiv = document.createElement('div');
-        tempDiv.appendChild(clone);
-        let html = tempDiv.innerHTML;
-        html = html.replace(/__INDEX__/g, newIndex);
-        
-        // 插入到容器中
-        container.insertAdjacentHTML('beforeend', html);
-        
-        updateAddressNumbers();
-        updateRemoveButtons();
-    });
-
-    // 刪除送貨地址（使用事件委派）
-    document.getElementById('deliveryAddressContainer').addEventListener('click', function(e) {
-        if (e.target.closest('.remove-address')) {
-            const addressItem = e.target.closest('.address-item');
-            const addressId = addressItem.querySelector('input[name*="[cda_id]"]').value;
-
-
-            if (confirm('確定要刪除這個送貨地址嗎？')) {
-                // 如果是已存在的地址（有 ID），記錄到刪除列表
-                if (addressId) {
-                    deletedAddressIds.push(addressId);
-                }
-
-                // 移除元素
-                addressItem.remove();
-                updateAddressNumbers();
-                updateRemoveButtons();
-
-                // 確保至少有一個預設地址
-                ensureDefaultAddress();
-            }
-        }
-    });
-
-    // 預設地址單選邏輯
-    document.getElementById('deliveryAddressContainer').addEventListener('change', function(e) {
-        if (e.target.classList.contains('default-address-checkbox')) {
-            if (e.target.checked) {
-                // 取消其他預設地址
-                document.querySelectorAll('.default-address-checkbox').forEach(checkbox => {
-                    if (checkbox !== e.target) {
-                        checkbox.checked = false;
-                    }
-                });
-            }
-        }
-    });
-
-    // 更新地址編號
-    function updateAddressNumbers() {
-        const addressItems = document.querySelectorAll('.address-item');
-        addressItems.forEach((item, index) => {
-            const numberSpan = item.querySelector('.address-number');
-            if (numberSpan) {
-                numberSpan.textContent = index + 1;
-            }
-        });
-    }
-
-    // 更新刪除按鈕狀態
-    function updateRemoveButtons() {
-        const removeButtons = document.querySelectorAll('.remove-address');
-        removeButtons.forEach(btn => {
-            btn.disabled = false;
-            btn.title = '';
-        });
-    }
-
-    // 確保至少有一個預設地址
-    function ensureDefaultAddress() {
-        const checkboxes = document.querySelectorAll('.default-address-checkbox');
-        const hasDefault = Array.from(checkboxes).some(cb => cb.checked);
-
-        if (!hasDefault && checkboxes.length > 0) {
-            checkboxes[0].checked = true;
-        }
-    }
-
-    // 初始化
-    document.addEventListener('DOMContentLoaded', function() {
-        updateRemoveButtons();
-        ensureDefaultAddress();
     });
 </script>
 

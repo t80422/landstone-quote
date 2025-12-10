@@ -21,10 +21,6 @@ function getFieldClass($fieldName)
 }
 
 $productCategories = $productCategories ?? [];
-$deliveryAddressMissing = $deliveryAddressMissing ?? false;
-$selectedCustomerId = old('o_c_id', $data['o_c_id'] ?? '');
-$selectedDeliveryAddressId = old('o_cda_id', $data['o_cda_id'] ?? '');
-
 $productCategories = $productCategories ?? [];
 ?>
 
@@ -118,15 +114,6 @@ $productCategories = $productCategories ?? [];
                             <?= showFieldError('o_c_id') ?>
                         </div>
                     </div>
-
-                    <?= view('components/delivery_address_selector', [
-                        'fieldName' => 'o_cda_id',
-                        'selectedCustomerId' => $selectedCustomerId,
-                        'selectedDeliveryAddressId' => $selectedDeliveryAddressId,
-                        'deliveryAddressMissing' => $deliveryAddressMissing,
-                        'fieldClass' => getFieldClass('o_cda_id'),
-                        'fieldError' => showFieldError('o_cda_id')
-                    ]) ?>
 
                     <div class="row">
                         <div class="col-md-3 mb-3">

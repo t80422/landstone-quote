@@ -59,7 +59,6 @@
                             <tr>
                                 <th>客戶編號</th>
                                 <th>公司行號名稱</th>
-                                <th>主要聯絡人</th>
                                 <th>聯絡電話</th>
                                 <th>建立時間</th>
                                 <th>更新時間</th>
@@ -68,21 +67,20 @@
                         </thead>
                         <tbody>
                             <?php foreach ($data as $item): ?>
-                                <tr>
+                                <tr class="table-row-link" data-href="<?= url_to('CustomerController::show', $item['c_id']) ?>">
                                     <td><strong class="text-primary"><?= esc($item['c_code']) ?></strong></td>
                                     <td><strong><?= esc($item['c_name']) ?></strong></td>
-                                    <td><?= esc($item['c_contact_person']) ?></td>
                                     <td><?= esc($item['c_phone']) ?></td>
                                     <td><small class="text-muted"><?= esc($item['c_created_at']) ?></small></td>
                                     <td><small class="text-muted"><?= esc($item['c_updated_at']) ?></small></td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="<?= url_to('CustomerController::edit', $item['c_id']) ?>"
-                                                class="btn btn-outline-primary" title="編輯">
+                                                class="btn btn-outline-primary" title="編輯" onclick="event.stopPropagation();">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <button type="button" class="btn btn-outline-danger"
-                                                onclick="confirmDelete('<?= url_to('CustomerController::delete', $item['c_id']) ?>')"
+                                                onclick="event.stopPropagation(); confirmDelete('<?= url_to('CustomerController::delete', $item['c_id']) ?>')"
                                                 title="刪除">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -108,5 +106,16 @@
 </div>
 
 <script src="<?= base_url('js/script.js') ?>"></script>
+<script>
+    // 列表整列可點
+    document.querySelectorAll('.table-row-link').forEach(row => {
+        row.addEventListener('click', function() {
+            const href = this.getAttribute('data-href');
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+</script>
 
 <?= $this->endSection() ?>
