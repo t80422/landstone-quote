@@ -13,6 +13,7 @@ class QuoteModel extends Model
         'q_date',
         'q_valid_date',
         'q_c_id',
+        'q_cc_id',
         'q_subtotal',
         'q_discount',
         'q_tax_rate',

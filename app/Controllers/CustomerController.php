@@ -9,6 +9,7 @@ use App\Models\CustomerContactModel;
 use App\Models\QuoteModel;
 use App\Models\OrderModel;
 
+
 class CustomerController extends BaseController
 {
     private $customerModel;
@@ -159,5 +160,26 @@ class CustomerController extends BaseController
         // 因為設定了 CASCADE，刪除客戶時會自動刪除相關的送貨地址
         $this->customerModel->delete($id);
         return redirect()->to(url_to('CustomerController::index'))->with('success', '刪除成功');
+    }
+
+    /**
+     * AJAX: 取得聯絡人列表
+     */
+    public function getContacts($customerId)
+    {
+        if (empty($customerId)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => '客戶不存在',
+                'data' => [],
+            ])->setStatusCode(400);
+        }
+
+        $contacts = $this->contactModel->getByCustomerId($customerId);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $contacts,
+        ]);
     }
 }

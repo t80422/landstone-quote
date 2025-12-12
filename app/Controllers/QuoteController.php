@@ -8,6 +8,7 @@ use App\Models\QuoteItemModel;
 use App\Models\CustomerModel;
 use App\Models\ProductModel;
 use App\Models\ProductCategoryModel;
+use App\Models\CustomerContactModel;
 
 class QuoteController extends BaseController
 {
@@ -16,6 +17,7 @@ class QuoteController extends BaseController
     private $customerModel;
     private $productModel;
     private $productCategoryModel;
+    private $contactModel;
 
     public function __construct()
     {
@@ -24,6 +26,7 @@ class QuoteController extends BaseController
         $this->customerModel = new CustomerModel();
         $this->productModel = new ProductModel();
         $this->productCategoryModel = new ProductCategoryModel();
+        $this->contactModel = new CustomerContactModel();
     }
 
     /**

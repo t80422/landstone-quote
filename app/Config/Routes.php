@@ -28,11 +28,14 @@ $routes->group('customer', function ($routes) {
     $routes->get('edit/(:num)', 'CustomerController::edit/$1');
     $routes->post('save', 'CustomerController::save');
     $routes->get('delete/(:num)', 'CustomerController::delete/$1');
+    $routes->get('delivery-addresses/(:num)', 'CustomerController::getDeliveryAddresses/$1');
+    $routes->get('contacts/(:num)', 'CustomerController::getContacts/$1');
 });
 
 $routes->group('product', function ($routes) {
     $routes->get('/', 'ProductController::index');
     $routes->get('create', 'ProductController::create');
+    $routes->get('show/(:num)', 'ProductController::show/$1');
     $routes->get('edit/(:num)', 'ProductController::edit/$1');
     $routes->post('save', 'ProductController::save');
     $routes->get('delete/(:num)', 'ProductController::delete/$1');

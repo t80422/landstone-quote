@@ -61,6 +61,19 @@ class ProductController extends BaseController
         ]);
     }
 
+    public function show($id)
+    {
+        $data = $this->productModel->getProductWithCategory($id);
+
+        if (!$data) {
+            return redirect()->to(url_to('ProductController::index'))->with('error', '商品不存在');
+        }
+
+        return view('product/show', [
+            'data' => $data,
+        ]);
+    }
+
     public function save()
     {
         $requestData = $this->request->getPost();
@@ -84,14 +97,12 @@ class ProductController extends BaseController
             'p_pc_id' => $requestData['p_pc_id'] ?? null,
             'p_name' => trim((string) ($requestData['p_name'] ?? '')),
             'p_supplier' => trim((string) ($requestData['p_supplier'] ?? '')),
-            'p_type' => trim((string) ($requestData['p_type'] ?? '')),
             'p_style' => trim((string) ($requestData['p_style'] ?? '')),
             'p_color' => trim((string) ($requestData['p_color'] ?? '')),
             'p_size' => trim((string) ($requestData['p_size'] ?? '')),
             'p_specifications' => trim((string) ($requestData['p_specifications'] ?? '')),
             'p_standard_price' => $requestData['p_standard_price'] ?? 0,
             'p_cost_price' => $requestData['p_cost_price'] ?? 0,
-            'p_unit' => trim((string) ($requestData['p_unit'] ?? '')),
         ];
 
         // 處理圖片上傳

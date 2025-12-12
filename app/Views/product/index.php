@@ -68,7 +68,7 @@
                         </thead>
                         <tbody>
                             <?php foreach ($data as $item): ?>
-                                <tr>
+                                <tr class="table-row-link" data-href="<?= url_to('ProductController::show', $item['p_id']) ?>">
                                     <td>
                                         <?php if (!empty($item['p_image'])): ?>
                                             <?php
@@ -97,11 +97,10 @@
                                     <td>
                                         <div>
                                             <div class="fw-bold"><?= esc($item['p_name']) ?></div>
-                                            <?php if (!empty($item['p_type']) || !empty($item['p_style']) || !empty($item['p_color']) || !empty($item['p_size'])): ?>
+                                            <?php if (!empty($item['p_style']) || !empty($item['p_color']) || !empty($item['p_size'])): ?>
                                                 <small class="text-muted">
                                                     <?php
                                                     $specs = [];
-                                                    if (!empty($item['p_type'])) $specs[] = esc($item['p_type']);
                                                     if (!empty($item['p_style'])) $specs[] = esc($item['p_style']);
                                                     if (!empty($item['p_color'])) $specs[] = esc($item['p_color']);
                                                     if (!empty($item['p_size'])) $specs[] = esc($item['p_size']);
@@ -133,9 +132,6 @@
                                             <span class="text-primary fw-bold">
                                                 <?= number_format($item['p_standard_price']) ?>
                                             </span>
-                                            <?php if (!empty($item['p_unit'])): ?>
-                                                <small class="text-muted ms-1">/ <?= esc($item['p_unit']) ?></small>
-                                            <?php endif; ?>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>
@@ -143,11 +139,11 @@
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="<?= url_to('ProductController::edit', $item['p_id']) ?>"
-                                                class="btn btn-outline-primary" title="編輯">
+                                                class="btn btn-outline-primary" title="編輯" onclick="event.stopPropagation();">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <button type="button" class="btn btn-outline-danger"
-                                                onclick="confirmDelete('<?= url_to('ProductController::delete', $item['p_id']) ?>')"
+                                                onclick="event.stopPropagation(); confirmDelete('<?= url_to('ProductController::delete', $item['p_id']) ?>')"
                                                 title="刪除">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -171,5 +167,6 @@
         </div>
     </div>
 </div>
+
 
 <?= $this->endSection() ?>

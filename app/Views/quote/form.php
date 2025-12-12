@@ -102,7 +102,7 @@ $productCategories = $productCategories ?? [];
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="customer" class="form-label">
                                 客戶 <span class="text-danger">*</span>
                             </label>
@@ -115,11 +115,27 @@ $productCategories = $productCategories ?? [];
                                 <?php foreach ($customers as $customer): ?>
                                     <option value="<?= $customer['c_id'] ?>"
                                         <?= (old('q_c_id', $data['q_c_id'] ?? '') == $customer['c_id']) ? 'selected' : '' ?>>
-                                        <?= esc($customer['c_name']) ?> - <?= esc($customer['c_contact_person']) ?>
+                                        <?= esc($customer['c_name']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                             <?= showFieldError('q_c_id') ?>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="contactSelect" class="form-label">
+                                聯絡人
+                            </label>
+                            <select
+                                class="form-select <?= getFieldClass('q_cc_id') ?>"
+                                id="contactSelect"
+                                name="q_cc_id"
+                                data-endpoint="<?= base_url('customer/contacts') ?>"
+                                data-initial-customer="<?= esc($data['q_c_id'] ?? '') ?>"
+                                data-selected-id="<?= esc(old('q_cc_id', $data['q_cc_id'] ?? '')) ?>">
+                                <option value="">請先選擇客戶</option>
+                            </select>
+                            <?= showFieldError('q_cc_id') ?>
+                            <div class="form-text" id="contactInfo" data-placeholder="電話 / Email"></div>
                         </div>
                     </div>
 
@@ -293,6 +309,7 @@ $productCategories = $productCategories ?? [];
         initCalculations();
         updateRemoveButtons();
         // 送貨地址管理器已在 component 中自動初始化
+        initContacts();
 
         // --- Event Listeners ---
         bindEvents();
@@ -307,6 +324,92 @@ $productCategories = $productCategories ?? [];
                     placeholder: '請選擇客戶'
                 });
             }
+        }
+
+        function initContacts() {
+            const customerSelect = document.getElementById('customer');
+            const contactSelect = document.getElementById('contactSelect');
+            const contactInfo = document.getElementById('contactInfo');
+            const endpoint = contactSelect ? contactSelect.dataset.endpoint : '';
+            const initialCustomerId = contactSelect ? contactSelect.dataset.initialCustomer : '';
+            const initialContactId = contactSelect ? contactSelect.dataset.selectedId : '';
+
+            if (!contactSelect || !customerSelect || !endpoint) {
+                return;
+            }
+
+            const tomConfig = {
+                ...TOM_SELECT_COMMON_CONFIG,
+                placeholder: '請選擇聯絡人'
+            };
+
+            const contactSelectInstance = new TomSelect(contactSelect, tomConfig);
+
+            customerSelect.addEventListener('change', function() {
+                loadContacts(this.value, contactSelectInstance, contactInfo, endpoint);
+            });
+
+            if (initialCustomerId) {
+                loadContacts(initialCustomerId, contactSelectInstance, contactInfo, endpoint, initialContactId, true);
+            }
+        }
+
+        function loadContacts(customerId, selectInstance, infoDom, endpoint, selectedId = '', preserveValue = false) {
+            if (!customerId) {
+                selectInstance.clearOptions();
+                selectInstance.addOption({value: '', text: '請先選擇客戶'});
+                selectInstance.setValue('');
+                infoDom.textContent = infoDom.dataset.placeholder || '';
+                return;
+            }
+
+            fetch(`${endpoint}/${customerId}`)
+                .then(resp => resp.json())
+                .then(result => {
+                    selectInstance.clearOptions();
+
+                    if (!result.success || !result.data || result.data.length === 0) {
+                        selectInstance.addOption({value: '', text: '無聯絡人資料'});
+                        selectInstance.setValue('');
+                        infoDom.textContent = '無聯絡人資料';
+                        return;
+                    }
+
+                    const contacts = result.data;
+                    contacts.forEach(c => {
+                        const label = c.cc_phone ? `${c.cc_name} (${c.cc_phone})` : c.cc_name;
+                        selectInstance.addOption({value: c.cc_id, text: label, phone: c.cc_phone, email: c.cc_email});
+                    });
+
+                    let targetId = preserveValue ? selectInstance.getValue() : selectedId;
+                    if (!targetId || !contacts.some(c => String(c.cc_id) === String(targetId))) {
+                        targetId = contacts[0].cc_id;
+                    }
+
+                    selectInstance.setValue(targetId);
+
+                    const selected = contacts.find(c => String(c.cc_id) === String(targetId));
+                    if (selected) {
+                        infoDom.textContent = `${selected.cc_email || ''}`.trim();
+                    } else {
+                        infoDom.textContent = infoDom.dataset.placeholder || '';
+                    }
+
+                    selectInstance.on('change', function(value) {
+                        const sel = contacts.find(c => String(c.cc_id) === String(value));
+                        if (sel) {
+                            infoDom.textContent = `${sel.cc_email || ''}`.trim();
+                        } else {
+                            infoDom.textContent = infoDom.dataset.placeholder || '';
+                        }
+                    });
+                })
+                .catch(() => {
+                    selectInstance.clearOptions();
+                    selectInstance.addOption({value: '', text: '載入失敗'});
+                    selectInstance.setValue('');
+                    infoDom.textContent = '載入聯絡人失敗';
+                });
         }
 
         function initProductTomSelect(elements) {

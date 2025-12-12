@@ -105,17 +105,4 @@
     </div>
 </div>
 
-<script src="<?= base_url('js/script.js') ?>"></script>
-<script>
-    // 列表整列可點
-    document.querySelectorAll('.table-row-link').forEach(row => {
-        row.addEventListener('click', function() {
-            const href = this.getAttribute('data-href');
-            if (href) {
-                window.location.href = href;
-            }
-        });
-    });
-</script>
-
 <?= $this->endSection() ?>

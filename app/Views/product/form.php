@@ -57,7 +57,7 @@ function getFieldClass($fieldName)
                         <i class="bi bi-box me-2 text-primary"></i>基本資料
                     </h5>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="productCode" class="form-label">產品編號</label>
                             <div class="input-group">
                                 <input
@@ -69,7 +69,7 @@ function getFieldClass($fieldName)
                             </div>
                             <div class="form-text">產品編號由系統自動產生</div>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                              <label for="productName" class="form-label">
                                 產品名稱 <span class="text-danger">*</span>
                             </label>
@@ -84,7 +84,7 @@ function getFieldClass($fieldName)
                                 aria-describedby="productNameError">
                             <?= showFieldError('p_name') ?>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="category" class="form-label">產品分類</label>
                             <select
                                 class="form-select <?= getFieldClass('p_pc_id') ?>"
@@ -104,6 +104,18 @@ function getFieldClass($fieldName)
                             </select>
                             <?= showFieldError('p_pc_id') ?>
                         </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="supplier" class="form-label">供應商</label>
+                            <textarea
+                                class="form-control <?= getFieldClass('p_supplier') ?>"
+                                id="supplier"
+                                name="p_supplier"
+                                rows="3"
+                                placeholder="供應商名稱"><?= old('p_supplier', $data['p_supplier'] ?? '') ?>
+                            </textarea>
+                            <?= showFieldError('p_supplier') ?>
+                            <div class="form-text">使用"、"分隔多個供應商</div>
+                        </div>    
                     </div>
                 </div>
 
@@ -112,79 +124,45 @@ function getFieldClass($fieldName)
                     <h5 class="border-bottom pb-2 mb-3">
                         <i class="bi bi-tags me-2 text-primary"></i>屬性與規格
                     </h5>
-                    
                     <!-- 第一行：主要屬性 -->
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label for="supplier" class="form-label">供應商</label>
-                            <input
-                                type="text"
-                                class="form-control <?= getFieldClass('p_supplier') ?>"
-                                id="supplier"
-                                name="p_supplier"
-                                value="<?= old('p_supplier', $data['p_supplier'] ?? '') ?>"
-                                placeholder="供應商名稱">
-                            <?= showFieldError('p_supplier') ?>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="type" class="form-label">種類</label>
-                            <input
-                                type="text"
-                                class="form-control <?= getFieldClass('p_type') ?>"
-                                id="type"
-                                name="p_type"
-                                value="<?= old('p_type', $data['p_type'] ?? '') ?>"
-                                placeholder="產品種類">
-                            <?= showFieldError('p_type') ?>
-                        </div>
-                        <div class="col-md-3 mb-3">
                             <label for="style" class="form-label">款式</label>
-                            <input
-                                type="text"
+                            <textarea
                                 class="form-control <?= getFieldClass('p_style') ?>"
                                 id="style"
                                 name="p_style"
-                                value="<?= old('p_style', $data['p_style'] ?? '') ?>"
-                                placeholder="產品款式">
+                                rows="3"
+                                placeholder="產品款式"><?= old('p_style', $data['p_style'] ?? '') ?></textarea>
                             <?= showFieldError('p_style') ?>
+                            <div class="form-text">使用"、"分隔多個款式</div>
                         </div>
-                         <div class="col-md-3 mb-3">
-                            <label for="unit" class="form-label">單位</label>
-                            <input
-                                type="text"
-                                class="form-control <?= getFieldClass('p_unit') ?>"
-                                id="unit"
-                                name="p_unit"
-                                value="<?= old('p_unit', $data['p_unit'] ?? '') ?>"
-                                placeholder="例如：個、組">
-                            <?= showFieldError('p_unit') ?>
-                        </div>
-                    </div>
-
-                    <!-- 第二行：次要屬性 -->
-                    <div class="row">
                         <div class="col-md-3 mb-3">
                             <label for="color" class="form-label">顏色/花色</label>
-                            <input
-                                type="text"
+                            <textarea
                                 class="form-control <?= getFieldClass('p_color') ?>"
                                 id="color"
                                 name="p_color"
-                                value="<?= old('p_color', $data['p_color'] ?? '') ?>"
-                                placeholder="顏色或花色">
+                                rows="3"
+                                placeholder="顏色或花色"><?= old('p_color', $data['p_color'] ?? '') ?></textarea>
                             <?= showFieldError('p_color') ?>
+                            <div class="form-text">使用"、"分隔多個顏色/花色</div>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="size" class="form-label">尺寸</label>
-                            <input
-                                type="text"
+                            <textarea
                                 class="form-control <?= getFieldClass('p_size') ?>"
                                 id="size"
                                 name="p_size"
-                                value="<?= old('p_size', $data['p_size'] ?? '') ?>"
-                                placeholder="產品尺寸">
+                                rows="3"
+                                placeholder="產品尺寸"><?= old('p_size', $data['p_size'] ?? '') ?></textarea>
                             <?= showFieldError('p_size') ?>
+                            <div class="form-text">使用"、"分隔多個尺寸</div>
                         </div>
+                    </div>
+
+                    <!-- 第二行：價格與成本 -->
+                    <div class="row">
                          <div class="col-md-3 mb-3">
                             <label for="sellingPrice" class="form-label">
                                 售價 <span class="text-danger">*</span>

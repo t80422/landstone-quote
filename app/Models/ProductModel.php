@@ -12,7 +12,6 @@ class ProductModel extends Model
         'p_pc_id',
         'p_name',
         'p_supplier',
-        'p_type',
         'p_style',
         'p_color',
         'p_size',
@@ -20,7 +19,6 @@ class ProductModel extends Model
         'p_specifications',
         'p_standard_price',
         'p_cost_price',
-        'p_unit',
     ];
 
     // Dates

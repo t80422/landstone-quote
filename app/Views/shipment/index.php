@@ -178,6 +178,4 @@
     </div>
 </div>
 
-<script src="<?= base_url('js/script.js') ?>"></script>
-
 <?= $this->endSection() ?>
