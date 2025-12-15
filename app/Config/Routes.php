@@ -53,6 +53,8 @@ $routes->group('product-category', function ($routes) {
 $routes->group('quote', function ($routes) {
     $routes->get('/', 'QuoteController::index');
     $routes->get('create', 'QuoteController::create');
+    $routes->get('view/(:num)', 'QuoteController::view/$1');
+    $routes->get('print/(:num)', 'QuoteController::print/$1');
     $routes->get('edit/(:num)', 'QuoteController::edit/$1');
     $routes->post('save', 'QuoteController::save');
     $routes->get('delete/(:num)', 'QuoteController::delete/$1');

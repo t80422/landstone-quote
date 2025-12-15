@@ -9,6 +9,7 @@ class ProductModel extends Model
     protected $table = 'products';
     protected $primaryKey = 'p_id';
     protected $allowedFields = [
+        'p_code',
         'p_pc_id',
         'p_name',
         'p_supplier',
@@ -56,12 +57,10 @@ class ProductModel extends Model
             // 查詢目前最大的編號（使用原生 SQL 排序）
             $builder = $this->builder();
             $maxCode = $builder->select('p_code')
-                            ->where('p_code LIKE', 'P%')
-                            ->orderBy('LENGTH(p_code)', 'DESC')
-                            ->orderBy('p_code', 'DESC')
-                            ->limit(1)
-                            ->get()
-                            ->getRowArray();
+                ->orderBy('p_code', 'DESC')
+                ->limit(1)
+                ->get()
+                ->getRowArray();
 
             if ($maxCode && !empty($maxCode['p_code'])) {
                 // 提取數字部分並 +1

@@ -13,6 +13,7 @@ class OrderModel extends Model
         'o_date',
         'o_c_id',
         'o_q_id',
+        'o_cda_id',
         'o_delivery_date',
         'o_total_amount',
         'o_payment_status',

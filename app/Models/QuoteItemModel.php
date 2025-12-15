@@ -15,6 +15,10 @@ class QuoteItemModel extends Model
     protected $allowedFields = [
         'qi_q_id',
         'qi_p_id',
+        'qi_supplier',
+        'qi_style',
+        'qi_color',
+        'qi_size',
         'qi_quantity',
         'qi_unit_price',
         'qi_discount',
@@ -68,8 +72,9 @@ class QuoteItemModel extends Model
      */
     public function getItemsWithProduct($quoteId)
     {
-        return $this->select('quote_items.*, products.p_name, products.p_code, products.p_specifications, products.p_unit')
+        return $this->select('quote_items.*, products.p_name, products.p_code, products.p_specifications, products.p_supplier, products.p_style, products.p_color, products.p_size, products.p_image, product_categories.pc_name')
                     ->join('products', 'products.p_id = quote_items.qi_p_id', 'left')
+                    ->join('product_categories', 'product_categories.pc_id = products.p_pc_id', 'left')
                     ->where('qi_q_id', $quoteId)
                     ->findAll();
     }

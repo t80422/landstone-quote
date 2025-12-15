@@ -100,6 +100,60 @@ class QuoteController extends BaseController
     }
 
     /**
+     * 顯示報價單詳細頁
+     */
+    public function view($id)
+    {
+        $quote = $this->quoteModel->find($id);
+
+        if (!$quote) {
+            return redirect()->to(url_to('QuoteController::index'))
+                ->with('error', '報價單不存在');
+        }
+
+        // 取得關聯資料
+        $customer = $this->customerModel->find($quote['q_c_id']);
+        $contact = $quote['q_cc_id'] ? $this->contactModel->find($quote['q_cc_id']) : null;
+        $items = $this->quoteItemModel->getItemsWithProduct($id);
+
+        // 合併資料
+        $quote['customer'] = $customer;
+        $quote['contact'] = $contact;
+        $quote['items'] = $items;
+
+        return view('quote/view', [
+            'data' => $quote,
+        ]);
+    }
+
+    /**
+     * 列印報價單
+     */
+    public function print($id)
+    {
+        $quote = $this->quoteModel->find($id);
+
+        if (!$quote) {
+            return redirect()->to(url_to('QuoteController::index'))
+                ->with('error', '報價單不存在');
+        }
+
+        // 取得關聯資料
+        $customer = $this->customerModel->find($quote['q_c_id']);
+        $contact = $quote['q_cc_id'] ? $this->contactModel->find($quote['q_cc_id']) : null;
+        $items = $this->quoteItemModel->getItemsWithProduct($id);
+
+        // 合併資料
+        $quote['customer'] = $customer;
+        $quote['contact'] = $contact;
+        $quote['items'] = $items;
+
+        return view('quote/print', [
+            'data' => $quote,
+        ]);
+    }
+
+    /**
      * 儲存報價單（新增/編輯）
      */
     public function save()

@@ -68,7 +68,7 @@
                         </thead>
                         <tbody>
                             <?php foreach ($data as $item): ?>
-                                <tr>
+                                <tr class="table-row-link" data-href="<?= url_to('QuoteController::view', $item['q_id']) ?>" style="cursor: pointer;">
                                     <td><strong><?= esc($item['q_number']) ?></strong></td>
                                     <td><?= esc($item['customer_name']) ?></td>
                                     <td><?= esc($item['q_date']) ?></td>
@@ -83,19 +83,18 @@
                                                 <a href="<?= url_to('OrderController::createFromQuote', $item['q_id']) ?>"
                                                     class="btn btn-outline-success"
                                                     title="轉成訂單"
-                                                    onclick="return confirm('確定要將此報價單轉換為訂單嗎？')">
+                                                    onclick="event.stopPropagation(); return confirm('確定要將此報價單轉換為訂單嗎？')">
                                                     <i class="bi bi-arrow-right-circle"></i>
                                                 </a>
-                                            <?php else: ?>
-                                                <span class="btn btn-outline-secondary" title="已轉為訂單">
-                                                    <i class="bi bi-check-circle"></i>
-                                                </span>
                                             <?php endif; ?>
-                                            <a href="<?= url_to('QuoteController::edit', $item['q_id']) ?>" class="btn btn-outline-primary" title="編輯">
+                                            <a href="<?= url_to('QuoteController::edit', $item['q_id']) ?>" 
+                                               class="btn btn-outline-primary" 
+                                               title="編輯"
+                                               onclick="event.stopPropagation();">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <button type="button" class="btn btn-outline-danger"
-                                                onclick="confirmDelete('<?= url_to('QuoteController::delete', $item['q_id']) ?>')"
+                                                onclick="event.stopPropagation(); confirmDelete('<?= url_to('QuoteController::delete', $item['q_id']) ?>')"
                                                 title="刪除">
                                                 <i class="bi bi-trash"></i>
                                             </button>

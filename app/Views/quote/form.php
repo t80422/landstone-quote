@@ -27,6 +27,79 @@ $productCategories = $productCategories ?? [];
 <?= $this->extend('_layout') ?>
 <?= $this->section('content') ?>
 
+<style>
+    /* 商品項目表格優化 */
+    #itemsTable thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        white-space: nowrap;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    #itemsTable tbody td {
+        padding: 0.5rem;
+        vertical-align: middle;
+    }
+    
+    .item-row {
+        transition: background-color 0.2s;
+    }
+    
+    .item-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* 圖片預覽優化 */
+    .item-image-preview {
+        transition: transform 0.2s;
+    }
+    
+    .item-image-preview:hover {
+        transform: scale(1.05);
+    }
+    
+    /* 表單控制項優化 */
+    .form-control-sm, .form-select-sm {
+        font-size: 0.875rem;
+    }
+    
+    .small {
+        font-size: 0.875rem;
+    }
+    
+    /* 金額顯示強調 */
+    .amount-display {
+        color: #0d6efd;
+    }
+    
+    /* 必填欄位標示 */
+    .form-label .text-danger {
+        margin-left: 2px;
+    }
+    
+    /* 按鈕優化 */
+    .remove-item {
+        transition: all 0.2s;
+    }
+    
+    .remove-item:hover {
+        transform: scale(1.1);
+    }
+    
+    /* 表格固定表頭 */
+    .table-responsive {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+</style>
+
 <div class="container-fluid mt-4">
     <!-- 頁面標題 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -96,7 +169,17 @@ $productCategories = $productCategories ?? [];
                                     class="form-control <?= getFieldClass('q_valid_date') ?>"
                                     id="validDate"
                                     name="q_valid_date"
-                                    value="<?= old('q_valid_date', $data['q_valid_date'] ?? '') ?>">
+                                    value="<?php
+                                        $validDate = old('q_valid_date', $data['q_valid_date'] ?? '');
+                                        if (empty($validDate) && !$isEdit) {
+                                            // 新增模式且沒有有效日期時，預設為報價日期+15天
+                                            $quoteDate = old('q_date', $data['q_date'] ?? date('Y-m-d'));
+                                            $quoteDateObj = new DateTime($quoteDate);
+                                            $quoteDateObj->modify('+15 days');
+                                            $validDate = $quoteDateObj->format('Y-m-d');
+                                        }
+                                        echo $validDate;
+                                    ?>">
                             </div>
                             <?= showFieldError('q_valid_date') ?>
                         </div>
@@ -139,6 +222,16 @@ $productCategories = $productCategories ?? [];
                         </div>
                     </div>
 
+                    <!-- 送貨地址區塊 -->
+                    <div class="row">
+                        <div class="col-12">
+                            <?= view('components/delivery_address_selector', [
+                                'deliveryCity' => $data['q_delivery_city'] ?? old('q_delivery_city'),
+                                'deliveryAddress' => $data['q_delivery_address'] ?? old('q_delivery_address')
+                            ]) ?>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- 商品項目區塊 -->
@@ -148,16 +241,42 @@ $productCategories = $productCategories ?? [];
                     </h5>
 
                     <div class="table-responsive">
-                        <table class="table" id="itemsTable">
-                            <thead class="table-light">
+                        <table class="table table-hover align-middle" id="itemsTable">
+                            <thead class="table-light sticky-top">
                                 <tr>
-                                    <th style="width: 35%;">商品分類 / 商品</th>
-                                    <th style="width: 10%;">數量</th>
-                                    <th style="width: 15%;">單價</th>
-                                    <th style="width: 10%;">單位</th>
-                                    <th style="width: 10%;">折扣(%)</th>
-                                    <th style="width: 12%;">金額</th>
-                                    <th style="width: 13%;" class="text-center">操作</th>
+                                    <th style="width: 10%;" class="text-center">
+                                        <i class="bi bi-image me-1"></i>圖片
+                                    </th>
+                                    <th style="width: 20%;">
+                                        <i class="bi bi-box-seam me-1"></i>商品分類 / 商品
+                                    </th>
+                                    <th style="width: 8%;" class="small">
+                                        <i class="bi bi-truck me-1"></i>供應商
+                                    </th>
+                                    <th style="width: 8%;" class="small">
+                                        <i class="bi bi-palette me-1"></i>款式
+                                    </th>
+                                    <th style="width: 8%;" class="small">
+                                        <i class="bi bi-paint-bucket me-1"></i>顏色/花色
+                                    </th>
+                                    <th style="width: 8%;" class="small">
+                                        <i class="bi bi-rulers me-1"></i>尺寸
+                                    </th>
+                                    <th style="width: 7%;" class="text-center">
+                                        <i class="bi bi-123 me-1"></i>數量
+                                    </th>
+                                    <th style="width: 10%;" class="text-end">
+                                        <i class="bi bi-currency-dollar me-1"></i>單價
+                                    </th>
+                                    <th style="width: 7%;" class="text-center small">
+                                        <i class="bi bi-percent me-1"></i>折扣
+                                    </th>
+                                    <th style="width: 10%;" class="text-end">
+                                        <i class="bi bi-calculator me-1"></i>金額
+                                    </th>
+                                    <th style="width: 4%;" class="text-center">
+                                        <i class="bi bi-gear"></i>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="itemsContainer">
@@ -241,6 +360,17 @@ $productCategories = $productCategories ?? [];
                                     </td>
                                 </tr>
                                 <tr>
+                                    <td class="text-end">
+                                        <label for="shippingFee" class="form-label mb-0">運費：</label>
+                                    </td>
+                                    <td class="text-end">
+                                        <input type="number" class="form-control form-control-sm text-end"
+                                            id="shippingFee" name="q_shipping_fee"
+                                            value="<?= old('q_shipping_fee', $data['q_shipping_fee'] ?? 0) ?>"
+                                            min="0" step="1">
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td class="text-end fw-bold">稅額：</td>
                                     <td class="text-end">
                                         <span id="taxDisplay">NT$ 0</span>
@@ -305,11 +435,13 @@ $productCategories = $productCategories ?? [];
             if (categorySelect && categorySelect.value) {
                 applyCategoryFilter(row, true);
             }
+            initVariantOptions(row, true);
         });
         initCalculations();
         updateRemoveButtons();
         // 送貨地址管理器已在 component 中自動初始化
         initContacts();
+        initValidDateCalculation();
 
         // --- Event Listeners ---
         bindEvents();
@@ -352,6 +484,27 @@ $productCategories = $productCategories ?? [];
             if (initialCustomerId) {
                 loadContacts(initialCustomerId, contactSelectInstance, contactInfo, endpoint, initialContactId, true);
             }
+        }
+
+        function initValidDateCalculation() {
+            const quoteDateInput = document.getElementById('quoteDate');
+            const validDateInput = document.getElementById('validDate');
+
+            if (!quoteDateInput || !validDateInput) {
+                return;
+            }
+
+            // 當報價日期變更時，自動計算有效日期為報價日期+15天
+            quoteDateInput.addEventListener('change', function() {
+                const quoteDate = new Date(this.value);
+                if (!isNaN(quoteDate.getTime())) {
+                    // 加上15天
+                    quoteDate.setDate(quoteDate.getDate() + 15);
+                    // 格式化為YYYY-MM-DD
+                    const validDateStr = quoteDate.toISOString().split('T')[0];
+                    validDateInput.value = validDateStr;
+                }
+            });
         }
 
         function loadContacts(customerId, selectInstance, infoDom, endpoint, selectedId = '', preserveValue = false) {
@@ -443,9 +596,10 @@ $productCategories = $productCategories ?? [];
             itemsContainer.addEventListener('change', handleItemChange);
             itemsContainer.addEventListener('input', handleItemInput);
 
-            // Global Discount and Tax
+            // Global Discount, Tax, and Shipping Fee
             document.getElementById('discount').addEventListener('input', calculateTotal);
             document.getElementById('taxRate').addEventListener('input', calculateTotal);
+            document.getElementById('shippingFee').addEventListener('input', calculateTotal);
 
             // Form Submit
             document.getElementById('quoteForm').addEventListener('submit', handleFormSubmit);
@@ -475,6 +629,7 @@ $productCategories = $productCategories ?? [];
             if (categorySelect && categorySelect.value) {
                 applyCategoryFilter(newRow, true);
             }
+            initVariantOptions(newRow, true);
 
             updateRemoveButtons();
         }
@@ -522,11 +677,10 @@ $productCategories = $productCategories ?? [];
             if (e.target.classList.contains('product-select')) {
                 const selectedOption = e.target.options[e.target.selectedIndex];
                 const price = selectedOption.dataset.price || 0;
-                const unit = selectedOption.dataset.unit || '';
                 const row = e.target.closest('.item-row');
 
                 row.querySelector('.price-input').value = price;
-                row.querySelector('.unit-display').value = unit;
+                initVariantOptions(row, false);
                 calculateItemAmount(row);
             }
         }
@@ -584,7 +738,6 @@ $productCategories = $productCategories ?? [];
                 const option = document.createElement('option');
                 option.value = product.p_id;
                 option.dataset.price = product.p_standard_price;
-                option.dataset.unit = product.p_unit || '';
                 option.dataset.category = product.p_pc_id || '';
                 option.textContent = `${product.p_code} - ${product.p_name}`;
                 productSelect.appendChild(option);
@@ -597,8 +750,68 @@ $productCategories = $productCategories ?? [];
             } else if (productSelect.tomselect) {
                 productSelect.tomselect.clear();
                 row.querySelector('.price-input').value = 0;
-                row.querySelector('.unit-display').value = '';
                 calculateItemAmount(row);
+            }
+            initVariantOptions(row, !preserveValue);
+        }
+
+        function initVariantOptions(row, preserveExisting) {
+            const productSelect = row.querySelector('.product-select');
+            const productId = productSelect ? productSelect.value : '';
+            const product = products.find(p => String(p.p_id) === String(productId));
+
+            const supplierSelect = row.querySelector('.supplier-select');
+            const styleSelect = row.querySelector('.style-select');
+            const colorSelect = row.querySelector('.color-select');
+            const sizeSelect = row.querySelector('.size-select');
+            const imagePreview = row.querySelector('.item-image-preview');
+
+            const savedSupplier = row.dataset.selectedSupplier || '';
+            const savedStyle = row.dataset.selectedStyle || '';
+            const savedColor = row.dataset.selectedColor || '';
+            const savedSize = row.dataset.selectedSize || '';
+
+            const setOptions = (selectEl, values, saved) => {
+                if (!selectEl) return;
+                const current = preserveExisting ? (selectEl.value || saved) : saved;
+                selectEl.innerHTML = '<option value=""></option>';
+                values.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    selectEl.appendChild(opt);
+                });
+                if (current && values.includes(current)) {
+                    selectEl.value = current;
+                }
+            };
+
+            const splitValues = (str) => {
+                if (!str) return [];
+                return str.split('、').map(s => s.trim()).filter(Boolean);
+            };
+
+            if (product) {
+                setOptions(supplierSelect, splitValues(product.p_supplier), preserveExisting ? (supplierSelect ? supplierSelect.value : '') : savedSupplier);
+                setOptions(styleSelect, splitValues(product.p_style), preserveExisting ? (styleSelect ? styleSelect.value : '') : savedStyle);
+                setOptions(colorSelect, splitValues(product.p_color), preserveExisting ? (colorSelect ? colorSelect.value : '') : savedColor);
+                setOptions(sizeSelect, splitValues(product.p_size), preserveExisting ? (sizeSelect ? sizeSelect.value : '') : savedSize);
+
+                if (imagePreview) {
+                    const placeholder = imagePreview.dataset.placeholder || '';
+                    // p_image 已包含完整相對路徑（如：uploads/products/xxx.jpg）
+                    const imageSrc = product.p_image ? '<?= base_url() ?>' + product.p_image : placeholder;
+                    imagePreview.src = imageSrc;
+                }
+            } else {
+                setOptions(supplierSelect, [], '');
+                setOptions(styleSelect, [], '');
+                setOptions(colorSelect, [], '');
+                setOptions(sizeSelect, [], '');
+                if (imagePreview) {
+                    const placeholder = imagePreview.dataset.placeholder || '';
+                    imagePreview.src = placeholder;
+                }
             }
         }
 
@@ -622,6 +835,7 @@ $productCategories = $productCategories ?? [];
         }
 
         function calculateTotal() {
+            // 1. 計算商品小計
             let subtotal = 0;
             document.querySelectorAll('.item-row').forEach(row => {
                 const amount = parseFloat(row.querySelector('.amount-display').value) || 0;
@@ -630,25 +844,35 @@ $productCategories = $productCategories ?? [];
 
             const discount = parseFloat(document.getElementById('discount').value) || 0;
             const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+            const shippingFee = parseInt(document.getElementById('shippingFee').value) || 0;
 
+            // 2. 折扣後金額 = 商品小計 × (1 - 整單折扣%)
             const discountedSubtotal = subtotal * (1 - discount / 100);
-            const taxAmount = discountedSubtotal * (taxRate / 100);
-            const totalAmount = discountedSubtotal + taxAmount;
+            
+            // 3. 加運費後 = 折扣後金額 + 運費
+            const amountWithShipping = discountedSubtotal + shippingFee;
+            
+            // 4. 稅額 = 加運費後 × 稅率%
+            const taxAmount = amountWithShipping * (taxRate / 100);
+            
+            // 5. 總金額 = 加運費後 + 稅額
+            const totalAmount = amountWithShipping + taxAmount;
 
+            // 更新顯示
             document.getElementById('subtotalDisplay').textContent = 'NT$ ' + subtotal.toLocaleString('zh-TW', {
                 minimumFractionDigits: 0
             });
-            document.getElementById('subtotalInput').value = subtotal;
+            document.getElementById('subtotalInput').value = subtotal.toFixed(0);
 
             document.getElementById('taxDisplay').textContent = 'NT$ ' + taxAmount.toLocaleString('zh-TW', {
                 minimumFractionDigits: 0
             });
-            document.getElementById('taxInput').value = taxAmount;
+            document.getElementById('taxInput').value = taxAmount.toFixed(0);
 
             document.getElementById('totalDisplay').textContent = 'NT$ ' + totalAmount.toLocaleString('zh-TW', {
                 minimumFractionDigits: 0
             });
-            document.getElementById('totalInput').value = totalAmount;
+            document.getElementById('totalInput').value = totalAmount.toFixed(0);
         }
 
         function updateRemoveButtons() {
