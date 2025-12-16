@@ -12,15 +12,23 @@ class OrderModel extends Model
         'o_number',
         'o_date',
         'o_c_id',
+        'o_cc_id',
         'o_q_id',
-        'o_cda_id',
         'o_delivery_date',
+        'o_delivery_city',
+        'o_delivery_address',
         'o_total_amount',
+        'o_subtotal',
+        'o_discount',
+        'o_tax_rate',
+        'o_shipping_fee',
+        'o_tax_amount',
         'o_payment_status',
         'o_invoice_number',
         'o_status',
         'o_shipment_status',
         'o_notes',
+
     ];
 
     // Dates
@@ -133,7 +141,15 @@ class OrderModel extends Model
             'o_total_amount' => $quote['q_total_amount'],
             'o_status' => 'processing',
             'o_payment_status' => 'unpaid',
-            'o_shipment_status' => 'preparing'
+            'o_shipment_status' => 'preparing',
+            'o_cc_id' => $quote['q_cc_id'],
+            'o_delivery_city' => $quote['q_delivery_city'],
+            'o_delivery_address' => $quote['q_delivery_address'],
+            'o_subtotal' => $quote['q_subtotal'],
+            'o_discount' => $quote['q_discount'],
+            'o_tax_rate' => $quote['q_tax_rate'],
+            'o_shipping_fee' => $quote['q_shipping_fee'],
+            'o_tax_amount' => $quote['q_tax_amount'],
         ];
 
         // 準備訂單項目數據
@@ -144,7 +160,11 @@ class OrderModel extends Model
                 'oi_quantity' => $item['qi_quantity'],
                 'oi_unit_price' => $item['qi_unit_price'],
                 'oi_discount' => $item['qi_discount'],
-                'oi_amount' => $item['qi_quantity'] * $item['qi_unit_price'] * (1 - $item['qi_discount'] / 100)
+                'oi_amount' => $item['qi_quantity'] * $item['qi_unit_price'] * (1 - $item['qi_discount'] / 100),
+                'oi_supplier' => $item['qi_supplier'],
+                'oi_style' => $item['qi_style'],
+                'oi_color' => $item['qi_color'],
+                'oi_size' => $item['qi_size'],
             ];
         }
 

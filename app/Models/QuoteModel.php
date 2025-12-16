@@ -323,4 +323,9 @@ class QuoteModel extends Model
 
         return $quote;
     }
+
+    public function deleteOrderId(int $orderId)
+    {
+        $this->builder()->where('q_o_id', $orderId)->update(['q_o_id' => null]);
+    }
 }

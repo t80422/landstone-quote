@@ -132,6 +132,7 @@ $productCategories = $productCategories ?? [];
                         <i class="bi bi-file-earmark-text me-2 text-primary"></i>基本資料
                     </h5>
                     <div class="row">
+                        <!-- 報價單號 -->
                         <div class="col-md-4 mb-3">
                             <label for="quoteNumber" class="form-label">報價單號</label>
                             <input
@@ -227,7 +228,8 @@ $productCategories = $productCategories ?? [];
                         <div class="col-12">
                             <?= view('components/delivery_address_selector', [
                                 'deliveryCity' => $data['q_delivery_city'] ?? old('q_delivery_city'),
-                                'deliveryAddress' => $data['q_delivery_address'] ?? old('q_delivery_address')
+                                'deliveryAddress' => $data['q_delivery_address'] ?? old('q_delivery_address'),
+                                'prefix' => 'q'
                             ]) ?>
                         </div>
                     </div>
@@ -575,6 +577,25 @@ $productCategories = $productCategories ?? [];
                     onInitialize: function() {
                         // Ensure dropdown content has a reasonable max height
                         this.dropdown_content.style.maxHeight = '250px';
+                    },
+                    onChange: function(value) {
+                        // 當商品選擇變更時，更新價格和變體選項
+                        const row = element.closest('.item-row');
+                        if (!row) return;
+
+                        if (value) {
+                            const selectedProduct = products.find(p => p.p_id == value);
+                            if (selectedProduct) {
+                                row.querySelector('.price-input').value = selectedProduct.p_standard_price || 0;
+                            } else {
+                                row.querySelector('.price-input').value = 0;
+                            }
+                        } else {
+                            row.querySelector('.price-input').value = 0;
+                        }
+
+                        initVariantOptions(row, false);
+                        calculateItemAmount(row);
                     }
                 });
             });

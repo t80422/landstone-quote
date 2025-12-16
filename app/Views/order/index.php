@@ -69,8 +69,10 @@
                         </thead>
                         <tbody>
                             <?php foreach ($data as $item): ?>
-                                <tr>
-                                    <td><strong><?= esc($item['o_number']) ?></strong></td>
+                                <tr class="clickable-row" data-href="<?= url_to('OrderController::view', $item['o_id']) ?>" style="cursor: pointer;">
+                                    <td>
+                                        <strong><?= esc($item['o_number']) ?></strong>
+                                    </td>
                                     <td><?= esc($item['o_date']) ?></td>
                                     <td><?= esc($item['c_name']) ?></td>
                                     <td>
@@ -142,5 +144,31 @@
         </div>
     </div>
 </div>
+
+<script>
+    // 刪除確認對話框
+    function confirmDelete(url) {
+        if (confirm('確定要刪除此訂單嗎？刪除後將無法恢復。')) {
+            window.location.href = url;
+        }
+    }
+
+    // 點擊整列進入詳細頁面
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.clickable-row');
+        
+        rows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // 如果點擊的是按鈕或按鈕內的元素，不要跳轉
+                if (e.target.closest('.btn-group') || e.target.closest('button') || e.target.closest('a.btn')) {
+                    return;
+                }
+                
+                // 跳轉到詳細頁面
+                window.location.href = this.dataset.href;
+            });
+        });
+    });
+</script>
 
 <?= $this->endSection() ?>

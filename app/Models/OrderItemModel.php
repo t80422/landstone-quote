@@ -15,7 +15,11 @@ class OrderItemModel extends Model
         'oi_unit_price',
         'oi_discount',
         'oi_amount',
-        'oi_shipped_quantity'
+        'oi_shipped_quantity',
+        'oi_supplier',
+        'oi_style',
+        'oi_color',
+        'oi_size',
     ];
 
     protected $useTimestamps = true;
@@ -28,8 +32,7 @@ class OrderItemModel extends Model
         return $this->select('
                 order_items.*,
                 products.p_name,
-                products.p_code,
-                products.p_unit
+                products.p_code
             ')
             ->join('products', 'products.p_id = order_items.oi_p_id')
             ->where('oi_o_id', $orderId)
