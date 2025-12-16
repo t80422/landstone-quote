@@ -17,7 +17,40 @@ class ShipmentModel extends Model
         's_number',
         's_date',
         's_status',
+        's_after_sales_status',
         's_notes',
+    ];
+
+    // 出貨狀態
+    public const STATUS_FACTORY_ORDERED = 1; // 工廠已下單
+    public const STATUS_FACTORY_SHIPPED = 2; // 工廠已發貨
+    public const STATUS_LAND_WAREHOUSE = 3;  // 已到陸倉
+    public const STATUS_CUSTOMS_CLEARED = 4; // 已清關待收尾款
+    public const STATUS_FINAL_PAYMENT = 5;   // 已收尾款
+    public const STATUS_SHIPPED = 6;         // 已發貨
+    public const STATUS_ARRIVED = 7;         // 已到貨
+
+    // 售後狀態
+    public const AFTERSALES_NORMAL = 1;      // 正常
+    public const AFTERSALES_PROCESSING = 2;  // 售後處理中
+    public const AFTERSALES_COMPLETED = 3;   // 售後完成
+
+    // 出貨狀態映射
+    public static $statusMap = [
+        self::STATUS_FACTORY_ORDERED => '工廠已下單',
+        self::STATUS_FACTORY_SHIPPED => '工廠已發貨',
+        self::STATUS_LAND_WAREHOUSE => '已到陸倉',
+        self::STATUS_CUSTOMS_CLEARED => '已清關待收尾款',
+        self::STATUS_FINAL_PAYMENT => '已收尾款',
+        self::STATUS_SHIPPED => '已發貨',
+        self::STATUS_ARRIVED => '已到貨',
+    ];
+
+    // 售後狀態映射
+    public static $afterSalesStatusMap = [
+        self::AFTERSALES_NORMAL => '正常',
+        self::AFTERSALES_PROCESSING => '售後處理中',
+        self::AFTERSALES_COMPLETED => '售後完成',
     ];
 
     // Dates
@@ -31,7 +64,8 @@ class ShipmentModel extends Model
         's_o_id' => 'required|integer',
         's_number' => 'required|max_length[50]',
         's_date' => 'required|valid_date',
-        's_status' => 'permit_empty|in_list[preparing,partial,completed]',
+        's_status' => 'permit_empty|integer',
+        's_after_sales_status' => 'permit_empty|integer',
     ];
 
     protected $validationMessages = [
@@ -81,7 +115,7 @@ class ShipmentModel extends Model
     public function getList($keyword = null, $page = 1, $orderId = null)
     {
         $builder = $this->builder()
-            ->select('shipments.s_id, shipments.s_number, shipments.s_date, shipments.s_status, shipments.s_notes, shipments.s_created_at, shipments.s_o_id, orders.o_number, customers.c_name')
+            ->select('shipments.s_id, shipments.s_number, shipments.s_date, shipments.s_status, shipments.s_after_sales_status, shipments.s_notes, shipments.s_created_at, shipments.s_o_id, orders.o_number, customers.c_name')
             ->join('orders', 'orders.o_id = shipments.s_o_id')
             ->join('customers', 'customers.c_id = orders.o_c_id');
 
@@ -119,6 +153,61 @@ class ShipmentModel extends Model
     public function getByOrder($orderId)
     {
         return $this->where('s_o_id', $orderId)->findAll();
+    }
+
+    /**
+     * 取得出貨單詳細資料（包含訂單、客戶、聯絡人、出貨項目）
+     */
+    public function getShipmentDetails($id)
+    {
+        // 1. 取得出貨單基本資料（含訂單、客戶、聯絡人）
+        $shipment = $this->select('shipments.*, orders.o_number, orders.o_date as order_date, customers.c_name, customers.c_tax_id, customer_contacts.cc_name, customer_contacts.cc_phone')
+            ->join('orders', 'orders.o_id = shipments.s_o_id')
+            ->join('customers', 'customers.c_id = orders.o_c_id')
+            ->join('customer_contacts', 'customer_contacts.cc_id = orders.o_cc_id', 'left')
+            ->where('shipments.s_id', $id)
+            ->first();
+
+        if (!$shipment) {
+            return null;
+        }
+
+        // 2. 取得出貨項目（關聯訂單項目與產品）
+        $shipmentItemModel = new ShipmentItemModel();
+        $items = $shipmentItemModel->select('shipment_items.*, order_items.oi_quantity as order_quantity, order_items.oi_shipped_quantity as total_shipped, products.p_name, products.p_image, products.p_code, product_categories.pc_name')
+            ->join('order_items', 'order_items.oi_id = shipment_items.si_oi_id')
+            ->join('products', 'products.p_id = order_items.oi_p_id')
+            ->join('product_categories', 'product_categories.pc_id = products.p_pc_id', 'left')
+            ->where('shipment_items.si_s_id', $id)
+            ->findAll();
+
+        // 補上樣式/顏色/尺寸等資訊 (這些在 order_items)
+        // 再次 join order_items 取得詳細規格，或者直接在上方的 select 加入
+        // 為了確保資訊完整，我調整上方查詢加入 order_items 的規格欄位
+
+        // 重新查詢 items 以包含規格
+        $items = $shipmentItemModel->select('
+                shipment_items.*, 
+                order_items.oi_quantity as order_quantity, 
+                order_items.oi_shipped_quantity as total_shipped,
+                order_items.oi_style,
+                order_items.oi_color,
+                order_items.oi_size,
+                order_items.oi_supplier,
+                products.p_name, 
+                products.p_image, 
+                products.p_code, 
+                product_categories.pc_name
+            ')
+            ->join('order_items', 'order_items.oi_id = shipment_items.si_oi_id')
+            ->join('products', 'products.p_id = order_items.oi_p_id')
+            ->join('product_categories', 'product_categories.pc_id = products.p_pc_id', 'left')
+            ->where('shipment_items.si_s_id', $id)
+            ->findAll();
+
+        $shipment['items'] = $items;
+
+        return $shipment;
     }
 
     /**

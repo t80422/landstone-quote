@@ -43,11 +43,29 @@
                         <label class="form-label">出貨狀態</label>
                         <select class="form-select" name="s_status">
                             <?php
-                            // 編輯模式：使用已儲存的值；新增模式：預設為「準備中」
-                            $defaultStatus = $isEdit ? ($shipment['s_status'] ?? 'preparing') : 'preparing';
+                            $currentStatus = $isEdit ? ($shipment['s_status'] ?? 1) : 1;
+                            foreach (\App\Models\ShipmentModel::$statusMap as $key => $label):
                             ?>
-                            <option value="preparing" <?= $defaultStatus == 'preparing' ? 'selected' : '' ?>>準備中</option>
-                            <option value="completed" <?= $defaultStatus == 'completed' ? 'selected' : '' ?>>已出貨</option>
+                                <option value="<?= $key ?>" <?= $currentStatus == $key ? 'selected' : '' ?>>
+                                    <?= $key ?>. <?= $label ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">售後狀態</label>
+                        <select class="form-select" name="s_after_sales_status">
+                            <?php
+                            $currentAfterSales = $isEdit ? ($shipment['s_after_sales_status'] ?? 1) : 1;
+                            foreach (\App\Models\ShipmentModel::$afterSalesStatusMap as $key => $label):
+                            ?>
+                                <option value="<?= $key ?>" <?= $currentAfterSales == $key ? 'selected' : '' ?>>
+                                    <?= $label ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>

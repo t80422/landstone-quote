@@ -348,7 +348,11 @@
         <div class="info-section">
             <div class="info-row">
                 <div class="info-cell" style="width: 70%;">
-                    <div><span class="info-label">聯絡人：</span><?= esc($data['contact']['cc_name'] ?? '') ?></div>
+                    <div>
+                        <span class="info-label">聯絡人：</span>
+                        <?= esc($data['contact']['cc_name'] ?? '') ?>
+                        <?= esc($data['contact']['cc_phone'] ?? '') ?>
+                    </div>
                 </div>
                 <div class="info-cell info-right" style="width: 30%;">
                     <div><span class="info-label">單號：</span><?= esc($data['o_number']) ?></div>
@@ -371,10 +375,6 @@
                         <?php if (!empty($data['o_delivery_city']) || !empty($data['o_delivery_address'])): ?>
                             <?= esc($data['o_delivery_city'] ?? '') ?> <?= esc($data['o_delivery_address'] ?? '') ?>
                         <?php endif; ?>
-                        <?php if (!empty($data['contact']['cc_phone'])): ?>
-                            <?= esc($data['contact']['cc_phone']) ?>
-                        <?php endif; ?>
-                        <?= esc($data['contact']['cc_name']) ?>
                     </div>
                 </div>
             </div>

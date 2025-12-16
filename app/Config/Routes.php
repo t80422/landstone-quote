@@ -69,7 +69,7 @@ $routes->group('order', function ($routes) {
     $routes->get('delete/(:num)', 'OrderController::delete/$1');
     $routes->get('create-from-quote/(:num)', 'OrderController::createFromQuote/$1');
     $routes->get('view/(:num)', 'OrderController::view/$1');
-    $routes->get('print/(:num)','OrderController::print/$1');
+    $routes->get('print/(:num)', 'OrderController::print/$1');
 });
 
 $routes->group('shipment', function ($routes) {
@@ -78,6 +78,7 @@ $routes->group('shipment', function ($routes) {
     $routes->get('edit/(:num)', 'ShipmentController::edit/$1');
     $routes->post('save', 'ShipmentController::save');
     $routes->get('delete/(:num)', 'ShipmentController::delete/$1');
+    $routes->get('view/(:num)', 'ShipmentController::view/$1');
 });
 
 $routes->group('payment-method', function ($routes) {

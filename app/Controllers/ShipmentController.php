@@ -44,6 +44,17 @@ class ShipmentController extends BaseController
         ]);
     }
 
+    public function view($id)
+    {
+        $data = $this->shipmentModel->getShipmentDetails($id);
+
+        if (!$data) {
+            return redirect()->to(url_to('ShipmentController::index'))->with('error', '找不到該出貨單');
+        }
+
+        return view('shipment/view', ['data' => $data]);
+    }
+
     public function create($orderId)
     {
         $order = $this->orderModel->getOrderWithItems($orderId);
@@ -78,7 +89,7 @@ class ShipmentController extends BaseController
     {
         $shipmentModel = new \App\Models\ShipmentModel();
         $shipmentItemModel = new \App\Models\ShipmentItemModel();
-        
+
         // 取得出貨單資料
         $shipment = $shipmentModel->find($id);
         if (!$shipment) {
@@ -93,7 +104,7 @@ class ShipmentController extends BaseController
 
         // 取得出貨明細
         $shipmentItems = $shipmentItemModel->getItemsByShipmentId($id);
-        
+
         // 建立出貨明細的映射（以訂單項目ID為鍵）
         $shipmentItemsMap = [];
         foreach ($shipmentItems as $item) {
@@ -141,7 +152,7 @@ class ShipmentController extends BaseController
         }
 
         $message = $isEdit ? '出貨單更新成功' : '出貨單建立成功';
-        
+
         // 重定向回出貨單列表（帶訂單篩選）
         return redirect()->to(url_to('ShipmentController::index') . '?order_id=' . $data['s_o_id'])
             ->with('success', $message);

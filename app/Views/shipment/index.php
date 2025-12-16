@@ -107,13 +107,14 @@
                                 <th>訂單編號</th>
                                 <th>出貨日期</th>
                                 <th>備註</th>
-                                <th>狀態</th>
+                                <th>出貨狀態</th>
+                                <th>售後狀態</th>
                                 <th style="width: 120px;" class="text-center">操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($data as $item): ?>
-                                <tr>
+                                <tr class="clickable-row" data-href="<?= url_to('ShipmentController::view', $item['s_id']) ?>" style="cursor: pointer;">
                                     <td><strong><?= esc($item['s_number']) ?></strong></td>
                                     <td>
                                         <a href="<?= url_to('OrderController::edit', $item['s_o_id']) ?>" class="text-decoration-none">
@@ -135,14 +136,27 @@
                                     </td>
                                     <td>
                                         <?php
-                                        $statusMap = [
-                                            'preparing' => ['text' => '準備中', 'class' => 'bg-secondary'],
-                                            'partial' => ['text' => '部分出貨', 'class' => 'bg-warning text-dark'],
-                                            'completed' => ['text' => '已出貨', 'class' => 'bg-success'],
-                                        ];
-                                        $status = $statusMap[$item['s_status']] ?? ['text' => $item['s_status'], 'class' => 'bg-secondary'];
+                                        $statusLabel = \App\Models\ShipmentModel::$statusMap[$item['s_status'] ?? 0] ?? '未知';
+                                        $statusClass = 'bg-secondary';
+                                        if (($item['s_status'] ?? 0) == \App\Models\ShipmentModel::STATUS_SHIPPED || ($item['s_status'] ?? 0) == \App\Models\ShipmentModel::STATUS_ARRIVED) {
+                                            $statusClass = 'bg-success';
+                                        } elseif (($item['s_status'] ?? 0) > 1) {
+                                            $statusClass = 'bg-primary';
+                                        }
                                         ?>
-                                        <span class="badge <?= $status['class'] ?>"><?= $status['text'] ?></span>
+                                        <span class="badge <?= $statusClass ?>"><?= $statusLabel ?></span>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $asLabel = \App\Models\ShipmentModel::$afterSalesStatusMap[$item['s_after_sales_status'] ?? 1] ?? '正常';
+                                        $asClass = 'bg-light text-dark border';
+                                        if (($item['s_after_sales_status'] ?? 1) == \App\Models\ShipmentModel::AFTERSALES_PROCESSING) {
+                                            $asClass = 'bg-warning text-dark';
+                                        } elseif (($item['s_after_sales_status'] ?? 1) == \App\Models\ShipmentModel::AFTERSALES_COMPLETED) {
+                                            $asClass = 'bg-info text-dark';
+                                        }
+                                        ?>
+                                        <span class="badge <?= $asClass ?>"><?= $asLabel ?></span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
@@ -177,5 +191,29 @@
         </div>
     </div>
 </div>
+
+<script>
+    function confirmDelete(url) {
+        if (confirm('確定要刪除此出貨單嗎？刪除後將無法恢復。')) {
+            window.location.href = url;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.clickable-row');
+
+        rows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // 如果點擊的是按鈕或按鈕內的元素，不要跳轉
+                if (e.target.closest('.btn-group') || e.target.closest('button') || e.target.closest('a.btn')) {
+                    return;
+                }
+
+                // 跳轉到詳細頁面
+                window.location.href = this.dataset.href;
+            });
+        });
+    });
+</script>
 
 <?= $this->endSection() ?>
