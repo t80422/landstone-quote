@@ -72,10 +72,10 @@
                                     <td>
                                         <?php if (!empty($item['p_image'])): ?>
                                             <?php
-                                                $imagePath = $item['p_image'];
-                                                if (strpos($imagePath, 'http://') !== 0 && strpos($imagePath, 'https://') !== 0) {
-                                                    $imagePath = base_url(ltrim($imagePath, '/'));
-                                                }
+                                            $imagePath = $item['p_image'];
+                                            if (strpos($imagePath, 'http://') !== 0 && strpos($imagePath, 'https://') !== 0) {
+                                                $imagePath = base_url(ltrim($imagePath, '/'));
+                                            }
                                             ?>
                                             <img src="<?= esc($imagePath) ?>"
                                                 alt="<?= esc($item['p_name']) ?>"
@@ -97,11 +97,10 @@
                                     <td>
                                         <div>
                                             <div class="fw-bold"><?= esc($item['p_name']) ?></div>
-                                            <?php if (!empty($item['p_style']) || !empty($item['p_color']) || !empty($item['p_size'])): ?>
+                                            <?php if (!empty($item['p_color']) || !empty($item['p_size'])): ?>
                                                 <small class="text-muted">
                                                     <?php
                                                     $specs = [];
-                                                    if (!empty($item['p_style'])) $specs[] = esc($item['p_style']);
                                                     if (!empty($item['p_color'])) $specs[] = esc($item['p_color']);
                                                     if (!empty($item['p_size'])) $specs[] = esc($item['p_size']);
                                                     echo implode(' / ', $specs);

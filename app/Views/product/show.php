@@ -54,10 +54,10 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
                 <div class="card-body text-center">
                     <?php if ($imagePath): ?>
                         <img src="<?= esc($imagePath) ?>" alt="<?= esc($data['p_name']) ?>"
-                             class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
+                            class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
                     <?php else: ?>
                         <div class="bg-light d-flex align-items-center justify-content-center mb-3"
-                             style="width: 100%; height: 300px; border-radius: 8px;">
+                            style="width: 100%; height: 300px; border-radius: 8px;">
                             <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
                         </div>
                     <?php endif; ?>
@@ -101,15 +101,11 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-4">
-                            <div class="text-muted small">款式</div>
-                            <div><?= esc($data['p_style'] ?? '-') ?></div>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="text-muted small">顏色/花色</div>
                             <div><?= esc($data['p_color'] ?? '-') ?></div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="text-muted small">尺寸</div>
                             <div><?= esc($data['p_size'] ?? '-') ?></div>
                         </div>
@@ -137,5 +133,3 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
 </div>
 
 <?= $this->endSection() ?>
-
-

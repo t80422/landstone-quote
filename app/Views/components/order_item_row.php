@@ -82,7 +82,6 @@ $placeholder = base_url('images/placeholder.png');
 <tr class="item-row"
     data-shipped-qty="<?= $shippedQty ?>"
     data-selected-supplier="<?= esc($item['oi_supplier'] ?? '') ?>"
-    data-selected-style="<?= esc($item['oi_style'] ?? '') ?>"
     data-selected-color="<?= esc($item['oi_color'] ?? '') ?>"
     data-selected-size="<?= esc($item['oi_size'] ?? '') ?>">
     <td style="width: 10%;" class="align-middle">
@@ -117,7 +116,6 @@ $placeholder = base_url('images/placeholder.png');
                         data-price="<?= $product['p_standard_price'] ?>"
                         data-category="<?= $product['p_pc_id'] ?? '' ?>"
                         data-supplier="<?= esc($product['p_supplier'] ?? '') ?>"
-                        data-style="<?= esc($product['p_style'] ?? '') ?>"
                         data-color="<?= esc($product['p_color'] ?? '') ?>"
                         data-size="<?= esc($product['p_size'] ?? '') ?>"
                         data-image="<?= esc($product['p_image'] ?? '') ?>"
@@ -131,28 +129,21 @@ $placeholder = base_url('images/placeholder.png');
             <small class="text-muted">已出貨：<?= $shippedQty ?></small>
         <?php endif; ?>
     </td>
-    <td style="width: 8%;" class="align-middle">
+    <td style="width: 10%;" class="align-middle">
         <select class="form-select form-select-sm supplier-select small"
             name="items[<?= $index ?>][oi_supplier]"
             title="供應商">
             <option value="">-</option>
         </select>
     </td>
-    <td style="width: 8%;" class="align-middle">
-        <select class="form-select form-select-sm style-select small"
-            name="items[<?= $index ?>][oi_style]"
-            title="款式">
-            <option value="">-</option>
-        </select>
-    </td>
-    <td style="width: 8%;" class="align-middle">
+    <td style="width: 10%;" class="align-middle">
         <select class="form-select form-select-sm color-select small"
             name="items[<?= $index ?>][oi_color]"
             title="顏色">
             <option value="">-</option>
         </select>
     </td>
-    <td style="width: 8%;" class="align-middle">
+    <td style="width: 10%;" class="align-middle">
         <select class="form-select form-select-sm size-select small"
             name="items[<?= $index ?>][oi_size]"
             title="尺寸">

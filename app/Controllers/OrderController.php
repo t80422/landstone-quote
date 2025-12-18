@@ -9,6 +9,7 @@ use App\Models\ProductModel;
 use App\Models\ProductCategoryModel;
 use App\Models\QuoteModel;
 use App\Models\CustomerContactModel;
+
 class OrderController extends BaseController
 {
     private $orderModel;
@@ -68,7 +69,7 @@ class OrderController extends BaseController
         }
 
         return redirect()->to(url_to('QuoteController::index'))
-            ->with('error', '建立訂單失敗，請確認報價單尚未轉換過');
+            ->with('error', '建立訂單失敗');
     }
 
     public function view($id)
@@ -77,7 +78,6 @@ class OrderController extends BaseController
         if (!$data) {
             return redirect()->to(url_to('OrderController::index'))->with('error', '訂單不存在');
         }
-
         return view('order/view', [
             'data' => $data
         ]);
@@ -143,18 +143,8 @@ class OrderController extends BaseController
             return redirect()->to(url_to('OrderController::index'))->with('error', '訂單不存在');
         }
 
-        // 取得聯絡人資訊
-        if (!empty($data['o_cc_id'])) {
-            $contact = $this->customerContactModel->find($data['o_cc_id']);
-            $data['contact'] = $contact;
-        }
-
-        // 取得所有商品資料（用於顯示商品名稱）
-        $products = $this->productModel->findAll();
-
         return view('order/print', [
-            'data' => $data,
-            'products' => $products
+            'data' => $data
         ]);
     }
 }

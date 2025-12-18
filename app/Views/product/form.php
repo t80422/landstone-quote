@@ -70,8 +70,28 @@ function getFieldClass($fieldName)
                             <div class="form-text">產品編號由系統自動產生</div>
                         </div>
                         <div class="col-md-3 mb-3">
-                             <label for="productName" class="form-label">
-                                產品名稱 <span class="text-danger">*</span>
+                            <label for="category" class="form-label">產品分類</label>
+                            <select
+                                class="form-select <?= getFieldClass('p_pc_id') ?>"
+                                id="category"
+                                name="p_pc_id"
+                                aria-describedby="categoryError"
+                                required>
+                                <option value="">請選擇分類</option>
+                                <?php if (isset($categories) && is_array($categories)): ?>
+                                    <?php foreach ($categories as $category): ?>
+                                        <option value="<?= esc($category['pc_id']) ?>"
+                                            <?= (old('p_pc_id', $data['p_pc_id'] ?? '') == $category['pc_id']) ? 'selected' : '' ?>>
+                                            <?= esc($category['pc_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            <?= showFieldError('p_pc_id') ?>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="productName" class="form-label">
+                                產品名稱/款式 <span class="text-danger">*</span>
                             </label>
                             <input
                                 type="text"
@@ -85,26 +105,6 @@ function getFieldClass($fieldName)
                             <?= showFieldError('p_name') ?>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label for="category" class="form-label">產品分類</label>
-                            <select
-                                class="form-select <?= getFieldClass('p_pc_id') ?>"
-                                id="category"
-                                name="p_pc_id"
-                                aria-describedby="categoryError"
-                                required>
-                                <option value="">請選擇分類</option>
-                                <?php if (isset($categories) && is_array($categories)): ?>
-                                    <?php foreach ($categories as $category): ?>
-                                        <option value="<?= esc($category['pc_id']) ?>"
-                                                <?= (old('p_pc_id', $data['p_pc_id'] ?? '') == $category['pc_id']) ? 'selected' : '' ?>>
-                                            <?= esc($category['pc_name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
-                            <?= showFieldError('p_pc_id') ?>
-                        </div>
-                        <div class="col-md-3 mb-3">
                             <label for="supplier" class="form-label">供應商</label>
                             <textarea
                                 class="form-control <?= getFieldClass('p_supplier') ?>"
@@ -115,7 +115,7 @@ function getFieldClass($fieldName)
                             </textarea>
                             <?= showFieldError('p_supplier') ?>
                             <div class="form-text">使用"、"分隔多個供應商</div>
-                        </div>    
+                        </div>
                     </div>
                 </div>
 
@@ -126,18 +126,7 @@ function getFieldClass($fieldName)
                     </h5>
                     <!-- 第一行：主要屬性 -->
                     <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label for="style" class="form-label">款式</label>
-                            <textarea
-                                class="form-control <?= getFieldClass('p_style') ?>"
-                                id="style"
-                                name="p_style"
-                                rows="3"
-                                placeholder="產品款式"><?= old('p_style', $data['p_style'] ?? '') ?></textarea>
-                            <?= showFieldError('p_style') ?>
-                            <div class="form-text">使用"、"分隔多個款式</div>
-                        </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="color" class="form-label">顏色/花色</label>
                             <textarea
                                 class="form-control <?= getFieldClass('p_color') ?>"
@@ -148,7 +137,7 @@ function getFieldClass($fieldName)
                             <?= showFieldError('p_color') ?>
                             <div class="form-text">使用"、"分隔多個顏色/花色</div>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="size" class="form-label">尺寸</label>
                             <textarea
                                 class="form-control <?= getFieldClass('p_size') ?>"
@@ -163,7 +152,7 @@ function getFieldClass($fieldName)
 
                     <!-- 第二行：價格與成本 -->
                     <div class="row">
-                         <div class="col-md-3 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="sellingPrice" class="form-label">
                                 售價 <span class="text-danger">*</span>
                             </label>
@@ -224,10 +213,10 @@ function getFieldClass($fieldName)
                         <div class="col-md-12 mb-3">
                             <?php if (!empty($data['p_image'])): ?>
                                 <?php
-                                    $currentImagePath = $data['p_image'];
-                                    if (strpos($currentImagePath, 'http://') !== 0 && strpos($currentImagePath, 'https://') !== 0) {
-                                        $currentImagePath = base_url(ltrim($currentImagePath, '/'));
-                                    }
+                                $currentImagePath = $data['p_image'];
+                                if (strpos($currentImagePath, 'http://') !== 0 && strpos($currentImagePath, 'https://') !== 0) {
+                                    $currentImagePath = base_url(ltrim($currentImagePath, '/'));
+                                }
                                 ?>
                                 <div class="mb-3">
                                     <label class="form-label">目前圖片</label>

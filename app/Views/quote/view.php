@@ -6,18 +6,18 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-file-earmark-text me-2"></i>報價單內容</h2>
         <div class="d-flex gap-2">
-            <a href="<?= url_to('QuoteController::print', $data['q_id']) ?>" 
-               class="btn btn-outline-dark btn-sm" 
-               target="_blank">
+            <a href="<?= url_to('QuoteController::print', $data['q_id']) ?>"
+                class="btn btn-outline-dark btn-sm"
+                target="_blank">
                 <i class="bi bi-printer me-1"></i>列印
             </a>
             <?php if (empty($data['q_o_id'])): ?>
                 <a href="<?= url_to('QuoteController::edit', $data['q_id']) ?>" class="btn btn-primary btn-sm">
                     <i class="bi bi-pencil-square me-1"></i>編輯
                 </a>
-                <button type="button" class="btn btn-success btn-sm btn-convert-order" 
-                        data-id="<?= $data['q_id'] ?>" 
-                        data-number="<?= esc($data['q_number']) ?>">
+                <button type="button" class="btn btn-success btn-sm btn-convert-order"
+                    data-id="<?= $data['q_id'] ?>"
+                    data-number="<?= esc($data['q_number']) ?>">
                     <i class="bi bi-check-circle me-1"></i>轉成訂單
                 </button>
             <?php else: ?>
@@ -144,22 +144,21 @@
                                 <?php if (!empty($data['items'])): ?>
                                     <?php foreach ($data['items'] as $item): ?>
                                         <?php
-                                            // 處理圖片路徑
-                                            $imagePath = !empty($item['p_image']) ? base_url($item['p_image']) : base_url('assets/images/placeholder.png');
-                                            
-                                            // 處理規格合併顯示
-                                            $specs = array_filter([
-                                                $item['qi_style'] ? "款式:{$item['qi_style']}" : null,
-                                                $item['qi_color'] ? "顏色:{$item['qi_color']}" : null,
-                                                $item['qi_size'] ? "尺寸:{$item['qi_size']}" : null,
-                                            ]);
-                                            $specString = implode(' / ', $specs);
+                                        // 處理圖片路徑
+                                        $imagePath = !empty($item['p_image']) ? base_url($item['p_image']) : base_url('assets/images/placeholder.png');
+
+                                        // 處理規格合併顯示
+                                        $specs = array_filter([
+                                            $item['qi_color'] ? "顏色:{$item['qi_color']}" : null,
+                                            $item['qi_size'] ? "尺寸:{$item['qi_size']}" : null,
+                                        ]);
+                                        $specString = implode(' / ', $specs);
                                         ?>
                                         <tr>
                                             <td class="ps-4">
                                                 <div class="ratio ratio-1x1 bg-light border rounded" style="width: 60px;">
-                                                    <img src="<?= esc($imagePath) ?>" alt="" 
-                                                         class="img-fluid object-fit-cover rounded">
+                                                    <img src="<?= esc($imagePath) ?>" alt=""
+                                                        class="img-fluid object-fit-cover rounded">
                                                 </div>
                                             </td>
                                             <td>
@@ -172,7 +171,7 @@
                                                     <?php endif; ?>
                                                     <span class="small text-muted"><?= esc($item['p_code']) ?></span>
                                                 </div>
-                                                
+
                                                 <?php if (!empty($item['qi_supplier'])): ?>
                                                     <div class="small text-secondary mt-1">
                                                         <i class="bi bi-shop me-1"></i>供應商：<?= esc($item['qi_supplier']) ?>
@@ -219,10 +218,10 @@
                                     <td class="text-end fw-bold">NT$ <?= number_format($data['q_subtotal'], 0) ?></td>
                                 </tr>
                                 <?php if ($data['q_discount'] > 0): ?>
-                                <tr>
-                                    <td class="text-danger">整單折扣</td>
-                                    <td class="text-end text-danger">- <?= floatval($data['q_discount']) ?>%</td>
-                                </tr>
+                                    <tr>
+                                        <td class="text-danger">整單折扣</td>
+                                        <td class="text-end text-danger">- <?= floatval($data['q_discount']) ?>%</td>
+                                    </tr>
                                 <?php endif; ?>
                                 <tr>
                                     <td class="text-muted">運費</td>
@@ -245,65 +244,72 @@
 
         <!-- 備註 -->
         <?php if (!empty($data['q_notes'])): ?>
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">備註條款</h6>
-                </div>
-                <div class="card-body">
-                    <?= nl2br(esc($data['q_notes'])) ?>
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">備註條款</h6>
+                    </div>
+                    <div class="card-body">
+                        <?= nl2br(esc($data['q_notes'])) ?>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endif; ?>
     </div>
 </div>
 
 <!-- 轉訂單的 JS 邏輯 (如果有) -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 綁定轉訂單按鈕
-    const convertBtn = document.querySelector('.btn-convert-order');
-    if (convertBtn) {
-        convertBtn.addEventListener('click', function() {
-            if (confirm(`確定要將報價單 ${this.dataset.number} 轉為訂單嗎？`)) {
-                // 使用 GET 請求轉訂單
-                window.location.href = '<?= url_to('OrderController::createFromQuote', $data['q_id']) ?>';
-            }
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        // 綁定轉訂單按鈕
+        const convertBtn = document.querySelector('.btn-convert-order');
+        if (convertBtn) {
+            convertBtn.addEventListener('click', function() {
+                if (confirm(`確定要將報價單 ${this.dataset.number} 轉為訂單嗎？`)) {
+                    // 使用 GET 請求轉訂單
+                    window.location.href = '<?= url_to('OrderController::createFromQuote', $data['q_id']) ?>';
+                }
+            });
+        }
+    });
 </script>
 
 <!-- 列印樣式 -->
 <style>
-@media print {
-    /* 隱藏非必要元素 */
-    .btn, .alert, header, footer, .bi {
-        display: none !important;
-    }
-    
-    /* 確保背景色列印 */
-    .card-header, .table-light, .bg-light {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
+    @media print {
 
-    /* 調整列印版面 */
-    .card {
-        border: none !important;
-        box-shadow: none !important;
+        /* 隱藏非必要元素 */
+        .btn,
+        .alert,
+        header,
+        footer,
+        .bi {
+            display: none !important;
+        }
+
+        /* 確保背景色列印 */
+        .card-header,
+        .table-light,
+        .bg-light {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* 調整列印版面 */
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .card-header {
+            border-bottom: 2px solid #000 !important;
+        }
+
+        /* 強制分頁設定 */
+        .page-break {
+            page-break-before: always;
+        }
     }
-    
-    .card-header {
-        border-bottom: 2px solid #000 !important;
-    }
-    
-    /* 強制分頁設定 */
-    .page-break {
-        page-break-before: always;
-    }
-}
 </style>
 
 <?= $this->endSection() ?>

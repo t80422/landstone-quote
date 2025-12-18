@@ -97,7 +97,6 @@ class ProductController extends BaseController
             'p_pc_id' => $requestData['p_pc_id'] ?? null,
             'p_name' => trim((string) ($requestData['p_name'] ?? '')),
             'p_supplier' => trim((string) ($requestData['p_supplier'] ?? '')),
-            'p_style' => trim((string) ($requestData['p_style'] ?? '')),
             'p_color' => trim((string) ($requestData['p_color'] ?? '')),
             'p_size' => trim((string) ($requestData['p_size'] ?? '')),
             'p_specifications' => trim((string) ($requestData['p_specifications'] ?? '')),

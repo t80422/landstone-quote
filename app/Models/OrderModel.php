@@ -28,7 +28,9 @@ class OrderModel extends Model
         'o_status',
         'o_shipment_status',
         'o_notes',
-
+        'o_shipping_address',
+        'o_vendor_contect',
+        'o_vendor_address',
     ];
 
     // Dates
@@ -52,11 +54,12 @@ class OrderModel extends Model
     // 獲取單個訂單及其項目
     public function getOrderWithItems($orderId)
     {
-        $order = $this->select('orders.*, customers.c_name, customers.c_phone, customers.c_email')
+        $order = $this->select('orders.*, customers.c_name, customers.c_phone, customers.c_email, customer_contacts.cc_name, customer_contacts.cc_phone')
             ->join('customers', 'customers.c_id = orders.o_c_id', 'left')
+            ->join('customer_contacts', 'customer_contacts.cc_id = orders.o_cc_id', 'left')
             ->where('orders.o_id', $orderId)
             ->first();
-            
+
         if (!$order) {
             return null;
         }
@@ -162,7 +165,6 @@ class OrderModel extends Model
                 'oi_discount' => $item['qi_discount'],
                 'oi_amount' => $item['qi_quantity'] * $item['qi_unit_price'] * (1 - $item['qi_discount'] / 100),
                 'oi_supplier' => $item['qi_supplier'],
-                'oi_style' => $item['qi_style'],
                 'oi_color' => $item['qi_color'],
                 'oi_size' => $item['qi_size'],
             ];
@@ -189,6 +191,7 @@ class OrderModel extends Model
         try {
             $orderItemModel = new OrderItemModel();
             $orderId = $orderData['o_id'] ?? null;
+            $orderData['o_cc_id'] = $orderData['o_cc_id'] ?? null;
 
             // 手動驗證資料
             if (!$this->validate($orderData)) {
@@ -202,26 +205,26 @@ class OrderModel extends Model
             if ($orderId) {
                 // 更新訂單：需要驗證修改的合法性
                 $oldItems = $orderItemModel->where('oi_o_id', $orderId)->findAll();
-                
+
                 // 建立舊項目的映射（以商品ID為鍵）
                 $oldItemsMap = [];
                 foreach ($oldItems as $oldItem) {
                     $oldItemsMap[$oldItem['oi_p_id']] = $oldItem;
                 }
-                
+
                 // 驗證新項目
                 foreach ($items as $item) {
                     if (empty($item['oi_p_id'])) {
                         continue;
                     }
-                    
+
                     $productId = $item['oi_p_id'];
                     $newQuantity = $item['oi_quantity'];
-                    
+
                     // 如果是現有項目，檢查數量是否小於已出貨數量
                     if (isset($oldItemsMap[$productId])) {
                         $shippedQty = $oldItemsMap[$productId]['oi_shipped_quantity'] ?? 0;
-                        
+
                         if ($newQuantity < $shippedQty) {
                             return [
                                 'success' => false,
@@ -229,12 +232,12 @@ class OrderModel extends Model
                                 'orderId' => null,
                             ];
                         }
-                        
+
                         // 從映射中移除，剩下的就是被刪除的項目
                         unset($oldItemsMap[$productId]);
                     }
                 }
-                
+
                 // 檢查被刪除的項目是否有出貨記錄
                 foreach ($oldItemsMap as $deletedItem) {
                     $shippedQty = $deletedItem['oi_shipped_quantity'] ?? 0;
@@ -246,7 +249,7 @@ class OrderModel extends Model
                         ];
                     }
                 }
-                
+
                 // 更新訂單
                 $this->update($orderId, $orderData);
 
@@ -263,7 +266,7 @@ class OrderModel extends Model
                     ];
                 }
             }
-            
+
             // 新增項目
             foreach ($items as $item) {
                 if (empty($item['oi_p_id'])) {

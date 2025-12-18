@@ -43,7 +43,6 @@
             </form>
         </div>
     </div>
-
     <!-- 訂單列表 -->
     <div class="card shadow-sm">
         <div class="card-body">
@@ -113,6 +112,9 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
+                                            <a href="<?= url_to('OrderController::print', $item['o_id']) ?>" class="btn btn-outline-info" title="轉出廠商採購單" target="_blank">
+                                                <i class="bi bi-printer"></i>
+                                            </a>
                                             <a href="<?= url_to('ShipmentController::index') ?>?order_id=<?= $item['o_id'] ?>" class="btn btn-outline-info" title="出貨記錄">
                                                 <i class="bi bi-truck"></i>
                                             </a>
@@ -156,14 +158,14 @@
     // 點擊整列進入詳細頁面
     document.addEventListener('DOMContentLoaded', function() {
         const rows = document.querySelectorAll('.clickable-row');
-        
+
         rows.forEach(row => {
             row.addEventListener('click', function(e) {
                 // 如果點擊的是按鈕或按鈕內的元素，不要跳轉
                 if (e.target.closest('.btn-group') || e.target.closest('button') || e.target.closest('a.btn')) {
                     return;
                 }
-                
+
                 // 跳轉到詳細頁面
                 window.location.href = this.dataset.href;
             });

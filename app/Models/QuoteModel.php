@@ -146,6 +146,10 @@ class QuoteModel extends Model
             $quoteItemModel = new QuoteItemModel();
             $quoteId = $quoteData['q_id'] ?? null;
 
+            if (empty($quoteData['q_cc_id'])) {
+                $quoteData['q_cc_id'] = null;
+            }
+
             if ($quoteId) {
                 // 更新報價單
                 $this->update($quoteId, $quoteData);
@@ -223,7 +227,6 @@ class QuoteModel extends Model
 
             $amount = $quantity * $unitPrice * (1 - $discount / 100);
             $item['qi_amount'] = $amount;
-
             $quoteItemModel->insert($item);
             $subtotal += $amount;
         }

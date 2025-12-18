@@ -7,7 +7,7 @@
         <h2><i class="bi bi-file-earmark-text me-2"></i>訂單內容</h2>
         <div class="d-flex gap-2">
             <a href="<?= url_to('OrderController::print', $data['o_id']) ?>" class="btn btn-success btn-sm" target="_blank">
-                <i class="bi bi-printer me-1"></i>列印
+                <i class="bi bi-printer me-1"></i>轉出廠商採購單
             </a>
             <a href="<?= url_to('OrderController::edit', $data['o_id']) ?>" class="btn btn-primary btn-sm">
                 <i class="bi bi-pencil-square me-1"></i>編輯
@@ -54,103 +54,101 @@
                         <!-- 左側：基本資料 -->
                         <div class="col-md-6 border-end">
                             <h6 class="text-secondary mb-3 border-bottom pb-2">基本資料</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <table class="table table-borderless table-sm mb-0">
-                                        <tr>
-                                            <td class="text-muted" width="80">訂單日期</td>
-                                            <td class="fw-bold"><?= esc($data['o_date']) ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">訂單狀態</td>
-                                            <td>
-                                                <?php
-                                                $statusMap = [
-                                                    'processing' => ['處理中', 'primary'],
-                                                    'completed' => ['已完結', 'success'],
-                                                    'cancelled' => ['已取消', 'secondary']
-                                                ];
-                                                $status = $statusMap[$data['o_status'] ?? ''] ?? ['未知', 'secondary'];
-                                                ?>
-                                                <span class="badge bg-<?= $status[1] ?>"><?= $status[0] ?></span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">付款狀態</td>
-                                            <td>
-                                                <?php
-                                                $paymentMap = [
-                                                    'unpaid' => ['未收款', 'danger'],
-                                                    'partial' => ['部分收款', 'warning'],
-                                                    'paid' => ['已結清', 'success']
-                                                ];
-                                                $payment = $paymentMap[$data['o_payment_status'] ?? ''] ?? ['-', 'secondary'];
-                                                ?>
-                                                <span class="badge bg-<?= $payment[1] ?>"><?= $payment[0] ?></span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-6">
-                                    <table class="table table-borderless table-sm mb-0">
-                                        <tr>
-                                            <td class="text-muted" width="80">預交期</td>
-                                            <td><?= esc($data['o_delivery_date'] ?? '-') ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">出貨狀態</td>
-                                            <td>
-                                                <?php
-                                                $shipmentMap = [
-                                                    'preparing' => ['備貨中', 'info'],
-                                                    'partial' => ['部分出貨', 'primary'],
-                                                    'shipped' => ['已全出', 'success']
-                                                ];
-                                                $shipment = $shipmentMap[$data['o_shipment_status'] ?? ''] ?? ['-', 'secondary'];
-                                                ?>
-                                                <span class="badge bg-<?= $shipment[1] ?>"><?= $shipment[0] ?></span>
-                                            </td>
-                                        </tr>
-                                        <?php if (!empty($data['o_invoice_number'])): ?>
-                                            <tr>
-                                                <td class="text-muted">發票號碼</td>
-                                                <td><?= esc($data['o_invoice_number']) ?></td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </table>
-                                </div>
-                            </div>
+                            <table class="table table-borderless table-sm mb-0">
+                                <tr>
+                                    <td class="text-muted" style="width: 15%;">訂單日期</td>
+                                    <td class="fw-bold" style="width: 35%;"><?= esc($data['o_date']) ?></td>
+                                    <td class="text-muted" style="width: 15%;">預交期</td>
+                                    <td class="fw-bold" style="width: 35%;"><?= esc($data['o_delivery_date'] ?? '-') ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">訂單狀態</td>
+                                    <td>
+                                        <?php
+                                        $statusMap = [
+                                            'processing' => ['處理中', 'primary'],
+                                            'completed' => ['已完結', 'success'],
+                                            'cancelled' => ['已取消', 'secondary']
+                                        ];
+                                        $status = $statusMap[$data['o_status'] ?? ''] ?? ['未知', 'secondary'];
+                                        ?>
+                                        <span class="badge bg-<?= $status[1] ?>"><?= $status[0] ?></span>
+                                    </td>
+                                    <td class="text-muted">出貨狀態</td>
+                                    <td>
+                                        <?php
+                                        $shipmentMap = [
+                                            'preparing' => ['備貨中', 'info'],
+                                            'partial' => ['部分出貨', 'primary'],
+                                            'shipped' => ['已全出', 'success']
+                                        ];
+                                        $shipment = $shipmentMap[$data['o_shipment_status'] ?? ''] ?? ['-', 'secondary'];
+                                        ?>
+                                        <span class="badge bg-<?= $shipment[1] ?>"><?= $shipment[0] ?></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">付款狀態</td>
+                                    <td>
+                                        <?php
+                                        $paymentMap = [
+                                            'unpaid' => ['未收款', 'danger'],
+                                            'partial' => ['部分收款', 'warning'],
+                                            'paid' => ['已結清', 'success']
+                                        ];
+                                        $payment = $paymentMap[$data['o_payment_status'] ?? ''] ?? ['-', 'secondary'];
+                                        ?>
+                                        <span class="badge bg-<?= $payment[1] ?>"><?= $payment[0] ?></span>
+                                    </td>
+                                    <?php if (!empty($data['o_invoice_number'])): ?>
+                                        <td class="text-muted">發票號碼</td>
+                                        <td><?= esc($data['o_invoice_number']) ?></td>
+                                    <?php else: ?>
+                                        <td colspan="2"></td>
+                                    <?php endif; ?>
+                                </tr>
+                            </table>
                         </div>
 
                         <!-- 右側：客戶資料 -->
                         <div class="col-md-6">
                             <h6 class="text-secondary mb-3 border-bottom pb-2">客戶資料</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <table class="table table-borderless table-sm mb-0">
-                                        <tr>
-                                            <td class="text-muted" width="80">客戶名稱</td>
-                                            <td class="fw-bold"><?= esc($data['customer']['c_name'] ?? '-') ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">統一編號</td>
-                                            <td><?= esc($data['customer']['c_tax_id'] ?? '-') ?></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-6">
-                                    <table class="table table-borderless table-sm mb-0">
-                                        <tr>
-                                            <td class="text-muted" width="80">聯絡人</td>
-                                            <td><?= esc($data['contact']['cc_name'] ?? '-') ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">聯絡電話</td>
-                                            <td><?= esc($data['contact']['cc_phone'] ?? '-') ?></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+                            <table class="table table-borderless table-sm mb-0">
+                                <tr>
+                                    <td class="text-muted" style="width: 15%;">客戶名稱</td>
+                                    <td class="fw-bold" style="width: 35%;"><?= esc($data['c_name'] ?? '-') ?></td>
+                                    <td class="text-muted" style="width: 15%;">聯絡人</td>
+                                    <td class="fw-bold" style="width: 35%;"><?= esc($data['cc_name'] ?? '-') ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">統一編號</td>
+                                    <td><?= esc($data['c_tax_id'] ?? '-') ?></td>
+                                    <td class="text-muted">聯絡電話</td>
+                                    <td><?= esc($data['cc_phone'] ?? '-') ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">送貨地址</td>
+                                    <td><?= esc($data['o_delivery_city'] ?? '-') ?></td>
+                                    <td colspan="2"><?= esc($data['o_delivery_address'] ?? '-') ?></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 廠商資料 -->
+                        <div class="col-12 mt-2 pt-2 border-top">
+                            <h6 class="text-secondary mb-3 pb-2">廠商資料</h6>
+                            <table class="table table-borderless table-sm mb-0">
+                                <tr>
+                                    <td class="text-muted" style="width: 15%;">廠商聯絡人</td>
+                                    <td class="fw-bold" style="width: 35%;"><?= esc($data['o_vendor_contect'] ?? '-') ?></td>
+                                    <td class="text-muted" style="width: 15%;">廠商出貨地址</td>
+                                    <td class="fw-bold" style="width: 35%;"><?= esc($data['o_shipping_address'] ?? '-') ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">廠商詳細地址</td>
+                                    <td colspan="3"><?= esc($data['o_vendor_address'] ?? '-') ?></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -187,7 +185,6 @@
                                         // 注意：這裡使用 oi_ 前綴，假設這些欄位在資料庫中已存在 (因為 form 中有使用)
                                         // 如果資料庫中沒有這些欄位，則可能需要從 products 表關聯獲取，但依照 form 邏輯應是已儲存
                                         $specs = array_filter([
-                                            ($item['oi_style'] ?? '') ? "款式:{$item['oi_style']}" : null,
                                             ($item['oi_color'] ?? '') ? "顏色:{$item['oi_color']}" : null,
                                             ($item['oi_size'] ?? '') ? "尺寸:{$item['oi_size']}" : null,
                                         ]);
@@ -265,10 +262,27 @@
                     <div class="row justify-content-end">
                         <div class="col-md-5 col-lg-4">
                             <table class="table table-sm table-borderless mb-0">
-                                <!-- 訂單表單中沒有額外的稅額運費欄位，直接顯示總金額 -->
+                                <tr>
+                                    <td class="text-muted">商品小計</td>
+                                    <td class="text-end fw-bold">NT$ <?= number_format($data['o_subtotal'], 0) ?></td>
+                                </tr>
+                                <?php if ($data['o_discount'] > 0): ?>
+                                    <tr>
+                                        <td class="text-danger">整單折扣</td>
+                                        <td class="text-end text-danger">- <?= floatval($data['o_discount']) ?>%</td>
+                                    </tr>
+                                <?php endif; ?>
+                                <tr>
+                                    <td class="text-muted">運費</td>
+                                    <td class="text-end">NT$ <?= number_format($data['o_shipping_fee'], 0) ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">營業稅 (<?= floatval($data['o_tax_rate']) ?>%)</td>
+                                    <td class="text-end">NT$ <?= number_format($data['o_tax_amount'], 0) ?></td>
+                                </tr>
                                 <tr class="border-top border-2">
                                     <td class="pt-2 fs-5 fw-bold text-primary">總金額</td>
-                                    <td class="pt-2 fs-5 fw-bold text-end text-primary">NT$ <?= number_format($data['o_total_amount'] ?? 0, 0) ?></td>
+                                    <td class="pt-2 fs-5 fw-bold text-end text-primary">NT$ <?= number_format($data['o_total_amount'], 0) ?></td>
                                 </tr>
                             </table>
                         </div>

@@ -73,18 +73,17 @@ $placeholder = base_url('images/placeholder.png');
 ?>
 <tr class="item-row"
     data-selected-supplier="<?= esc($item['qi_supplier'] ?? '') ?>"
-    data-selected-style="<?= esc($item['qi_style'] ?? '') ?>"
     data-selected-color="<?= esc($item['qi_color'] ?? '') ?>"
     data-selected-size="<?= esc($item['qi_size'] ?? '') ?>">
     <td style="width: 10%;" class="align-middle">
         <input type="hidden" name="items[<?= $index ?>][qi_id]" value="<?= esc($item['qi_id']) ?>">
         <div class="ratio ratio-1x1 border rounded overflow-hidden bg-light shadow-sm">
-            <img src="<?= esc($selectedImage ?: $placeholder) ?>" 
-                 class="img-fluid item-image-preview object-fit-cover" 
-                 alt="商品圖片" 
-                 data-placeholder="<?= esc($placeholder) ?>"
-                 style="cursor: pointer;"
-                 title="點擊查看大圖">
+            <img src="<?= esc($selectedImage ?: $placeholder) ?>"
+                class="img-fluid item-image-preview object-fit-cover"
+                alt="商品圖片"
+                data-placeholder="<?= esc($placeholder) ?>"
+                style="cursor: pointer;"
+                title="點擊查看大圖">
         </div>
     </td>
     <td style="width: 20%;" class="align-middle">
@@ -108,7 +107,6 @@ $placeholder = base_url('images/placeholder.png');
                         data-price="<?= $product['p_standard_price'] ?>"
                         data-category="<?= $product['p_pc_id'] ?? '' ?>"
                         data-supplier="<?= esc($product['p_supplier'] ?? '') ?>"
-                        data-style="<?= esc($product['p_style'] ?? '') ?>"
                         data-color="<?= esc($product['p_color'] ?? '') ?>"
                         data-size="<?= esc($product['p_size'] ?? '') ?>"
                         data-image="<?= esc($product['p_image'] ?? '') ?>"
@@ -119,28 +117,21 @@ $placeholder = base_url('images/placeholder.png');
             </select>
         </div>
     </td>
-    <td style="width: 8%;" class="align-middle">
+    <td style="width: 10%;" class="align-middle">
         <select class="form-select form-select-sm supplier-select small"
             name="items[<?= $index ?>][qi_supplier]"
             title="供應商">
             <option value="">-</option>
         </select>
     </td>
-    <td style="width: 8%;" class="align-middle">
-        <select class="form-select form-select-sm style-select small"
-            name="items[<?= $index ?>][qi_style]"
-            title="款式">
-            <option value="">-</option>
-        </select>
-    </td>
-    <td style="width: 8%;" class="align-middle">
+    <td style="width: 10%;" class="align-middle">
         <select class="form-select form-select-sm color-select small"
             name="items[<?= $index ?>][qi_color]"
             title="顏色">
             <option value="">-</option>
         </select>
     </td>
-    <td style="width: 8%;" class="align-middle">
+    <td style="width: 10%;" class="align-middle">
         <select class="form-select form-select-sm size-select small"
             name="items[<?= $index ?>][qi_size]"
             title="尺寸">
@@ -151,7 +142,7 @@ $placeholder = base_url('images/placeholder.png');
         <input type="number" class="form-control form-control-sm quantity-input text-center"
             name="items[<?= $index ?>][qi_quantity]"
             value="<?= esc($item['qi_quantity']) ?>"
-            min="1" step="1" 
+            min="1" step="1"
             title="數量"
             required>
     </td>
@@ -159,7 +150,7 @@ $placeholder = base_url('images/placeholder.png');
         <input type="number" class="form-control form-control-sm price-input text-end"
             name="items[<?= $index ?>][qi_unit_price]"
             value="<?= esc($item['qi_unit_price']) ?>"
-            min="0" step="1" 
+            min="0" step="1"
             title="單價"
             required>
     </td>
@@ -172,7 +163,7 @@ $placeholder = base_url('images/placeholder.png');
     </td>
     <td style="width: 10%;" class="align-middle">
         <input type="text" class="form-control form-control-sm amount-display text-end bg-light fw-bold"
-            value="0" 
+            value="0"
             title="小計金額"
             readonly>
     </td>

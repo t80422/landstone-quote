@@ -36,63 +36,64 @@ $productCategories = $productCategories ?? [];
         white-space: nowrap;
         padding: 0.75rem 0.5rem;
     }
-    
+
     #itemsTable tbody td {
         padding: 0.5rem;
         vertical-align: middle;
     }
-    
+
     .item-row {
         transition: background-color 0.2s;
     }
-    
+
     .item-row:hover {
         background-color: #f8f9fa;
     }
-    
+
     /* 圖片預覽優化 */
     .item-image-preview {
         transition: transform 0.2s;
     }
-    
+
     .item-image-preview:hover {
         transform: scale(1.05);
     }
-    
+
     /* 表單控制項優化 */
-    .form-control-sm, .form-select-sm {
+    .form-control-sm,
+    .form-select-sm {
         font-size: 0.875rem;
     }
-    
+
     .small {
         font-size: 0.875rem;
     }
-    
+
     /* 金額顯示強調 */
     .amount-display {
         color: #0d6efd;
     }
-    
+
     /* 必填欄位標示 */
     .form-label .text-danger {
         margin-left: 2px;
     }
-    
+
     /* 按鈕優化 */
     .remove-item {
         transition: all 0.2s;
     }
-    
+
     .remove-item:hover {
         transform: scale(1.1);
     }
-    
+
     /* 表格固定表頭 */
     .table-responsive {
         max-height: 600px;
         overflow-y: auto;
     }
-    
+
     .sticky-top {
         position: sticky;
         top: 0;
@@ -171,16 +172,16 @@ $productCategories = $productCategories ?? [];
                                     id="validDate"
                                     name="q_valid_date"
                                     value="<?php
-                                        $validDate = old('q_valid_date', $data['q_valid_date'] ?? '');
-                                        if (empty($validDate) && !$isEdit) {
-                                            // 新增模式且沒有有效日期時，預設為報價日期+15天
-                                            $quoteDate = old('q_date', $data['q_date'] ?? date('Y-m-d'));
-                                            $quoteDateObj = new DateTime($quoteDate);
-                                            $quoteDateObj->modify('+15 days');
-                                            $validDate = $quoteDateObj->format('Y-m-d');
-                                        }
-                                        echo $validDate;
-                                    ?>">
+                                            $validDate = old('q_valid_date', $data['q_valid_date'] ?? '');
+                                            if (empty($validDate) && !$isEdit) {
+                                                // 新增模式且沒有有效日期時，預設為報價日期+15天
+                                                $quoteDate = old('q_date', $data['q_date'] ?? date('Y-m-d'));
+                                                $quoteDateObj = new DateTime($quoteDate);
+                                                $quoteDateObj->modify('+15 days');
+                                                $validDate = $quoteDateObj->format('Y-m-d');
+                                            }
+                                            echo $validDate;
+                                            ?>">
                             </div>
                             <?= showFieldError('q_valid_date') ?>
                         </div>
@@ -252,16 +253,13 @@ $productCategories = $productCategories ?? [];
                                     <th style="width: 20%;">
                                         <i class="bi bi-box-seam me-1"></i>商品分類 / 商品
                                     </th>
-                                    <th style="width: 8%;" class="small">
+                                    <th style="width: 10%;" class="small">
                                         <i class="bi bi-truck me-1"></i>供應商
                                     </th>
-                                    <th style="width: 8%;" class="small">
-                                        <i class="bi bi-palette me-1"></i>款式
-                                    </th>
-                                    <th style="width: 8%;" class="small">
+                                    <th style="width: 10%;" class="small">
                                         <i class="bi bi-paint-bucket me-1"></i>顏色/花色
                                     </th>
-                                    <th style="width: 8%;" class="small">
+                                    <th style="width: 10%;" class="small">
                                         <i class="bi bi-rulers me-1"></i>尺寸
                                     </th>
                                     <th style="width: 7%;" class="text-center">
@@ -512,7 +510,10 @@ $productCategories = $productCategories ?? [];
         function loadContacts(customerId, selectInstance, infoDom, endpoint, selectedId = '', preserveValue = false) {
             if (!customerId) {
                 selectInstance.clearOptions();
-                selectInstance.addOption({value: '', text: '請先選擇客戶'});
+                selectInstance.addOption({
+                    value: '',
+                    text: '請先選擇客戶'
+                });
                 selectInstance.setValue('');
                 infoDom.textContent = infoDom.dataset.placeholder || '';
                 return;
@@ -524,7 +525,10 @@ $productCategories = $productCategories ?? [];
                     selectInstance.clearOptions();
 
                     if (!result.success || !result.data || result.data.length === 0) {
-                        selectInstance.addOption({value: '', text: '無聯絡人資料'});
+                        selectInstance.addOption({
+                            value: '',
+                            text: '無聯絡人資料'
+                        });
                         selectInstance.setValue('');
                         infoDom.textContent = '無聯絡人資料';
                         return;
@@ -533,7 +537,12 @@ $productCategories = $productCategories ?? [];
                     const contacts = result.data;
                     contacts.forEach(c => {
                         const label = c.cc_phone ? `${c.cc_name} (${c.cc_phone})` : c.cc_name;
-                        selectInstance.addOption({value: c.cc_id, text: label, phone: c.cc_phone, email: c.cc_email});
+                        selectInstance.addOption({
+                            value: c.cc_id,
+                            text: label,
+                            phone: c.cc_phone,
+                            email: c.cc_email
+                        });
                     });
 
                     let targetId = preserveValue ? selectInstance.getValue() : selectedId;
@@ -561,7 +570,10 @@ $productCategories = $productCategories ?? [];
                 })
                 .catch(() => {
                     selectInstance.clearOptions();
-                    selectInstance.addOption({value: '', text: '載入失敗'});
+                    selectInstance.addOption({
+                        value: '',
+                        text: '載入失敗'
+                    });
                     selectInstance.setValue('');
                     infoDom.textContent = '載入聯絡人失敗';
                 });
@@ -782,13 +794,11 @@ $productCategories = $productCategories ?? [];
             const product = products.find(p => String(p.p_id) === String(productId));
 
             const supplierSelect = row.querySelector('.supplier-select');
-            const styleSelect = row.querySelector('.style-select');
             const colorSelect = row.querySelector('.color-select');
             const sizeSelect = row.querySelector('.size-select');
             const imagePreview = row.querySelector('.item-image-preview');
 
             const savedSupplier = row.dataset.selectedSupplier || '';
-            const savedStyle = row.dataset.selectedStyle || '';
             const savedColor = row.dataset.selectedColor || '';
             const savedSize = row.dataset.selectedSize || '';
 
@@ -814,7 +824,6 @@ $productCategories = $productCategories ?? [];
 
             if (product) {
                 setOptions(supplierSelect, splitValues(product.p_supplier), preserveExisting ? (supplierSelect ? supplierSelect.value : '') : savedSupplier);
-                setOptions(styleSelect, splitValues(product.p_style), preserveExisting ? (styleSelect ? styleSelect.value : '') : savedStyle);
                 setOptions(colorSelect, splitValues(product.p_color), preserveExisting ? (colorSelect ? colorSelect.value : '') : savedColor);
                 setOptions(sizeSelect, splitValues(product.p_size), preserveExisting ? (sizeSelect ? sizeSelect.value : '') : savedSize);
 
@@ -869,13 +878,13 @@ $productCategories = $productCategories ?? [];
 
             // 2. 折扣後金額 = 商品小計 × (1 - 整單折扣%)
             const discountedSubtotal = subtotal * (1 - discount / 100);
-            
+
             // 3. 加運費後 = 折扣後金額 + 運費
             const amountWithShipping = discountedSubtotal + shippingFee;
-            
+
             // 4. 稅額 = 加運費後 × 稅率%
             const taxAmount = amountWithShipping * (taxRate / 100);
-            
+
             // 5. 總金額 = 加運費後 + 稅額
             const totalAmount = amountWithShipping + taxAmount;
 

@@ -17,7 +17,6 @@ class OrderItemModel extends Model
         'oi_amount',
         'oi_shipped_quantity',
         'oi_supplier',
-        'oi_style',
         'oi_color',
         'oi_size',
     ];

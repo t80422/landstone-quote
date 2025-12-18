@@ -337,7 +337,7 @@
         <div class="info-section">
             <div class="info-row">
                 <div class="info-cell" style="width: 70%;">
-                    <div><span class="info-label">供應商名稱：</span><?= esc($data['c_name']) ?></div>
+                    <div><span class="info-label">供應商名稱：</span><?= $data['items'][0]['oi_supplier'] ?></div>
                 </div>
                 <div class="info-cell info-right" style="width: 30%;">
                     <div><span class="info-label">日期：</span><?= esc($data['o_date']) ?></div>
@@ -350,8 +350,7 @@
                 <div class="info-cell" style="width: 70%;">
                     <div>
                         <span class="info-label">聯絡人：</span>
-                        <?= esc($data['contact']['cc_name'] ?? '') ?>
-                        <?= esc($data['contact']['cc_phone'] ?? '') ?>
+                        <?= $data['o_vendor_contect'] ?? '' ?>
                     </div>
                 </div>
                 <div class="info-cell info-right" style="width: 30%;">
@@ -363,7 +362,7 @@
         <div class="info-section">
             <div class="info-row">
                 <div class="info-cell">
-                    <div><span class="info-label">地址：</span><?= esc($data['c_phone'] ?? '') ?></div>
+                    <div><span class="info-label">地址：</span><?= $data['o_vendor_address'] ?? '' ?></div>
                 </div>
             </div>
         </div>
@@ -400,17 +399,7 @@
                     <?php foreach ($data['items'] as $item): ?>
                         <tr>
                             <td class="text-left">
-                                <?php
-                                // 顯示商品名稱
-                                $productName = '';
-                                foreach ($products ?? [] as $product) {
-                                    if ($product['p_id'] == $item['oi_p_id']) {
-                                        $productName = $product['p_name'];
-                                        break;
-                                    }
-                                }
-                                echo esc($productName);
-                                ?>
+                                <?= $item['p_name']; ?>
                                 <?php if (!empty($item['oi_supplier'])): ?>
                                     <br><small><?= esc($item['oi_supplier']) ?></small>
                                 <?php endif; ?>
@@ -418,9 +407,6 @@
                             <td>
                                 <?php if (!empty($item['oi_color'])): ?>
                                     <?= esc($item['oi_color']) ?>
-                                <?php endif; ?>
-                                <?php if (!empty($item['oi_style'])): ?>
-                                    <br><small><?= esc($item['oi_style']) ?></small>
                                 <?php endif; ?>
                             </td>
                             <td><?= esc($item['oi_quantity']) ?></td>

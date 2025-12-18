@@ -13,7 +13,6 @@ class ProductModel extends Model
         'p_pc_id',
         'p_name',
         'p_supplier',
-        'p_style',
         'p_color',
         'p_size',
         'p_image',

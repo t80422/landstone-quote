@@ -238,17 +238,6 @@ $productCategories = $productCategories ?? [];
 
                     <!-- 送貨地址區塊 -->
                     <div class="row">
-                        <div class="col-12">
-                            <?= view('components/delivery_address_selector', [
-                                'deliveryCity' => $data['o_delivery_city'] ?? old('o_delivery_city'),
-                                'deliveryAddress' => $data['o_delivery_address'] ?? old('o_delivery_address'),
-                                'prefix' => 'o'
-                            ]) ?>
-                        </div>
-                    </div>
-                    
-                    <!-- 發票號碼 -->
-                    <div class="row">
                         <div class="col-md-3 mb-3">
                             <label for="invoiceNumber" class="form-label">發票號碼</label>
                             <input
@@ -259,6 +248,57 @@ $productCategories = $productCategories ?? [];
                                 value="<?= old('o_invoice_number', $data['o_invoice_number'] ?? '') ?>"
                                 placeholder="請輸入發票號碼">
                             <?= showFieldError('o_invoice_number') ?>
+                        </div>
+                        <div class="col-9 mb-3">
+                            <?= view('components/delivery_address_selector', [
+                                'deliveryCity' => $data['o_delivery_city'] ?? old('o_delivery_city'),
+                                'deliveryAddress' => $data['o_delivery_address'] ?? old('o_delivery_address'),
+                                'prefix' => 'o'
+                            ]) ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 廠商資料區塊 -->
+                <div class="mb-4">
+                    <h5 class="border-bottom pb-2 mb-3">
+                        <i class="bi bi-shop me-2 text-primary"></i>廠商資料
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="vendorContect" class="form-label">廠商聯絡人</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('o_vendor_contect') ?>"
+                                id="vendorContect"
+                                name="o_vendor_contect"
+                                value="<?= old('o_vendor_contect', $data['o_vendor_contect'] ?? '') ?>"
+                                placeholder="請輸入廠商聯絡人">
+                            <?= showFieldError('o_vendor_contect') ?>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="vendorShippingAddress" class="form-label">廠商出貨地址</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('o_shipping_address') ?>"
+                                id="vendorShippingAddress"
+                                name="o_shipping_address"
+                                value="<?= old('o_shipping_address', $data['o_shipping_address'] ?? '') ?>"
+                                placeholder="請輸入廠商出貨地址">
+                            <?= showFieldError('o_shipping_address') ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="vendorAddress" class="form-label">廠商地址</label>
+                            <input
+                                type="text"
+                                class="form-control <?= getFieldClass('o_vendor_address') ?>"
+                                id="vendorAddress"
+                                name="o_vendor_address"
+                                value="<?= old('o_vendor_address', $data['o_vendor_address'] ?? '') ?>"
+                                placeholder="請輸入廠商詳細地址">
+                            <?= showFieldError('o_vendor_address') ?>
                         </div>
                     </div>
                 </div>
@@ -279,16 +319,13 @@ $productCategories = $productCategories ?? [];
                                     <th style="width: 20%;">
                                         <i class="bi bi-box-seam me-1"></i>商品分類 / 商品
                                     </th>
-                                    <th style="width: 8%;" class="small">
+                                    <th style="width: 10%;" class="small">
                                         <i class="bi bi-truck me-1"></i>供應商
                                     </th>
-                                    <th style="width: 8%;" class="small">
-                                        <i class="bi bi-palette me-1"></i>款式
-                                    </th>
-                                    <th style="width: 8%;" class="small">
+                                    <th style="width: 10%;" class="small">
                                         <i class="bi bi-paint-bucket me-1"></i>顏色/花色
                                     </th>
-                                    <th style="width: 8%;" class="small">
+                                    <th style="width: 10%;" class="small">
                                         <i class="bi bi-rulers me-1"></i>尺寸
                                     </th>
                                     <th style="width: 7%;" class="text-center">
@@ -509,7 +546,10 @@ $productCategories = $productCategories ?? [];
         function loadContacts(customerId, selectInstance, infoDom, endpoint, selectedId = '', preserveValue = false) {
             if (!customerId) {
                 selectInstance.clearOptions();
-                selectInstance.addOption({value: '', text: '請先選擇客戶'});
+                selectInstance.addOption({
+                    value: '',
+                    text: '請先選擇客戶'
+                });
                 selectInstance.setValue('');
                 infoDom.textContent = infoDom.dataset.placeholder || '';
                 return;
@@ -521,7 +561,10 @@ $productCategories = $productCategories ?? [];
                     selectInstance.clearOptions();
 
                     if (!result.success || !result.data || result.data.length === 0) {
-                        selectInstance.addOption({value: '', text: '無聯絡人資料'});
+                        selectInstance.addOption({
+                            value: '',
+                            text: '無聯絡人資料'
+                        });
                         selectInstance.setValue('');
                         infoDom.textContent = '無聯絡人資料';
                         return;
@@ -530,7 +573,12 @@ $productCategories = $productCategories ?? [];
                     const contacts = result.data;
                     contacts.forEach(c => {
                         const label = c.cc_phone ? `${c.cc_name} (${c.cc_phone})` : c.cc_name;
-                        selectInstance.addOption({value: c.cc_id, text: label, phone: c.cc_phone, email: c.cc_email});
+                        selectInstance.addOption({
+                            value: c.cc_id,
+                            text: label,
+                            phone: c.cc_phone,
+                            email: c.cc_email
+                        });
                     });
 
                     let targetId = preserveValue ? selectInstance.getValue() : selectedId;
@@ -558,7 +606,10 @@ $productCategories = $productCategories ?? [];
                 })
                 .catch(() => {
                     selectInstance.clearOptions();
-                    selectInstance.addOption({value: '', text: '載入失敗'});
+                    selectInstance.addOption({
+                        value: '',
+                        text: '載入失敗'
+                    });
                     selectInstance.setValue('');
                     infoDom.textContent = '載入聯絡人失敗';
                 });
@@ -766,13 +817,11 @@ $productCategories = $productCategories ?? [];
             const product = products.find(p => String(p.p_id) === String(productId));
 
             const supplierSelect = row.querySelector('.supplier-select');
-            const styleSelect = row.querySelector('.style-select');
             const colorSelect = row.querySelector('.color-select');
             const sizeSelect = row.querySelector('.size-select');
             const imagePreview = row.querySelector('.item-image-preview');
 
             const savedSupplier = row.dataset.selectedSupplier || '';
-            const savedStyle = row.dataset.selectedStyle || '';
             const savedColor = row.dataset.selectedColor || '';
             const savedSize = row.dataset.selectedSize || '';
 
@@ -798,7 +847,6 @@ $productCategories = $productCategories ?? [];
 
             if (product) {
                 setOptions(supplierSelect, splitValues(product.p_supplier), preserveExisting ? (supplierSelect ? supplierSelect.value : '') : savedSupplier);
-                setOptions(styleSelect, splitValues(product.p_style), preserveExisting ? (styleSelect ? styleSelect.value : '') : savedStyle);
                 setOptions(colorSelect, splitValues(product.p_color), preserveExisting ? (colorSelect ? colorSelect.value : '') : savedColor);
                 setOptions(sizeSelect, splitValues(product.p_size), preserveExisting ? (sizeSelect ? sizeSelect.value : '') : savedSize);
 
