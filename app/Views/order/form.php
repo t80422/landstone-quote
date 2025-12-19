@@ -795,7 +795,7 @@ $productCategories = $productCategories ?? [];
                 option.value = product.p_id;
                 option.dataset.price = product.p_standard_price;
                 option.dataset.category = product.p_pc_id || '';
-                option.textContent = `${product.p_code} - ${product.p_name}`;
+                option.textContent = `${product.p_name}`;
                 productSelect.appendChild(option);
             });
 

@@ -75,6 +75,7 @@ $placeholder = base_url('images/placeholder.png');
     data-selected-supplier="<?= esc($item['qi_supplier'] ?? '') ?>"
     data-selected-color="<?= esc($item['qi_color'] ?? '') ?>"
     data-selected-size="<?= esc($item['qi_size'] ?? '') ?>">
+    <!-- 商品圖片 -->
     <td style="width: 10%;" class="align-middle">
         <input type="hidden" name="items[<?= $index ?>][qi_id]" value="<?= esc($item['qi_id']) ?>">
         <div class="ratio ratio-1x1 border rounded overflow-hidden bg-light shadow-sm">
@@ -86,6 +87,7 @@ $placeholder = base_url('images/placeholder.png');
                 title="點擊查看大圖">
         </div>
     </td>
+    <!-- 商品資訊 -->
     <td style="width: 20%;" class="align-middle">
         <div class="d-flex flex-column gap-2">
             <select class="form-select form-select-sm category-select" data-index="<?= $index ?>" title="商品分類">
@@ -111,7 +113,7 @@ $placeholder = base_url('images/placeholder.png');
                         data-size="<?= esc($product['p_size'] ?? '') ?>"
                         data-image="<?= esc($product['p_image'] ?? '') ?>"
                         <?= ($item['qi_p_id'] == $product['p_id']) ? 'selected' : '' ?>>
-                        <?= esc($product['p_code']) ?> - <?= esc($product['p_name']) ?>
+                        <?= esc($product['p_name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>

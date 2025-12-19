@@ -95,6 +95,7 @@ $placeholder = base_url('images/placeholder.png');
                 title="點擊查看大圖">
         </div>
     </td>
+    <!-- 商品資訊 -->
     <td style="width: 20%;" class="align-middle">
         <div class="d-flex flex-column gap-2">
             <select class="form-select form-select-sm category-select" data-index="<?= $index ?>" title="商品分類">
@@ -120,7 +121,7 @@ $placeholder = base_url('images/placeholder.png');
                         data-size="<?= esc($product['p_size'] ?? '') ?>"
                         data-image="<?= esc($product['p_image'] ?? '') ?>"
                         <?= ($item['oi_p_id'] == $product['p_id']) ? 'selected' : '' ?>>
-                        <?= esc($product['p_code']) ?> - <?= esc($product['p_name']) ?>
+                        <?= esc($product['p_name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
