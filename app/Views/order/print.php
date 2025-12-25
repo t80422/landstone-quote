@@ -371,9 +371,7 @@
             <div class="info-row">
                 <div class="info-cell">
                     <div><span class="info-label">送貨地址：</span>
-                        <?php if (!empty($data['o_delivery_city']) || !empty($data['o_delivery_address'])): ?>
-                            <?= esc($data['o_delivery_city'] ?? '') ?> <?= esc($data['o_delivery_address'] ?? '') ?>
-                        <?php endif; ?>
+                        <?= esc($data['o_shipping_address'] ?? '') ?>
                     </div>
                 </div>
             </div>
@@ -400,9 +398,6 @@
                         <tr>
                             <td class="text-left">
                                 <?= $item['p_name']; ?>
-                                <?php if (!empty($item['oi_supplier'])): ?>
-                                    <br><small><?= esc($item['oi_supplier']) ?></small>
-                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if (!empty($item['oi_color'])): ?>

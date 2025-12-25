@@ -126,7 +126,6 @@
         .info-right {
             flex: 1;
             padding: 10px;
-            margin-left: 20px;
         }
 
         .info-label {
@@ -135,34 +134,65 @@
             font-size: 10pt;
         }
 
-        .info-row {
+        /* 客戶資料 Grid 佈局 */
+        .client-info-grid {
             display: grid;
-            grid-template-columns: 75px 1fr 75px 1fr;
+            /* 欄寬設定：[標籤 1] [內容 1] [標籤 2] [內容 2] */
+            grid-template-columns: 80px 210px 50px 100px;
+            column-gap: 10px;
+            /* 欄間距 */
+            row-gap: 8px;
+            /* 列間距 */
             align-items: center;
             font-size: 11pt;
         }
 
-        /* 單欄佈局（如聯絡人、地址） */
-        .info-row label:first-child:last-of-type {
-            grid-column: 1;
+        .grid-item {
+            display: contents;
+            /* 讓子元素直接參與 grid 佈局（如果需要的話），但這裡主要當 wrapper 或直接放內容 */
         }
 
-        .info-row label:first-child:last-of-type+span,
-        .info-row label:first-child:last-of-type+.value {
-            grid-column: 2 / -1;
-        }
-
-        .info-row label {
+        .client-info-grid label {
             color: #666;
+            font-weight: bold;
+            text-align: justify;
+            text-align-last: justify;
             white-space: nowrap;
         }
 
-        .info-row .value {
+        .client-info-grid span {
             font-weight: bold;
+            color: #333;
+            word-break: break-all;
         }
 
-        .info-row span {
-            word-break: break-word;
+        /* 跨欄樣式：佔據後方 3 格（整行內容） */
+        .span-3 {
+            grid-column: span 3;
+        }
+
+        /* 單據詳細 Grid 佈局 */
+        .details-info-grid {
+            display: grid;
+            /* 欄寬設定：[標籤] [內容] */
+            grid-template-columns: 80px 1fr;
+            column-gap: 15px;
+            row-gap: 8px;
+            align-items: center;
+            font-size: 11pt;
+        }
+
+        .details-info-grid label {
+            color: #666;
+            font-weight: bold;
+            text-align: justify;
+            text-align-last: justify;
+            white-space: nowrap;
+        }
+
+        .details-info-grid span {
+            font-weight: bold;
+            color: #333;
         }
 
         /* 商品明細表格 */
@@ -399,7 +429,7 @@
     $itemsPerPage = 5;
     $items = $data['items'] ?? [];
     $totalItems = count($items);
-    
+
     // 如果沒有商品，至少顯示一頁
     if ($totalItems === 0) {
         $totalPages = 1;
@@ -412,12 +442,12 @@
     ?>
 
     <?php for ($pageNum = 0; $pageNum < $totalPages; $pageNum++): ?>
-        <?php 
+        <?php
         $isFirstPage = ($pageNum === 0);
         $isLastPage = ($pageNum === $totalPages - 1);
         $currentItems = isset($itemGroups[$pageNum]) ? $itemGroups[$pageNum] : [];
         ?>
-        
+
         <!-- A4 容器 -->
         <div class="a4-container <?= $isLastPage ? 'last-page' : '' ?>">
             <!-- 頁首（每頁都顯示） -->
@@ -442,67 +472,66 @@
 
             <!-- 客戶與單據資訊（只在第一頁顯示） -->
             <?php if ($isFirstPage): ?>
-            <div class="info-section first-page-only">
-            <div class="info-left">
-                <div class="info-label">客戶資料 (CLIENT)</div>
-                <div class="info-row">
-                    <label>客戶名稱：</label>
-                    <span class="value"><?= esc($data['customer']['c_name'] ?? '') ?></span>
-                    <label>統編：</label>
-                    <span><?= esc($data['customer']['c_tax_id'] ?? '') ?></span>
+                <div class="info-section first-page-only">
+                    <div class="info-left">
+                        <div class="info-label">客戶資料 (CLIENT)</div>
+                        <div class="client-info-grid">
+                            <!-- 第一行 -->
+                            <label>客戶名稱：</label>
+                            <span class="span-3"><?= esc($data['customer']['c_name'] ?? '') ?></span>
+
+                            <!-- 第二行 -->
+                            <label>聯絡人：</label>
+                            <span><?= esc($data['contact']['cc_name'] ?? '') ?></span>
+                            <label>統編：</label>
+                            <span><?= esc($data['customer']['c_tax_id'] ?? '') ?></span>
+
+                            <!-- 第三行 -->
+                            <label>市話：</label>
+                            <span><?= esc($data['contact']['cc_phone'] ?? '') ?></span>
+                            <label>手機：</label>
+                            <span><?= esc($data['contact']['cc_mobile'] ?? '') ?></span>
+
+                            <!-- 第四行 -->
+                            <label>傳真：</label>
+                            <span><?= esc($data['customer']['c_fax'] ?? '') ?></span>
+                            <label>Email：</label>
+                            <span><?= esc($data['contact']['cc_email'] ?? '') ?></span>
+
+                            <!-- 第五行 -->
+                            <label>地址：</label>
+                            <span class="span-3"><?= esc($data['customer']['c_city'] ?? '') ?> <?= esc($data['customer']['c_address'] ?? '') ?></span>
+
+                            <!-- 第六行 -->
+                            <label>送貨地址：</label>
+                            <span class="span-3"><?= esc($data['q_delivery_city'] ?? '') ?> <?= esc($data['q_delivery_address'] ?? '') ?></span>
+                        </div>
+                    </div>
+                    <div class="info-right">
+                        <div class="info-label">單據詳細 (DETAILS)</div>
+                        <div class="details-info-grid">
+                            <label>報價日期：</label>
+                            <span class="value"><?= esc($data['q_date']) ?></span>
+
+                            <label>有效期限：</label>
+                            <span class="value">
+                                <?php
+                                if (!empty($data['q_valid_date'])) {
+                                    $validDate = new DateTime($data['q_valid_date']);
+                                    $quoteDate = new DateTime($data['q_date']);
+                                    $diff = $quoteDate->diff($validDate);
+                                    echo $diff->days . '天';
+                                } else {
+                                    echo '-';
+                                }
+                                ?>
+                            </span>
+
+                            <label>經辦人員：</label>
+                            <span class="value"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="info-row">
-                    <label>聯絡人：</label>
-                    <span class="value"><?= esc($data['contact']['cc_name'] ?? '') ?></span>
-                </div>
-                <div class="info-row">
-                    <label>市話：</label>
-                    <span><?= esc($data['contact']['cc_phone'] ?? '') ?></span>
-                    <label>手機：</label>
-                    <span><?= esc($data['contact']['cc_mobile'] ?? '') ?></span>
-                </div>
-                <div class="info-row">
-                    <label>傳真：</label>
-                    <span><?= esc($data['customer']['c_fax'] ?? '') ?></span>
-                    <label>Email：</label>
-                    <span><?= esc($data['contact']['cc_email'] ?? '') ?></span>
-                </div>
-                <div class="info-row">
-                    <label>地址：</label>
-                    <span><?= esc($data['customer']['c_address'] ?? '') ?></span>
-                </div>
-                <div class="info-row">
-                    <label>送貨地址：</label>
-                    <span><?= esc($data['q_delivery_city'] ?? '') ?> <?= esc($data['q_delivery_address'] ?? '') ?></span>
-                </div>
-            </div>
-            <div class="info-right">
-                <div class="info-label">單據詳細 (DETAILS)</div>
-                <div class="info-row">
-                    <label>報價日期：</label>
-                    <span class="value"><?= esc($data['q_date']) ?></span>
-                </div>
-                <div class="info-row">
-                    <label>有效期限：</label>
-                    <span class="value">
-                        <?php
-                        if (!empty($data['q_valid_date'])) {
-                            $validDate = new DateTime($data['q_valid_date']);
-                            $quoteDate = new DateTime($data['q_date']);
-                            $diff = $quoteDate->diff($validDate);
-                            echo $diff->days . '天';
-                        } else {
-                            echo '-';
-                        }
-                        ?>
-                    </span>
-                </div>
-                <div class="info-row">
-                    <label>經辦人員：</label>
-                    <span class="value"></span>
-                </div>
-            </div>
-            </div>
             <?php endif; ?>
 
             <!-- 商品明細表格 -->
@@ -522,39 +551,39 @@
                 <tbody>
                     <?php if (!empty($currentItems)): ?>
                         <?php foreach ($currentItems as $item): ?>
-                        <?php
-                        // 處理圖片路徑
-                        $imagePath = !empty($item['p_image']) ? base_url($item['p_image']) : base_url('assets/images/placeholder.png');
+                            <?php
+                            // 處理圖片路徑
+                            $imagePath = !empty($item['p_image']) ? base_url($item['p_image']) : base_url('assets/images/placeholder.png');
 
-                        // 處理規格
-                        $specs = [];
-                        if (!empty($item['qi_color'])) $specs[] = "顏色: {$item['qi_color']}";
-                        if (!empty($item['qi_size'])) $specs[] = "尺寸: {$item['qi_size']}";
-                        $specString = implode(' | ', $specs);
-                        ?>
-                        <tr>
-                            <td class="desc-cell">
-                                <div class="product-name"><?= esc($item['p_name']) ?></div>
-                                <?php if ($specString): ?>
-                                    <div class="product-spec"><?= esc($specString) ?></div>
-                                <?php endif; ?>
-                            </td>
-                            <td class="img-cell">
-                                <img src="<?= esc($imagePath) ?>" alt="">
-                            </td>
-                            <td class="number-cell"><?= $item['qi_quantity'] ?></td>
-                            <td class="price-cell"><?= number_format($item['qi_unit_price'], 0) ?></td>
-                            <?php if ($hasDiscount): ?>
-                                <td class="discount-cell">
-                                    <?php if (!empty($item['qi_discount']) && $item['qi_discount'] > 0): ?>
-                                        -<?= floatval($item['qi_discount']) ?>%
-                                    <?php else: ?>
-                                        -
+                            // 處理規格
+                            $specs = [];
+                            if (!empty($item['qi_color'])) $specs[] = "顏色: {$item['qi_color']}";
+                            if (!empty($item['qi_size'])) $specs[] = "尺寸: {$item['qi_size']}";
+                            $specString = implode(' | ', $specs);
+                            ?>
+                            <tr>
+                                <td class="desc-cell">
+                                    <div class="product-name"><?= esc($item['p_name']) ?></div>
+                                    <?php if ($specString): ?>
+                                        <div class="product-spec"><?= esc($specString) ?></div>
                                     <?php endif; ?>
                                 </td>
-                            <?php endif; ?>
-                            <td class="amount-cell"><?= number_format($item['qi_amount'], 0) ?></td>
-                        </tr>
+                                <td class="img-cell">
+                                    <img src="<?= esc($imagePath) ?>" alt="">
+                                </td>
+                                <td class="number-cell"><?= $item['qi_quantity'] ?></td>
+                                <td class="price-cell"><?= number_format($item['qi_unit_price'], 0) ?></td>
+                                <?php if ($hasDiscount): ?>
+                                    <td class="discount-cell">
+                                        <?php if (!empty($item['qi_discount']) && $item['qi_discount'] > 0): ?>
+                                            -<?= floatval($item['qi_discount']) ?>%
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endif; ?>
+                                <td class="amount-cell"><?= number_format($item['qi_amount'], 0) ?></td>
+                            </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
 
@@ -645,7 +674,7 @@
             <?php endif; ?>
         </div>
         <!-- A4 容器結束 -->
-    
+
     <?php endfor; ?>
 </body>
 
