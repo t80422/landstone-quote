@@ -106,15 +106,23 @@ function getFieldClass($fieldName)
                         </div>
                         <div class="col-md-3 mb-3">
                             <label for="supplier" class="form-label">供應商</label>
-                            <textarea
-                                class="form-control <?= getFieldClass('p_supplier') ?>"
+							<select
+                                class="form-select <?= getFieldClass('p_supplier') ?>"
                                 id="supplier"
                                 name="p_supplier"
-                                rows="3"
-                                placeholder="供應商名稱"><?= old('p_supplier', $data['p_supplier'] ?? '') ?>
-                            </textarea>
-                            <?= showFieldError('p_supplier') ?>
-                            <div class="form-text">使用"、"分隔多個供應商</div>
+                                aria-describedby="categoryError"
+                                required>
+								<?php
+								$suppliers = array("文興W", "巨鋒G");
+								?>
+                               
+                                    <?php foreach ($suppliers as $supplier): ?>
+                                        <option value="<?= esc($supplier) ?>"
+                                            <?= (old('p_supplier', $data['p_supplier'] ?? '') == $supplier) ? 'selected' : '' ?>>
+                                            <?= esc($supplier) ?>
+                                        </option>
+                                    <?php endforeach; ?>                                
+                            </select>							
                         </div>
                     </div>
                 </div>

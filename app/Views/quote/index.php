@@ -79,7 +79,10 @@
                                     <td><small class="text-muted"><?= esc($item['q_created_at']) ?></small></td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <?php if (empty($item['q_o_id'])): ?>
+                                            <a href="<?= url_to('QuoteController::print', $item['q_id']) ?>" class="btn btn-outline-info" title="列印報價單" target="_blank">
+                                                <i class="bi bi-printer"></i>
+                                            </a>
+											<?php if (empty($item['q_o_id'])): ?>
                                                 <a href="<?= url_to('OrderController::createFromQuote', $item['q_id']) ?>"
                                                     class="btn btn-outline-success"
                                                     title="轉成訂單"
