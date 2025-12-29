@@ -381,47 +381,24 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width: 10%;">品名</th>
-                    <th style="width: 15%;">顏色</th>
+                    <th style="width: 40%;">品名</th>
+                    <th style="width: 10%;">顏色</th>
                     <th style="width: 10%;">數量/件</th>
-                    <th style="width: 15%;">尺寸/mm</th>
-                    <th style="width: 12%;">單價/CNY¥</th>
-                    <?php if ($hasDiscount): ?>
-                        <th style="width: 10%;">折扣</th>
-                    <?php endif; ?>
-                    <th style="width: 12%;">小計</th>
+                    <th style="width: 20%;">尺寸/mm</th>
+                    <th style="width: 10%;">單價/CNY¥</th>
+                    <th style="width: 10%;">小計</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (!empty($data['items'])): ?>
                     <?php foreach ($data['items'] as $item): ?>
                         <tr>
-                            <td class="text-left">
-                                <?= $item['p_name']; ?>
-                            </td>
-                            <td>
-                                <?php if (!empty($item['oi_color'])): ?>
-                                    <?= esc($item['oi_color']) ?>
-                                <?php endif; ?>
-                            </td>
+                            <td class="text-left"> <?= $item['p_name']; ?></td>
+                            <td><?= esc($item['oi_color'] ?? '') ?></td>
                             <td><?= esc($item['oi_quantity']) ?></td>
                             <td><?= esc($item['oi_size'] ?? '') ?></td>
-                            <td class="text-right"><?= number_format($item['oi_unit_price']) ?></td>
-                            <?php if ($hasDiscount): ?>
-                                <td class="text-center" style="color: #d9534f;">
-                                    <?php if (!empty($item['oi_discount']) && $item['oi_discount'] > 0): ?>
-                                        -<?= floatval($item['oi_discount']) ?>%
-                                    <?php else: ?>
-                                        -
-                                    <?php endif; ?>
-                                </td>
-                            <?php endif; ?>
-                            <td class="text-right">
-                                <?php
-                                $itemTotal = $item['oi_quantity'] * $item['oi_unit_price'] * (1 - ($item['oi_discount'] ?? 0) / 100);
-                                echo number_format($itemTotal);
-                                ?>
-                            </td>
+                            <td></td>
+                            <td></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -449,31 +426,6 @@
                 <td>&nbsp;</td>
                 <td style="width: 15%;">小計</td>
                 <td style="width: 15%;"><?= number_format($data['o_subtotal'] ?? 0) ?></td>
-            </tr>
-            <?php if (!empty($data['o_discount']) && $data['o_discount'] > 0): ?>
-                <tr class="discount-row">
-                    <td>&nbsp;</td>
-                    <td>整單折扣 (-<?= floatval($data['o_discount']) ?>%)</td>
-                    <td><?= number_format(($data['o_subtotal'] ?? 0) * (1 - ($data['o_discount'] / 100))) ?></td>
-                </tr>
-            <?php endif; ?>
-            <?php if (!empty($data['o_shipping_fee']) && $data['o_shipping_fee'] > 0): ?>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>運費</td>
-                    <td><?= number_format($data['o_shipping_fee']) ?></td>
-                </tr>
-            <?php endif; ?>
-            <?php if (!empty($data['o_tax_rate']) && $data['o_tax_rate'] > 0): ?>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>稅額 (<?= floatval($data['o_tax_rate']) ?>%)</td>
-                    <td><?= number_format($data['o_tax_amount'] ?? 0) ?></td>
-                </tr>
-            <?php endif; ?>
-            <tr class="total-row">
-                <td colspan="2" style="text-align: right;">總 計 Total</td>
-                <td><?= number_format($data['o_total_amount']) ?></td>
             </tr>
         </table>
 
