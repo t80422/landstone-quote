@@ -139,6 +139,10 @@
                             <h6 class="text-secondary mb-3 pb-2">廠商資料</h6>
                             <table class="table table-borderless table-sm mb-0">
                                 <tr>
+                                    <td class="text-muted" style="width: 15%;">供應商</td>
+                                    <td class="fw-bold" style="width: 35%;"><?= esc($data['o_vendor'] ?? '-') ?></td>
+                                </tr>
+                                <tr>
                                     <td class="text-muted" style="width: 15%;">廠商聯絡人</td>
                                     <td class="fw-bold" style="width: 35%;"><?= esc($data['o_vendor_contect'] ?? '-') ?></td>
                                     <td class="text-muted" style="width: 15%;">廠商出貨地址</td>
@@ -178,23 +182,21 @@
                                 <?php if (!empty($data['items'])): ?>
                                     <?php foreach ($data['items'] as $item): ?>
                                         <?php
-                                        // 處理圖片路徑
-                                        $imagePath = !empty($item['p_image']) ? base_url($item['p_image']) : base_url('assets/images/placeholder.png');
+                                        // 處理圖片路徑（使用 product_images）
+                                        $imagePath = base_url('assets/images/placeholder.png');
+                                        if (!empty($item['pi_name']) && !empty($item['pi_p_id'])) {
+                                            $imagePath = base_url('uploads/products/' . $item['pi_p_id'] . '/' . $item['pi_name']);
+                                        }
 
-                                        // 處理規格合併顯示
-                                        // 注意：這裡使用 oi_ 前綴，假設這些欄位在資料庫中已存在 (因為 form 中有使用)
-                                        // 如果資料庫中沒有這些欄位，則可能需要從 products 表關聯獲取，但依照 form 邏輯應是已儲存
-                                        $specs = array_filter([
-                                            ($item['oi_color'] ?? '') ? "顏色:{$item['oi_color']}" : null,
-                                            ($item['oi_size'] ?? '') ? "尺寸:{$item['oi_size']}" : null,
-                                        ]);
-                                        $specString = implode(' / ', $specs);
+                                        // 圖片檔名就是顏色/花色
+                                        $colorSpec = !empty($item['pi_name']) ? pathinfo($item['pi_name'], PATHINFO_FILENAME) : '';
                                         ?>
                                         <tr>
                                             <td class="ps-4">
                                                 <div class="ratio ratio-1x1 bg-light border rounded" style="width: 60px;">
                                                     <img src="<?= esc($imagePath) ?>" alt=""
-                                                        class="img-fluid object-fit-cover rounded">
+                                                        class="img-fluid object-fit-cover rounded"
+                                                        onerror="this.src='<?= base_url('assets/images/placeholder.png') ?>'">
                                                 </div>
                                             </td>
                                             <td>
@@ -208,15 +210,9 @@
                                                     <span class="small text-muted"><?= esc($item['p_code'] ?? '') ?></span>
                                                 </div>
 
-                                                <?php if (!empty($item['oi_supplier'])): ?>
-                                                    <div class="small text-secondary mt-1">
-                                                        <i class="bi bi-shop me-1"></i>供應商：<?= esc($item['oi_supplier']) ?>
-                                                    </div>
-                                                <?php endif; ?>
-
-                                                <?php if ($specString): ?>
+                                                <?php if ($colorSpec): ?>
                                                     <div class="small text-info mt-1">
-                                                        <i class="bi bi-tags me-1"></i><?= esc($specString) ?>
+                                                        <i class="bi bi-palette me-1"></i>顏色/花色：<?= esc($colorSpec) ?>
                                                     </div>
                                                 <?php endif; ?>
                                             </td>

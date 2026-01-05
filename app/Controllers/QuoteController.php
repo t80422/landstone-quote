@@ -9,9 +9,11 @@ use App\Models\CustomerModel;
 use App\Models\ProductModel;
 use App\Models\ProductCategoryModel;
 use App\Models\CustomerContactModel;
+use App\Traits\ProductImageTrait;
 
 class QuoteController extends BaseController
 {
+    use ProductImageTrait;
     private $quoteModel;
     private $quoteItemModel;
     private $customerModel;
@@ -159,7 +161,6 @@ class QuoteController extends BaseController
     public function save()
     {
         $quoteData = $this->request->getPost();
-        $items = $this->request->getPost('items') ?: [];
 
         // 檢查報價單號唯一性
         $quoteId = $quoteData['q_id'] ?? null;
@@ -172,7 +173,7 @@ class QuoteController extends BaseController
         }
 
         // 使用 Model 驗證項目
-        $validation = $this->quoteModel->validateItems($items);
+        $validation = $this->quoteModel->validateItems($quoteData['items']);
         if (!$validation['valid']) {
             return redirect()->back()
                 ->withInput()
@@ -180,7 +181,7 @@ class QuoteController extends BaseController
         }
 
         // 使用 Model 儲存（含事務處理）
-        $result = $this->quoteModel->saveQuoteWithItems($quoteData, $items);
+        $result = $this->quoteModel->saveQuoteWithItems($quoteData, $quoteData['items']);
 
         if (!$result['success']) {
             return redirect()->back()
@@ -221,4 +222,6 @@ class QuoteController extends BaseController
 
         return $this->response->setStatusCode(400);
     }
+
+    // getProductImages() 方法由 ProductImageTrait 提供
 }

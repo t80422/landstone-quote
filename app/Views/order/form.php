@@ -100,6 +100,66 @@ $productCategories = $productCategories ?? [];
         top: 0;
         z-index: 10;
     }
+
+    /* 圖片選擇器樣式 */
+    .image-selector {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        margin-top: 8px;
+    }
+
+    .image-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        padding: 8px;
+        border: 2px solid transparent;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .image-option:hover {
+        border-color: #0d6efd;
+        background: white;
+    }
+
+    .image-option input[type="radio"] {
+        margin-bottom: 5px;
+    }
+
+    .image-option img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+
+    .image-option.selected {
+        border-color: #0d6efd;
+        background: white;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top-color: #0d6efd;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -249,7 +309,28 @@ $productCategories = $productCategories ?? [];
                                 placeholder="請輸入發票號碼">
                             <?= showFieldError('o_invoice_number') ?>
                         </div>
-                        <div class="col-9 mb-3">
+
+                        <div class="col-md-3 mb-3">
+                            <label for="vendor" class="form-label">供應商</label>
+                            <select
+                                class="form-select <?= getFieldClass('o_vendor') ?>"
+                                id="vendor"
+                                name="o_vendor">
+                                <option value="">請選擇供應商</option>
+                                <?php 
+                                    $vendors = ['文興W', '巨鋒G'];
+                                    $selectedVendor = old('o_vendor', $data['o_vendor'] ?? '');
+                                ?>
+                                <?php foreach ($vendors as $vendor): ?>
+                                    <option value="<?= esc($vendor) ?>" <?= $selectedVendor === $vendor ? 'selected' : '' ?>>
+                                        <?= esc($vendor) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?= showFieldError('o_vendor') ?>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
                             <?= view('components/delivery_address_selector', [
                                 'deliveryCity' => $data['o_delivery_city'] ?? old('o_delivery_city'),
                                 'deliveryAddress' => $data['o_delivery_address'] ?? old('o_delivery_address'),
@@ -316,11 +397,8 @@ $productCategories = $productCategories ?? [];
                                     <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-image me-1"></i>圖片
                                     </th>
-                                    <th style="width: 20%;">
+                                    <th style="width: 30%;">
                                         <i class="bi bi-box-seam me-1"></i>商品分類 / 商品
-                                    </th>
-                                    <th style="width: 10%;" class="small">
-                                        <i class="bi bi-truck me-1"></i>供應商
                                     </th>
                                     <th style="width: 10%;" class="small">
                                         <i class="bi bi-paint-bucket me-1"></i>顏色/花色
@@ -485,17 +563,24 @@ $productCategories = $productCategories ?? [];
         // --- State ---
         let itemIndex = <?= count($items) ?>;
         const products = <?= json_encode($products) ?>;
+        const productImagesCache = {}; // 圖片緩存
 
         // --- Initialization ---
         initCustomerSelect();
         initContacts();
         initProductTomSelect(document.querySelectorAll('.product-select'));
-        document.querySelectorAll('.item-row').forEach(row => {
+        document.querySelectorAll('.item-row').forEach(async row => {
             const categorySelect = row.querySelector('.category-select');
             if (categorySelect && categorySelect.value) {
                 applyCategoryFilter(row, true);
             }
             initVariantOptions(row, true);
+            
+            // 如果已有選擇商品，顯示圖片選擇器
+            const productSelect = row.querySelector('.product-select');
+            if (productSelect && productSelect.value) {
+                await showImageSelector(row, productSelect.value);
+            }
         });
         initCalculations();
         updateRemoveButtons();
@@ -624,7 +709,7 @@ $productCategories = $productCategories ?? [];
                     onInitialize: function() {
                         this.dropdown_content.style.maxHeight = '250px';
                     },
-                    onChange: function(value) {
+                    onChange: async function(value) {
                         // 當商品選擇變更時，更新價格和變體選項
                         const row = element.closest('.item-row');
                         if (!row) return;
@@ -636,8 +721,12 @@ $productCategories = $productCategories ?? [];
                             } else {
                                 row.querySelector('.price-input').value = 0;
                             }
+                            
+                            // 顯示圖片選擇器
+                            await showImageSelector(row, value);
                         } else {
                             row.querySelector('.price-input').value = 0;
+                            hideImageSelector(row);
                         }
 
                         initVariantOptions(row, false);
@@ -867,6 +956,149 @@ $productCategories = $productCategories ?? [];
             }
         }
 
+        /**
+         * 顯示圖片選擇器（AJAX 加載）
+         */
+        async function showImageSelector(row, productId) {
+            const container = row.querySelector('.image-selector-container');
+            const imageGrid = row.querySelector('.image-grid');
+            const imageIdInput = row.querySelector('.image-id-input');
+            const imagePreview = row.querySelector('.item-image-preview');
+            const placeholder = imagePreview?.dataset.placeholder || '';
+            const rowIndex = Array.from(row.parentNode.children).indexOf(row);
+
+            if (!container || !imageGrid) return;
+
+            // 顯示載入中
+            imageGrid.innerHTML = '<div class="text-center p-2"><span class="spinner-border spinner-border-sm"></span> 載入中...</div>';
+            container.style.display = 'block';
+
+            try {
+                // 檢查緩存
+                if (!productImagesCache[productId]) {
+                    const response = await fetch(`<?= base_url('order/getProductImages') ?>/${productId}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error(result.message || '載入圖片失敗');
+                    }
+
+                    productImagesCache[productId] = result.images || [];
+                }
+
+                const images = productImagesCache[productId];
+
+                if (images.length === 0) {
+                    imageGrid.innerHTML = '<div class="text-center p-2 text-muted"><i class="bi bi-image"></i> 此商品尚無圖片</div>';
+                    if (imageIdInput) imageIdInput.value = '';
+                    if (imagePreview) imagePreview.src = placeholder;
+                    return;
+                }
+
+                // 取得已選擇的圖片 ID
+                const selectedImageId = imageIdInput?.value || '';
+
+                // 清空並重建圖片選項
+                imageGrid.innerHTML = '';
+
+                images.forEach(image => {
+                    const imageItem = document.createElement('label');
+                    imageItem.className = 'image-item d-flex flex-column align-items-center';
+                    imageItem.style.cursor = 'pointer';
+                    
+                    const isSelected = selectedImageId && image.pi_id == selectedImageId;
+                    const radioName = `image_row_${rowIndex}`;
+                    const fileName = image.pi_name.split('.')[0]; // 去除副檔名
+
+                    imageItem.innerHTML = `
+                        <input type="radio" 
+                            name="${radioName}" 
+                            value="${image.pi_id}" 
+                            class="form-check-input me-0 mb-1"
+                            ${isSelected ? 'checked' : ''}
+                            style="transform: scale(1.2);">
+                        <div class="border rounded overflow-hidden" style="width: 60px; height: 60px;">
+                            <img src="<?= base_url() ?>uploads/products/${productId}/${image.pi_name}" 
+                                class="img-fluid object-fit-cover w-100 h-100"
+                                alt="${image.pi_name}">
+                        </div>
+                        <small class="text-muted mt-1 text-center" style="max-width: 60px; font-size: 0.7rem; word-break: break-all;">
+                            ${fileName}
+                        </small>
+                    `;
+
+                    // 點擊選擇圖片
+                    const radio = imageItem.querySelector('input[type="radio"]');
+                    radio.addEventListener('change', function() {
+                        if (this.checked) {
+                            // 更新隱藏欄位
+                            if (imageIdInput) {
+                                imageIdInput.value = image.pi_id;
+                            }
+                            
+                            // 更新預覽圖
+                            if (imagePreview) {
+                                imagePreview.src = `<?= base_url() ?>uploads/products/${productId}/${image.pi_name}`;
+                            }
+
+                            // 更新 row 的 data 屬性
+                            row.dataset.productId = productId;
+                            row.dataset.imageId = image.pi_id;
+                        }
+                    });
+
+                    imageGrid.appendChild(imageItem);
+                });
+
+                // 如果有預設選擇，更新預覽圖
+                if (selectedImageId) {
+                    const selectedImage = images.find(img => img.pi_id == selectedImageId);
+                    if (selectedImage && imagePreview) {
+                        imagePreview.src = `<?= base_url() ?>uploads/products/${productId}/${selectedImage.pi_name}`;
+                    }
+                } else if (imagePreview) {
+                    imagePreview.src = placeholder;
+                }
+            } catch (error) {
+                console.error('載入圖片失敗:', error);
+                imageGrid.innerHTML = `<div class="text-center p-2 text-danger"><i class="bi bi-exclamation-triangle"></i> ${error.message}</div>`;
+                if (imageIdInput) imageIdInput.value = '';
+                if (imagePreview) imagePreview.src = placeholder;
+            }
+        }
+
+        /**
+         * 隱藏圖片選擇器
+         */
+        function hideImageSelector(row) {
+            const container = row.querySelector('.image-selector-container');
+            const imageIdInput = row.querySelector('.image-id-input');
+            const imagePreview = row.querySelector('.item-image-preview');
+            const placeholder = imagePreview?.dataset.placeholder || '';
+
+            if (container) {
+                container.style.display = 'none';
+            }
+
+            if (imageIdInput) {
+                imageIdInput.value = '';
+            }
+
+            if (imagePreview) {
+                imagePreview.src = placeholder;
+            }
+
+            // 清除 row 的 data 屬性
+            row.dataset.productId = '';
+            row.dataset.imageId = '';
+        }
+
         function getProductsByCategory(categoryId) {
             if (!categoryId) {
                 return products;
@@ -940,6 +1172,19 @@ $productCategories = $productCategories ?? [];
                 e.preventDefault();
                 alert('至少需要新增一個商品項目');
                 return false;
+            }
+
+            // 驗證每個商品項目都有選擇圖片
+            const rows = document.querySelectorAll('.item-row');
+            for (const row of rows) {
+                const productSelect = row.querySelector('.product-select');
+                const imageIdInput = row.querySelector('.image-id-input');
+                
+                if (productSelect && productSelect.value && (!imageIdInput || !imageIdInput.value)) {
+                    e.preventDefault();
+                    alert('請為每個商品選擇圖片/顏色');
+                    return false;
+                }
             }
 
             if (!this.checkValidity()) {

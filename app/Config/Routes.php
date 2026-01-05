@@ -39,6 +39,7 @@ $routes->group('product', function ($routes) {
     $routes->get('edit/(:num)', 'ProductController::edit/$1');
     $routes->post('save', 'ProductController::save');
     $routes->get('delete/(:num)', 'ProductController::delete/$1');
+    $routes->post('deleteImage/(:num)', 'ProductController::deleteImage/$1');
 });
 
 // 產品分類管理
@@ -59,6 +60,7 @@ $routes->group('quote', function ($routes) {
     $routes->post('save', 'QuoteController::save');
     $routes->get('delete/(:num)', 'QuoteController::delete/$1');
     $routes->get('get-product/(:num)', 'QuoteController::getProduct/$1');
+    $routes->get('getProductImages/(:num)', 'QuoteController::getProductImages/$1');
 });
 
 $routes->group('order', function ($routes) {
@@ -70,6 +72,7 @@ $routes->group('order', function ($routes) {
     $routes->get('create-from-quote/(:num)', 'OrderController::createFromQuote/$1');
     $routes->get('view/(:num)', 'OrderController::view/$1');
     $routes->get('print/(:num)', 'OrderController::print/$1');
+    $routes->get('getProductImages/(:num)', 'OrderController::getProductImages/$1');
 });
 
 $routes->group('shipment', function ($routes) {

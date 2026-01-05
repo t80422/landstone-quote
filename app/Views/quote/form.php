@@ -99,6 +99,34 @@ $productCategories = $productCategories ?? [];
         top: 0;
         z-index: 10;
     }
+
+    /* 圖片選擇區樣式 */
+    .image-selector-container {
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+        margin-top: 0.5rem;
+    }
+
+    .image-grid {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .image-item {
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s;
+    }
+
+    .image-item:hover {
+        background-color: #e9ecef;
+    }
+
+    .image-item input[type="radio"]:checked + div {
+        border: 2px solid #0d6efd !important;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -222,6 +250,27 @@ $productCategories = $productCategories ?? [];
                             <?= showFieldError('q_cc_id') ?>
                             <div class="form-text" id="contactInfo" data-placeholder="電話 / Email"></div>
                         </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="vendor" class="form-label">
+                            供應商
+                        </label>
+                        <select
+                            class="form-select <?= getFieldClass('q_vendor') ?>"
+                            id="vendor"
+                            name="q_vendor">
+                            <option value="">請選擇供應商</option>
+                            <?php 
+                                $vendors = ['文興W', '巨鋒G'];
+                                $selectedVendor = old('q_vendor', $data['q_vendor'] ?? '');
+                            ?>
+                            <?php foreach ($vendors as $vendor): ?>
+                                <option value="<?= esc($vendor) ?>" <?= $selectedVendor === $vendor ? 'selected' : '' ?>>
+                                    <?= esc($vendor) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?= showFieldError('q_vendor') ?>
+                    </div>
                     </div>
                     <!-- 送貨地址區塊 -->
                     <div class="row">
@@ -246,34 +295,25 @@ $productCategories = $productCategories ?? [];
                         <table class="table table-hover align-middle" id="itemsTable">
                             <thead class="table-light sticky-top">
                                 <tr>
-                                    <th style="width: 10%;" class="text-center">
+                                    <th style="width: 8%;" class="text-center">
                                         <i class="bi bi-image me-1"></i>圖片
                                     </th>
-                                    <th style="width: 20%;">
-                                        <i class="bi bi-box-seam me-1"></i>商品分類 / 商品
+                                    <th style="width: 22%;">
+                                        <i class="bi bi-box-seam me-1"></i>商品 / 顏色花色
                                     </th>
-                                    <th style="width: 10%;" class="small">
-                                        <i class="bi bi-truck me-1"></i>供應商
-                                    </th>
-                                    <th style="width: 10%;" class="small">
-                                        <i class="bi bi-paint-bucket me-1"></i>顏色/花色
-                                    </th>
-                                    <th style="width: 10%;" class="small">
-                                        <i class="bi bi-rulers me-1"></i>尺寸
-                                    </th>
-                                    <th style="width: 7%;" class="text-center">
+                                    <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-123 me-1"></i>數量
                                     </th>
-                                    <th style="width: 10%;" class="text-end">
+                                    <th style="width: 12%;" class="text-end">
                                         <i class="bi bi-currency-dollar me-1"></i>單價
                                     </th>
-                                    <th style="width: 7%;" class="text-center small">
-                                        <i class="bi bi-percent me-1"></i>折扣
+                                    <th style="width: 10%;" class="text-center">
+                                        <i class="bi bi-percent me-1"></i>折扣%
                                     </th>
-                                    <th style="width: 10%;" class="text-end">
+                                    <th style="width: 12%;" class="text-end">
                                         <i class="bi bi-calculator me-1"></i>金額
                                     </th>
-                                    <th style="width: 4%;" class="text-center">
+                                    <th style="width: 5%;" class="text-center">
                                         <i class="bi bi-gear"></i>
                                     </th>
                                 </tr>
@@ -425,6 +465,7 @@ $productCategories = $productCategories ?? [];
         // --- State ---
         let itemIndex = <?= count($items) ?>;
         const products = <?= json_encode($products) ?>;
+        const productImagesCache = {}; // 快取已載入的圖片資料
 
         // --- Initialization ---
         const customerSelectInstance = initCustomerSelect();
@@ -434,7 +475,12 @@ $productCategories = $productCategories ?? [];
             if (categorySelect && categorySelect.value) {
                 applyCategoryFilter(row, true);
             }
-            initVariantOptions(row, true);
+            // 初始化圖片選擇器
+            const productId = row.dataset.productId;
+            const selectedImageId = row.dataset.imageId;
+            if (productId && selectedImageId) {
+                showImageSelector(row, productId, selectedImageId);
+            }
         });
         initCalculations();
         updateRemoveButtons();
@@ -609,7 +655,7 @@ $productCategories = $productCategories ?? [];
                         this.dropdown_content.style.maxHeight = '250px';
                     },
                     onChange: function(value) {
-                        // 當商品選擇變更時，更新價格和變體選項
+                        // 當商品選擇變更時，顯示圖片選擇區並更新價格
                         const row = element.closest('.item-row');
                         if (!row) return;
 
@@ -620,11 +666,14 @@ $productCategories = $productCategories ?? [];
                             } else {
                                 row.querySelector('.price-input').value = 0;
                             }
+                            
+                            // 顯示圖片選擇區
+                            showImageSelector(row, value);
                         } else {
                             row.querySelector('.price-input').value = 0;
+                            hideImageSelector(row);
                         }
 
-                        initVariantOptions(row, false);
                         calculateItemAmount(row);
                     }
                 });
@@ -675,12 +724,12 @@ $productCategories = $productCategories ?? [];
 
             const newRow = container.lastElementChild;
             const newSelect = newRow.querySelector('.product-select');
+            newRow.dataset.index = newIndex; // 設置索引用於 radio name
             initProductTomSelect([newSelect]);
             const categorySelect = newRow.querySelector('.category-select');
             if (categorySelect && categorySelect.value) {
                 applyCategoryFilter(newRow, true);
             }
-            initVariantOptions(newRow, true);
 
             updateRemoveButtons();
         }
@@ -724,14 +773,13 @@ $productCategories = $productCategories ?? [];
                 return;
             }
 
-            // Product selection change
+            // Product selection change (fallback for non-TomSelect events)
             if (e.target.classList.contains('product-select')) {
                 const selectedOption = e.target.options[e.target.selectedIndex];
                 const price = selectedOption.dataset.price || 0;
                 const row = e.target.closest('.item-row');
 
                 row.querySelector('.price-input').value = price;
-                initVariantOptions(row, false);
                 calculateItemAmount(row);
             }
         }
@@ -745,6 +793,18 @@ $productCategories = $productCategories ?? [];
                 e.preventDefault();
                 alert('至少需要新增一個商品項目');
                 return false;
+            }
+
+            // 驗證每個商品項目都有選擇圖片
+            for (const row of items) {
+                const productSelect = row.querySelector('.product-select');
+                const imageIdInput = row.querySelector('.image-id-input');
+                
+                if (productSelect && productSelect.value && (!imageIdInput || !imageIdInput.value)) {
+                    e.preventDefault();
+                    alert('請為每個商品選擇圖片/顏色');
+                    return false;
+                }
             }
 
             // Form validation
@@ -798,68 +858,163 @@ $productCategories = $productCategories ?? [];
 
             if (shouldPreserveValue && productSelect.tomselect) {
                 productSelect.tomselect.setValue(currentValue, true);
+                // 保留值時也要顯示圖片選擇器
+                if (currentValue) {
+                    const selectedImageId = row.dataset.imageId;
+                    showImageSelector(row, currentValue, selectedImageId);
+                }
             } else if (productSelect.tomselect) {
                 productSelect.tomselect.clear();
                 row.querySelector('.price-input').value = 0;
+                hideImageSelector(row);
                 calculateItemAmount(row);
             }
-            initVariantOptions(row, !preserveValue);
         }
 
-        function initVariantOptions(row, preserveExisting) {
-            const productSelect = row.querySelector('.product-select');
-            const productId = productSelect ? productSelect.value : '';
-            const product = products.find(p => String(p.p_id) === String(productId));
-
-            const supplierSelect = row.querySelector('.supplier-select');
-            const colorSelect = row.querySelector('.color-select');
-            const sizeSelect = row.querySelector('.size-select');
+        /**
+         * 顯示圖片選擇區（使用 AJAX 載入）
+         */
+        async function showImageSelector(row, productId, selectedImageId = null) {
+            const container = row.querySelector('.image-selector-container');
+            const imageGrid = row.querySelector('.image-grid');
+            const imageIdInput = row.querySelector('.image-id-input');
             const imagePreview = row.querySelector('.item-image-preview');
+            const placeholder = imagePreview?.dataset.placeholder || '';
+            const rowIndex = row.closest('tr')?.rowIndex || Date.now();
 
-            const savedSupplier = row.dataset.selectedSupplier || '';
-            const savedColor = row.dataset.selectedColor || '';
-            const savedSize = row.dataset.selectedSize || '';
+            if (!container || !imageGrid) return;
 
-            const setOptions = (selectEl, values, saved) => {
-                if (!selectEl) return;
-                const current = preserveExisting ? (selectEl.value || saved) : saved;
-                selectEl.innerHTML = '<option value=""></option>';
-                values.forEach(v => {
-                    const opt = document.createElement('option');
-                    opt.value = v;
-                    opt.textContent = v;
-                    selectEl.appendChild(opt);
+            // 顯示載入中
+            imageGrid.innerHTML = '<div class="text-center p-2"><span class="spinner-border spinner-border-sm"></span> 載入中...</div>';
+            container.style.display = 'block';
+
+            try {
+                let images = [];
+
+                // 檢查快取
+                if (productImagesCache[productId]) {
+                    images = productImagesCache[productId];
+                } else {
+                    // AJAX 載入圖片
+                    const response = await fetch(`<?= base_url() ?>quote/getProductImages/${productId}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        throw new Error(data.message || '載入圖片失敗');
+                    }
+
+                    images = data.images || [];
+                    // 存入快取
+                    productImagesCache[productId] = images;
+                }
+
+                // 如果沒有圖片
+                if (images.length === 0) {
+                    imageGrid.innerHTML = '<div class="text-center p-2 text-muted"><i class="bi bi-image"></i> 此商品尚無圖片</div>';
+                    if (imageIdInput) imageIdInput.value = '';
+                    if (imagePreview) imagePreview.src = placeholder;
+                    return;
+                }
+
+                // 清空並重建圖片選項
+                imageGrid.innerHTML = '';
+
+                images.forEach(image => {
+                    const imageItem = document.createElement('label');
+                    imageItem.className = 'image-item d-flex flex-column align-items-center';
+                    imageItem.style.cursor = 'pointer';
+                    
+                    const isSelected = selectedImageId && image.pi_id == selectedImageId;
+                    const radioName = `image_row_${rowIndex}`;
+
+                    imageItem.innerHTML = `
+                        <input type="radio" 
+                            name="${radioName}" 
+                            value="${image.pi_id}" 
+                            class="form-check-input me-0 mb-1"
+                            ${isSelected ? 'checked' : ''}
+                            style="transform: scale(1.2);">
+                        <div class="border rounded overflow-hidden" style="width: 60px; height: 60px;">
+                            <img src="<?= base_url() ?>uploads/products/${productId}/${image.pi_name}" 
+                                class="img-fluid object-fit-cover w-100 h-100"
+                                alt="${image.pi_name}">
+                        </div>
+                        <small class="text-muted mt-1 text-center" style="max-width: 60px; font-size: 0.7rem; word-break: break-all;">
+                            ${image.pi_name}
+                        </small>
+                    `;
+
+                    // 點擊選擇圖片
+                    const radio = imageItem.querySelector('input[type="radio"]');
+                    radio.addEventListener('change', function() {
+                        if (this.checked) {
+                            // 更新隱藏欄位
+                            if (imageIdInput) {
+                                imageIdInput.value = image.pi_id;
+                            }
+                            
+                            // 更新預覽圖
+                            if (imagePreview) {
+                                imagePreview.src = `<?= base_url() ?>uploads/products/${productId}/${image.pi_name}`;
+                            }
+
+                            // 更新 row 的 data 屬性
+                            row.dataset.productId = productId;
+                            row.dataset.imageId = image.pi_id;
+                        }
+                    });
+
+                    imageGrid.appendChild(imageItem);
                 });
-                if (current && values.includes(current)) {
-                    selectEl.value = current;
-                }
-            };
 
-            const splitValues = (str) => {
-                if (!str) return [];
-                return str.split('、').map(s => s.trim()).filter(Boolean);
-            };
-
-            if (product) {
-                setOptions(supplierSelect, splitValues(product.p_supplier), preserveExisting ? (supplierSelect ? supplierSelect.value : '') : savedSupplier);
-                setOptions(colorSelect, splitValues(product.p_color), preserveExisting ? (colorSelect ? colorSelect.value : '') : savedColor);
-                setOptions(sizeSelect, splitValues(product.p_size), preserveExisting ? (sizeSelect ? sizeSelect.value : '') : savedSize);
-
-                if (imagePreview) {
-                    const placeholder = imagePreview.dataset.placeholder || '';
-                    // p_image 已包含完整相對路徑（如：uploads/products/xxx.jpg）
-                    const imageSrc = product.p_image ? '<?= base_url() ?>' + product.p_image : placeholder;
-                    imagePreview.src = imageSrc;
-                }
-            } else {
-                setOptions(supplierSelect, [], '');
-                setOptions(colorSelect, [], '');
-                setOptions(sizeSelect, [], '');
-                if (imagePreview) {
-                    const placeholder = imagePreview.dataset.placeholder || '';
+                // 如果有預設選擇，更新預覽圖
+                if (selectedImageId) {
+                    const selectedImage = images.find(img => img.pi_id == selectedImageId);
+                    if (selectedImage && imagePreview) {
+                        imagePreview.src = `<?= base_url() ?>uploads/products/${productId}/${selectedImage.pi_name}`;
+                    }
+                } else if (imagePreview) {
                     imagePreview.src = placeholder;
                 }
+            } catch (error) {
+                console.error('載入圖片失敗:', error);
+                imageGrid.innerHTML = `<div class="text-center p-2 text-danger"><i class="bi bi-exclamation-triangle"></i> ${error.message}</div>`;
+                if (imageIdInput) imageIdInput.value = '';
+                if (imagePreview) imagePreview.src = placeholder;
             }
+        }
+
+        /**
+         * 隱藏圖片選擇區
+         */
+        function hideImageSelector(row) {
+            const container = row.querySelector('.image-selector-container');
+            const imageIdInput = row.querySelector('.image-id-input');
+            const imagePreview = row.querySelector('.item-image-preview');
+            const placeholder = imagePreview?.dataset.placeholder || '';
+
+            if (container) {
+                container.style.display = 'none';
+            }
+
+            if (imageIdInput) {
+                imageIdInput.value = '';
+            }
+
+            if (imagePreview) {
+                imagePreview.src = placeholder;
+            }
+
+            // 清除 row 的 data 屬性
+            row.dataset.productId = '';
+            row.dataset.imageId = '';
         }
 
         function getProductsByCategory(categoryId) {

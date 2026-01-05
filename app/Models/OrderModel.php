@@ -31,6 +31,7 @@ class OrderModel extends Model
         'o_shipping_address',
         'o_vendor_contect',
         'o_vendor_address',
+        'o_vendor',
     ];
 
     // Dates
@@ -153,18 +154,18 @@ class OrderModel extends Model
             'o_tax_rate' => $quote['q_tax_rate'],
             'o_shipping_fee' => $quote['q_shipping_fee'],
             'o_tax_amount' => $quote['q_tax_amount'],
+            'o_vendor' => $quote['q_vendor'],
         ];
 
         // 準備訂單項目數據
         $orderItems = [];
         foreach ($quote['items'] as $item) {
             $orderItems[] = [
-                'oi_p_id' => $item['qi_p_id'],
+                'oi_pi_id' => $item['qi_pi_id'],
                 'oi_quantity' => $item['qi_quantity'],
                 'oi_unit_price' => $item['qi_unit_price'],
                 'oi_discount' => $item['qi_discount'],
                 'oi_amount' => $item['qi_quantity'] * $item['qi_unit_price'] * (1 - $item['qi_discount'] / 100),
-                'oi_supplier' => $item['qi_supplier'],
                 'oi_color' => $item['qi_color'],
                 'oi_size' => $item['qi_size'],
             ];
@@ -206,24 +207,24 @@ class OrderModel extends Model
                 // 更新訂單：需要驗證修改的合法性
                 $oldItems = $orderItemModel->where('oi_o_id', $orderId)->findAll();
 
-                // 建立舊項目的映射（以商品ID為鍵）
+                // 建立舊項目的映射（以圖片ID為鍵）
                 $oldItemsMap = [];
                 foreach ($oldItems as $oldItem) {
-                    $oldItemsMap[$oldItem['oi_p_id']] = $oldItem;
+                    $oldItemsMap[$oldItem['oi_pi_id']] = $oldItem;
                 }
 
                 // 驗證新項目
                 foreach ($items as $item) {
-                    if (empty($item['oi_p_id'])) {
+                    if (empty($item['oi_pi_id'])) {
                         continue;
                     }
 
-                    $productId = $item['oi_p_id'];
+                    $imageId = $item['oi_pi_id'];
                     $newQuantity = $item['oi_quantity'];
 
                     // 如果是現有項目，檢查數量是否小於已出貨數量
-                    if (isset($oldItemsMap[$productId])) {
-                        $shippedQty = $oldItemsMap[$productId]['oi_shipped_quantity'] ?? 0;
+                    if (isset($oldItemsMap[$imageId])) {
+                        $shippedQty = $oldItemsMap[$imageId]['oi_shipped_quantity'] ?? 0;
 
                         if ($newQuantity < $shippedQty) {
                             return [
@@ -234,7 +235,7 @@ class OrderModel extends Model
                         }
 
                         // 從映射中移除，剩下的就是被刪除的項目
-                        unset($oldItemsMap[$productId]);
+                        unset($oldItemsMap[$imageId]);
                     }
                 }
 
@@ -269,7 +270,7 @@ class OrderModel extends Model
 
             // 新增項目
             foreach ($items as $item) {
-                if (empty($item['oi_p_id'])) {
+                if (empty($item['oi_pi_id'])) {
                     continue;
                 }
 

@@ -24,6 +24,7 @@ class QuoteModel extends Model
         'q_total_amount',
         'q_notes',
         'q_o_id',
+        'q_vendor'
     ];
 
     // Dates
@@ -214,7 +215,7 @@ class QuoteModel extends Model
         $subtotal = 0;
 
         foreach ($items as $item) {
-            if (empty($item['qi_p_id']) || empty($item['qi_quantity'])) {
+            if (empty($item['qi_pi_id']) || empty($item['qi_quantity'])) {
                 continue;
             }
 
@@ -274,7 +275,7 @@ class QuoteModel extends Model
         }
 
         $validItemCount = count(array_filter($items, function ($item) {
-            return !empty($item['qi_p_id']) && !empty($item['qi_quantity']);
+            return !empty($item['qi_pi_id']) && !empty($item['qi_quantity']);
         }));
 
         if ($validItemCount === 0) {

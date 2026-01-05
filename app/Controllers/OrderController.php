@@ -9,9 +9,11 @@ use App\Models\ProductModel;
 use App\Models\ProductCategoryModel;
 use App\Models\QuoteModel;
 use App\Models\CustomerContactModel;
+use App\Traits\ProductImageTrait;
 
 class OrderController extends BaseController
 {
+    use ProductImageTrait;
     private $orderModel;
     private $customerModel;
     private $productModel;
@@ -147,4 +149,6 @@ class OrderController extends BaseController
             'data' => $data
         ]);
     }
+
+    // getProductImages() 方法由 ProductImageTrait 提供
 }

@@ -70,14 +70,8 @@
                             <?php foreach ($data as $item): ?>
                                 <tr class="table-row-link" data-href="<?= url_to('ProductController::show', $item['p_id']) ?>">
                                     <td>
-                                        <?php if (!empty($item['p_image'])): ?>
-                                            <?php
-                                            $imagePath = $item['p_image'];
-                                            if (strpos($imagePath, 'http://') !== 0 && strpos($imagePath, 'https://') !== 0) {
-                                                $imagePath = base_url(ltrim($imagePath, '/'));
-                                            }
-                                            ?>
-                                            <img src="<?= esc($imagePath) ?>"
+                                        <?php if (!empty($item['first_image'])): ?>
+                                            <img src="<?= base_url('uploads/products/' . $item['p_id'] . '/' . esc($item['first_image'])) ?>"
                                                 alt="<?= esc($item['p_name']) ?>"
                                                 class="img-thumbnail"
                                                 style="width: 60px; height: 60px; object-fit: cover;"

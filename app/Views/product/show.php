@@ -51,17 +51,75 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
     <div class="row g-3">
         <div class="col-lg-4">
             <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <?php if ($imagePath): ?>
-                        <img src="<?= esc($imagePath) ?>" alt="<?= esc($data['p_name']) ?>"
-                            class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
+                <div class="card-body">
+                    <!-- 產品圖片輪播或單圖顯示 -->
+                    <?php if (!empty($images) && count($images) > 0): ?>
+                        <?php if (count($images) > 1): ?>
+                            <!-- 多張圖片：使用輪播 -->
+                            <div id="productImageCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    <?php foreach ($images as $index => $image): ?>
+                                        <button type="button" 
+                                            data-bs-target="#productImageCarousel" 
+                                            data-bs-slide-to="<?= $index ?>" 
+                                            class="<?= $index === 0 ? 'active' : '' ?>"
+                                            aria-current="<?= $index === 0 ? 'true' : 'false' ?>"
+                                            aria-label="圖片 <?= $index + 1 ?>">
+                                        </button>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="carousel-inner">
+                                    <?php foreach ($images as $index => $image): ?>
+                                        <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+                                            <img src="<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($image['pi_name'])) ?>"
+                                                class="d-block w-100 rounded"
+                                                alt="<?= esc($data['p_name']) ?>"
+                                                style="height: 300px; object-fit: cover; cursor: pointer;"
+                                                onclick="openImageModal('<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($image['pi_name'])) ?>')">
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productImageCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">上一張</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productImageCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">下一張</span>
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <!-- 單張圖片 -->
+                            <div class="text-center mb-3">
+                                <img src="<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($images[0]['pi_name'])) ?>"
+                                    class="img-fluid rounded"
+                                    alt="<?= esc($data['p_name']) ?>"
+                                    style="max-height: 300px; object-fit: cover; cursor: pointer;"
+                                    onclick="openImageModal('<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($images[0]['pi_name'])) ?>')">
+                            </div>
+                        <?php endif; ?>
+                        
+                        <!-- 縮圖列表 -->
+                        <?php if (count($images) > 1): ?>
+                            <div class="d-flex gap-2 overflow-auto pb-2" style="max-width: 100%;">
+                                <?php foreach ($images as $index => $image): ?>
+                                    <img src="<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($image['pi_name'])) ?>"
+                                        class="img-thumbnail"
+                                        alt="縮圖 <?= $index + 1 ?>"
+                                        style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;"
+                                        onclick="document.querySelector('[data-bs-slide-to=&quot;<?= $index ?>&quot;]').click()">
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     <?php else: ?>
+                        <!-- 無圖片 -->
                         <div class="bg-light d-flex align-items-center justify-content-center mb-3"
                             style="width: 100%; height: 300px; border-radius: 8px;">
                             <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
                         </div>
                     <?php endif; ?>
-                    <div class="text-muted small">
+                    
+                    <div class="text-muted small text-center">
                         建立時間：<?= esc($data['p_created_at'] ?? '-') ?><br>
                         更新時間：<?= esc($data['p_updated_at'] ?? '-') ?>
                     </div>
@@ -93,10 +151,6 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
                                     <span class="text-muted">-</span>
                                 <?php endif; ?>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="text-muted small">供應商</div>
-                            <div><?= esc($data['p_supplier'] ?? '-') ?></div>
                         </div>
                     </div>
 
@@ -131,5 +185,26 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
         </div>
     </div>
 </div>
+
+<!-- 圖片放大預覽 Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0 position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-2" 
+                    data-bs-dismiss="modal" aria-label="關閉" style="z-index: 1050;"></button>
+                <img id="modalImage" src="" alt="預覽圖片" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 開啟圖片放大預覽
+    function openImageModal(imageUrl) {
+        document.getElementById('modalImage').src = imageUrl;
+        new bootstrap.Modal(document.getElementById('imageModal')).show();
+    }
+</script>
 
 <?= $this->endSection() ?>

@@ -138,7 +138,7 @@
         .client-info-grid {
             display: grid;
             /* 欄寬設定：[標籤 1] [內容 1] [標籤 2] [內容 2] */
-            grid-template-columns: 80px 210px 50px 100px;
+            grid-template-columns: 80px 100px 50px 210px;
             column-gap: 10px;
             /* 欄間距 */
             row-gap: 8px;
@@ -488,9 +488,9 @@
 
                             <!-- 第三行 -->
                             <label>市話：</label>
-                            <span><?= esc($data['contact']['cc_phone'] ?? '') ?></span>
+                            <span><?= esc($data['customer']['c_phone'] ?? '') ?></span>
                             <label>手機：</label>
-                            <span><?= esc($data['contact']['cc_mobile'] ?? '') ?></span>
+                            <span><?= esc($data['contact']['cc_phone'] ?? '') ?></span>
 
                             <!-- 第四行 -->
                             <label>傳真：</label>
@@ -552,24 +552,24 @@
                     <?php if (!empty($currentItems)): ?>
                         <?php foreach ($currentItems as $item): ?>
                             <?php
-                            // 處理圖片路徑
-                            $imagePath = !empty($item['p_image']) ? base_url($item['p_image']) : base_url('assets/images/placeholder.png');
+                            // 處理圖片路徑（使用 product_images）
+                            $imagePath = base_url('assets/images/placeholder.png');
+                            if (!empty($item['pi_name']) && !empty($item['pi_p_id'])) {
+                                $imagePath = base_url('uploads/products/' . $item['pi_p_id'] . '/' . $item['pi_name']);
+                            }
 
-                            // 處理規格
-                            $specs = [];
-                            if (!empty($item['qi_color'])) $specs[] = "顏色: {$item['qi_color']}";
-                            if (!empty($item['qi_size'])) $specs[] = "尺寸: {$item['qi_size']}";
-                            $specString = implode(' | ', $specs);
+                            // 圖片檔名就是顏色/花色
+                            $colorSpec = !empty($item['pi_name']) ? pathinfo($item['pi_name'], PATHINFO_FILENAME) : '';
                             ?>
                             <tr>
                                 <td class="desc-cell">
                                     <div class="product-name"><?= esc($item['p_name']) ?></div>
-                                    <?php if ($specString): ?>
-                                        <div class="product-spec"><?= esc($specString) ?></div>
+                                    <?php if ($colorSpec): ?>
+                                        <div class="product-spec">顏色/花色: <?= esc($colorSpec) ?></div>
                                     <?php endif; ?>
                                 </td>
                                 <td class="img-cell">
-                                    <img src="<?= esc($imagePath) ?>" alt="">
+                                    <img src="<?= esc($imagePath) ?>" alt="" onerror="this.src='<?= base_url('assets/images/placeholder.png') ?>'">
                                 </td>
                                 <td class="number-cell"><?= $item['qi_quantity'] ?></td>
                                 <td class="price-cell"><?= number_format($item['qi_unit_price'], 0) ?></td>

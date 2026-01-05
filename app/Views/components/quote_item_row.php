@@ -34,7 +34,7 @@ $isTemplate = $isTemplate ?? false;
 // 預設值
 $defaults = [
     'qi_id' => '',
-    'qi_p_id' => '',
+    'qi_pi_id' => '',
     'qi_quantity' => 1,
     'qi_unit_price' => 0,
     'qi_discount' => 0,
@@ -42,11 +42,17 @@ $defaults = [
 
 $item = array_merge($defaults, $item);
 
+// 取得選中商品的 ID（透過 pi_p_id）
+$selectedProductId = '';
+if (!empty($item['qi_pi_id']) && !empty($item['pi_p_id'])) {
+    $selectedProductId = $item['pi_p_id'];
+}
+
 // 找出選中商品的分類
 $selectedCategoryId = '';
-if (!empty($item['qi_p_id'])) {
+if (!empty($selectedProductId)) {
     foreach ($products as $p) {
-        if ($p['p_id'] == $item['qi_p_id']) {
+        if ($p['p_id'] == $selectedProductId) {
             $selectedCategoryId = $p['p_pc_id'] ?? '';
             break;
         }
@@ -55,29 +61,18 @@ if (!empty($item['qi_p_id'])) {
 ?>
 
 <?php
-// 取得產品圖片（若已有選定商品）
+// 取得已選擇的圖片
 $selectedImage = '';
-if (!empty($item['qi_p_id'])) {
-    foreach ($products as $p) {
-        if ($p['p_id'] == $item['qi_p_id']) {
-            $rawImage = $p['p_image'] ?? '';
-            if ($rawImage) {
-                // p_image 已包含完整相對路徑（如：uploads/products/xxx.jpg）
-                $selectedImage = base_url($rawImage);
-            }
-            break;
-        }
-    }
+if (!empty($item['qi_pi_id']) && !empty($selectedProductId) && !empty($item['pi_name'])) {
+    $selectedImage = base_url('uploads/products/' . $selectedProductId . '/' . $item['pi_name']);
 }
 $placeholder = base_url('images/placeholder.png');
 ?>
-<tr class="item-row"
-    data-selected-supplier="<?= esc($item['qi_supplier'] ?? '') ?>"
-    data-selected-color="<?= esc($item['qi_color'] ?? '') ?>"
-    data-selected-size="<?= esc($item['qi_size'] ?? '') ?>">
-    <!-- 商品圖片 -->
-    <td style="width: 10%;" class="align-middle">
+<tr class="item-row" data-product-id="<?= $selectedProductId ?>" data-image-id="<?= $item['qi_pi_id'] ?? '' ?>">
+    <!-- 商品圖片預覽 -->
+    <td style="width: 8%;" class="align-middle">
         <input type="hidden" name="items[<?= $index ?>][qi_id]" value="<?= esc($item['qi_id']) ?>">
+        <input type="hidden" name="items[<?= $index ?>][qi_pi_id]" class="image-id-input" value="<?= esc($item['qi_pi_id']) ?>" required>
         <div class="ratio ratio-1x1 border rounded overflow-hidden bg-light shadow-sm">
             <img src="<?= esc($selectedImage ?: $placeholder) ?>"
                 class="img-fluid item-image-preview object-fit-cover"
@@ -87,8 +82,8 @@ $placeholder = base_url('images/placeholder.png');
                 title="點擊查看大圖">
         </div>
     </td>
-    <!-- 商品資訊 -->
-    <td style="width: 20%;" class="align-middle">
+    <!-- 商品選擇 -->
+    <td style="width: 22%;" class="align-middle">
         <div class="d-flex flex-column gap-2">
             <select class="form-select form-select-sm category-select" data-index="<?= $index ?>" title="商品分類">
                 <option value="">全部分類</option>
@@ -99,7 +94,6 @@ $placeholder = base_url('images/placeholder.png');
                 <?php endforeach; ?>
             </select>
             <select class="form-select form-select-sm product-select"
-                name="items[<?= $index ?>][qi_p_id]"
                 data-index="<?= $index ?>"
                 title="選擇商品"
                 required>
@@ -108,37 +102,19 @@ $placeholder = base_url('images/placeholder.png');
                     <option value="<?= $product['p_id'] ?>"
                         data-price="<?= $product['p_standard_price'] ?>"
                         data-category="<?= $product['p_pc_id'] ?? '' ?>"
-                        data-supplier="<?= esc($product['p_supplier'] ?? '') ?>"
-                        data-color="<?= esc($product['p_color'] ?? '') ?>"
-                        data-size="<?= esc($product['p_size'] ?? '') ?>"
-                        data-image="<?= esc($product['p_image'] ?? '') ?>"
-                        <?= ($item['qi_p_id'] == $product['p_id']) ? 'selected' : '' ?>>
+                        <?= ($selectedProductId == $product['p_id']) ? 'selected' : '' ?>>
                         <?= esc($product['p_name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
+            <!-- 圖片選擇區（初始隱藏） -->
+            <div class="image-selector-container" style="display: none;">
+                <small class="text-muted mb-1 d-block">請選擇顏色/花色：</small>
+                <div class="image-grid d-flex flex-wrap gap-2">
+                    <!-- 圖片選項將由 JavaScript 動態產生 -->
+                </div>
+            </div>
         </div>
-    </td>
-    <td style="width: 10%;" class="align-middle">
-        <select class="form-select form-select-sm supplier-select small"
-            name="items[<?= $index ?>][qi_supplier]"
-            title="供應商">
-            <option value="">-</option>
-        </select>
-    </td>
-    <td style="width: 10%;" class="align-middle">
-        <select class="form-select form-select-sm color-select small"
-            name="items[<?= $index ?>][qi_color]"
-            title="顏色">
-            <option value="">-</option>
-        </select>
-    </td>
-    <td style="width: 10%;" class="align-middle">
-        <select class="form-select form-select-sm size-select small"
-            name="items[<?= $index ?>][qi_size]"
-            title="尺寸">
-            <option value="">-</option>
-        </select>
     </td>
     <td style="width: 7%;" class="align-middle">
         <input type="number" class="form-control form-control-sm quantity-input text-center"

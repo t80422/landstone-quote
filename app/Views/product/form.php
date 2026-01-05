@@ -104,26 +104,6 @@ function getFieldClass($fieldName)
                                 aria-describedby="productNameError">
                             <?= showFieldError('p_name') ?>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="supplier" class="form-label">供應商</label>
-							<select
-                                class="form-select <?= getFieldClass('p_supplier') ?>"
-                                id="supplier"
-                                name="p_supplier"
-                                aria-describedby="categoryError"
-                                required>
-								<?php
-								$suppliers = array("文興W", "巨鋒G");
-								?>
-                               
-                                    <?php foreach ($suppliers as $supplier): ?>
-                                        <option value="<?= esc($supplier) ?>"
-                                            <?= (old('p_supplier', $data['p_supplier'] ?? '') == $supplier) ? 'selected' : '' ?>>
-                                            <?= esc($supplier) ?>
-                                        </option>
-                                    <?php endforeach; ?>                                
-                            </select>							
-                        </div>
                     </div>
                 </div>
 
@@ -217,39 +197,54 @@ function getFieldClass($fieldName)
                     <h5 class="border-bottom pb-2 mb-3">
                         <i class="bi bi-image me-2 text-primary"></i>產品圖片
                     </h5>
+
+                    <!-- 已上傳的圖片（編輯模式） -->
+                    <?php if ($isEdit && isset($images) && !empty($images)): ?>
+                        <div class="mb-3">
+                            <label class="form-label">已上傳的圖片</label>
+                            <div class="row g-2" id="existingImagesContainer">
+                                <?php foreach ($images as $image): ?>
+                                    <div class="col-md-2 col-sm-3 col-4" data-image-id="<?= $image['pi_id'] ?>">
+                                        <div class="position-relative">
+                                            <img src="<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($image['pi_name'])) ?>"
+                                                alt="產品圖片"
+                                                class="img-thumbnail w-100"
+                                                style="height: 150px; object-fit: cover;">
+                                            <button type="button"
+                                                class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                                                onclick="deleteExistingImage(<?= $image['pi_id'] ?>, this)"
+                                                title="刪除圖片">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- 上傳新圖片 -->
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <?php if (!empty($data['p_image'])): ?>
-                                <?php
-                                $currentImagePath = $data['p_image'];
-                                if (strpos($currentImagePath, 'http://') !== 0 && strpos($currentImagePath, 'https://') !== 0) {
-                                    $currentImagePath = base_url(ltrim($currentImagePath, '/'));
-                                }
-                                ?>
-                                <div class="mb-3">
-                                    <label class="form-label">目前圖片</label>
-                                    <div>
-                                        <img src="<?= esc($currentImagePath) ?>"
-                                            alt="產品圖片"
-                                            class="img-thumbnail"
-                                            style="max-width: 300px; max-height: 300px;">
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                            <label for="productImage" class="form-label">
-                                <?= !empty($data['p_image']) ? '更換圖片' : '上傳圖片' ?>
+                            <label for="productImages" class="form-label">
+                                <?= $isEdit ? '新增圖片' : '上傳圖片' ?>
                             </label>
                             <input
                                 type="file"
-                                class="form-control <?= getFieldClass('p_image') ?>"
-                                id="productImage"
-                                name="p_image"
+                                class="form-control"
+                                id="productImages"
+                                name="p_images[]"
                                 accept="image/*"
-                                aria-describedby="productImageError">
-                            <?= showFieldError('p_image') ?>
-                            <div class="form-text">建議尺寸：800x800 像素，支援 JPG、PNG 格式</div>
+                                multiple>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                可一次選擇多張圖片，建議尺寸：800x800 像素，支援 JPG、PNG 格式
+                            </div>
                         </div>
                     </div>
+
+                    <!-- 新圖片預覽區 -->
+                    <div id="imagePreviewContainer" class="row g-2 mt-2" style="display: none;"></div>
                 </div>
 
                 <!-- 時間戳記資訊 (僅編輯時顯示) -->
@@ -323,18 +318,128 @@ function getFieldClass($fieldName)
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>儲存中...';
     });
 
-    // 圖片預覽功能
-    document.getElementById('productImage')?.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // 可以在這裡添加圖片預覽功能
-                console.log('圖片已選擇:', file.name);
-            };
-            reader.readAsDataURL(file);
-        }
+    // 多圖片預覽功能
+    const imageInput = document.getElementById('productImages');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    let selectedFiles = [];
+
+    imageInput?.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        if (files.length === 0) return;
+
+        // 添加新選擇的檔案
+        selectedFiles = [...selectedFiles, ...files];
+        
+        // 更新預覽
+        updateImagePreviews();
     });
+
+    function updateImagePreviews() {
+        previewContainer.innerHTML = '';
+        
+        if (selectedFiles.length === 0) {
+            previewContainer.style.display = 'none';
+            return;
+        }
+
+        previewContainer.style.display = 'flex';
+
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const col = document.createElement('div');
+                col.className = 'col-md-2 col-sm-3 col-4';
+                
+                col.innerHTML = `
+                    <div class="position-relative">
+                        <img src="${e.target.result}" 
+                            alt="${file.name}" 
+                            class="img-thumbnail w-100" 
+                            style="height: 150px; object-fit: cover;">
+                        <button type="button" 
+                            class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" 
+                            onclick="removeImage(${index})"
+                            title="移除圖片">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <div class="text-center mt-1">
+                            <small class="text-muted text-truncate d-block" style="max-width: 100%;">
+                                ${file.name}
+                            </small>
+                        </div>
+                    </div>
+                `;
+                
+                previewContainer.appendChild(col);
+            };
+            
+            reader.readAsDataURL(file);
+        });
+
+        // 更新 input 的 files（使用 DataTransfer）
+        updateInputFiles();
+    }
+
+    function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        updateImagePreviews();
+    }
+
+    function updateInputFiles() {
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        imageInput.files = dataTransfer.files;
+    }
+
+    // 刪除已上傳的圖片（編輯模式）
+    function deleteExistingImage(imageId, button) {
+        if (!confirm('確定要刪除這張圖片嗎？')) {
+            return;
+        }
+
+        const imageContainer = button.closest('[data-image-id]');
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        fetch('<?= base_url('product/deleteImage') ?>/' + imageId, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 淡出動畫後移除元素
+                imageContainer.style.transition = 'opacity 0.3s';
+                imageContainer.style.opacity = '0';
+                setTimeout(() => {
+                    imageContainer.remove();
+                    
+                    // 如果沒有圖片了，隱藏整個區塊
+                    const container = document.getElementById('existingImagesContainer');
+                    if (container && container.children.length === 0) {
+                        container.closest('.mb-3').style.display = 'none';
+                    }
+                }, 300);
+            } else {
+                alert('刪除失敗：' + data.message);
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-x-lg"></i>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('刪除失敗，請稍後再試');
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-x-lg"></i>';
+        });
+    }
 </script>
 
 <?= $this->endSection() ?>

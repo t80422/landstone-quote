@@ -163,3 +163,5 @@ package-lock.json
 *.tar
 *.gz
 *.rar
+
+uploads

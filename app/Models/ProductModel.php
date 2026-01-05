@@ -12,10 +12,8 @@ class ProductModel extends Model
         'p_code',
         'p_pc_id',
         'p_name',
-        'p_supplier',
         'p_color',
         'p_size',
-        'p_image',
         'p_specifications',
         'p_standard_price',
         'p_cost_price',
@@ -77,13 +75,14 @@ class ProductModel extends Model
     }
 
     /**
-     * 獲取產品列表（包含分類資訊）
+     * 獲取產品列表（包含分類資訊和第一張圖片）
      */
     public function getProductsWithCategory($keyword = null, $page = 1, $perPage = 10)
     {
         $builder = $this->builder('products p')
-            ->select('p.*, pc.pc_name')
-            ->join('product_categories pc', 'pc.pc_id = p.p_pc_id', 'left');
+            ->select('p.*, pc.pc_name, pi.pi_name as first_image')
+            ->join('product_categories pc', 'pc.pc_id = p.p_pc_id', 'left')
+            ->join('(SELECT pi_p_id, pi_name FROM product_images WHERE pi_id IN (SELECT MIN(pi_id) FROM product_images GROUP BY pi_p_id)) pi', 'pi.pi_p_id = p.p_id', 'left');
 
         if ($keyword) {
             $builder->groupStart()

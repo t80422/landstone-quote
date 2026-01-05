@@ -6,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>訂單列印 - <?= esc($data['o_number']) ?></title>
     <?php
-    // 檢查是否有任何商品有折扣
+    // 檢查是否有任何商品有折扣，同時計算數量總計
     $hasDiscount = false;
+    $totalQuantity = 0;
     if (!empty($data['items'])) {
         foreach ($data['items'] as $item) {
             if (!empty($item['oi_discount']) && $item['oi_discount'] > 0) {
                 $hasDiscount = true;
-                break;
             }
+            $totalQuantity += (int)($item['oi_quantity'] ?? 0);
         }
     }
     ?>
@@ -143,36 +144,6 @@
             object-fit: contain;
         }
 
-        /* 金額統計 */
-        .summary-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: -1px;
-            border: 1px solid #000;
-        }
-
-        .summary-table td {
-            border: 1px solid #000;
-            padding: 5px 8px;
-            text-align: right;
-            font-size: 10pt;
-            vertical-align: middle;
-        }
-
-        .summary-table td:first-child {
-            width: 70%;
-        }
-
-        .summary-table .discount-row {
-            color: #d9534f;
-        }
-
-        .summary-table .total-row {
-            font-weight: bold;
-            background-color: #f5f5f5;
-            font-size: 11pt;
-        }
-
         /* 備註 */
         .notes-section {
             padding: 8px 10px;
@@ -257,10 +228,6 @@
                 border: 1px solid #000 !important;
             }
 
-            .summary-table .total-row {
-                background-color: #f5f5f5 !important;
-            }
-
             /* 圖片列印優化 */
             .items-table .image-cell img {
                 max-width: 70px !important;
@@ -272,7 +239,6 @@
             /* 防止內容溢出 */
             .header,
             .info-section,
-            .summary-table,
             .notes-section {
                 page-break-inside: avoid;
             }
@@ -392,9 +358,13 @@
             <tbody>
                 <?php if (!empty($data['items'])): ?>
                     <?php foreach ($data['items'] as $item): ?>
+                        <?php
+                        // 圖片檔名就是顏色/花色
+                        $colorSpec = !empty($item['pi_name']) ? pathinfo($item['pi_name'], PATHINFO_FILENAME) : '';
+                        ?>
                         <tr>
                             <td class="text-left"> <?= $item['p_name']; ?></td>
-                            <td><?= esc($item['oi_color'] ?? '') ?></td>
+                            <td><?= esc($colorSpec) ?></td>
                             <td><?= esc($item['oi_quantity']) ?></td>
                             <td><?= esc($item['oi_size'] ?? '') ?></td>
                             <td></td>
@@ -411,22 +381,20 @@
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
-                        <?php if ($hasDiscount): ?>
-                            <td>&nbsp;</td>
-                        <?php endif; ?>
                         <td>&nbsp;</td>
                     </tr>
                 <?php endfor; ?>
-            </tbody>
-        </table>
 
-        <!-- 金額統計 -->
-        <table class="summary-table">
-            <tr>
-                <td>&nbsp;</td>
-                <td style="width: 15%;">小計</td>
-                <td style="width: 15%;"><?= number_format($data['o_subtotal'] ?? 0) ?></td>
-            </tr>
+                <!-- 數量與金額小計 -->
+                <tr style="font-weight: bold; background-color: #f5f5f5;">
+                    <td class="text-right"></td>
+                    <td class="text-center">數量小計</td>
+                    <td class="text-center"><?= $totalQuantity ?></td>
+                    <td></td>
+                    <td class="text-center">金額小計</td>
+                    <td></td>
+                </tr>
+            </tbody>
         </table>
 
         <!-- 備註 -->
