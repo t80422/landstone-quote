@@ -76,6 +76,9 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
                                                 alt="<?= esc($data['p_name']) ?>"
                                                 style="height: 300px; object-fit: cover; cursor: pointer;"
                                                 onclick="openImageModal('<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($image['pi_name'])) ?>')">
+                                            <div class="text-center mt-2">
+                                                <small class="text-muted"><?= esc($image['pi_name']) ?></small>
+                                            </div>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -96,6 +99,9 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
                                     alt="<?= esc($data['p_name']) ?>"
                                     style="max-height: 300px; object-fit: cover; cursor: pointer;"
                                     onclick="openImageModal('<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($images[0]['pi_name'])) ?>')">
+                                <div class="mt-2">
+                                    <small class="text-muted"><?= esc($images[0]['pi_name']) ?></small>
+                                </div>
                             </div>
                         <?php endif; ?>
                         
@@ -103,11 +109,18 @@ $imagePath = formatImagePath($data['p_image'] ?? '');
                         <?php if (count($images) > 1): ?>
                             <div class="d-flex gap-2 overflow-auto pb-2" style="max-width: 100%;">
                                 <?php foreach ($images as $index => $image): ?>
-                                    <img src="<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($image['pi_name'])) ?>"
-                                        class="img-thumbnail"
-                                        alt="縮圖 <?= $index + 1 ?>"
-                                        style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;"
-                                        onclick="document.querySelector('[data-bs-slide-to=&quot;<?= $index ?>&quot;]').click()">
+                                    <div class="text-center" style="min-width: 80px;">
+                                        <img src="<?= base_url('uploads/products/' . $data['p_id'] . '/' . esc($image['pi_name'])) ?>"
+                                            class="img-thumbnail"
+                                            alt="縮圖 <?= $index + 1 ?>"
+                                            style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;"
+                                            onclick="document.querySelector('[data-bs-slide-to=&quot;<?= $index ?>&quot;]').click()">
+                                        <div class="mt-1">
+                                            <small class="text-muted text-truncate d-block" style="max-width: 80px; font-size: 0.65rem;" title="<?= esc($image['pi_name']) ?>">
+                                                <?= esc($image['pi_name']) ?>
+                                            </small>
+                                        </div>
+                                    </div>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>

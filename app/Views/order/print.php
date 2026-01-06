@@ -303,7 +303,7 @@
         <div class="info-section">
             <div class="info-row">
                 <div class="info-cell" style="width: 70%;">
-                    <div><span class="info-label">供應商名稱：</span><?= $data['items'][0]['oi_supplier'] ?></div>
+                    <div><span class="info-label">供應商名稱：</span><?= $data['o_vendor'] ?></div>
                 </div>
                 <div class="info-cell info-right" style="width: 30%;">
                     <div><span class="info-label">日期：</span><?= esc($data['o_date']) ?></div>

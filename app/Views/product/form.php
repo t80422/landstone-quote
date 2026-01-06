@@ -217,6 +217,11 @@ function getFieldClass($fieldName)
                                                 <i class="bi bi-x-lg"></i>
                                             </button>
                                         </div>
+                                        <div class="text-center mt-1">
+                                            <small class="text-muted text-truncate d-block" style="max-width: 100%;" title="<?= esc($image['pi_name']) ?>">
+                                                <?= esc($image['pi_name']) ?>
+                                            </small>
+                                        </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
