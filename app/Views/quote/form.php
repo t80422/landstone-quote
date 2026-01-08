@@ -295,25 +295,28 @@ $productCategories = $productCategories ?? [];
                         <table class="table table-hover align-middle" id="itemsTable">
                             <thead class="table-light sticky-top">
                                 <tr>
-                                    <th style="width: 8%;" class="text-center">
+                                    <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-image me-1"></i>圖片
                                     </th>
-                                    <th style="width: 22%;">
+                                    <th style="width: 30%;">
                                         <i class="bi bi-box-seam me-1"></i>商品 / 顏色花色
+                                    </th>
+                                    <th style="width: 10%;" class="text-center">
+                                        <i class="bi bi-123 me-1"></i>尺寸
                                     </th>
                                     <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-123 me-1"></i>數量
                                     </th>
-                                    <th style="width: 12%;" class="text-end">
+                                    <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-currency-dollar me-1"></i>單價
                                     </th>
                                     <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-percent me-1"></i>折扣%
                                     </th>
-                                    <th style="width: 12%;" class="text-end">
+                                    <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-calculator me-1"></i>金額
                                     </th>
-                                    <th style="width: 5%;" class="text-center">
+                                    <th style="width: 10%;" class="text-center">
                                         <i class="bi bi-gear"></i>
                                     </th>
                                 </tr>
@@ -663,14 +666,18 @@ $productCategories = $productCategories ?? [];
                             const selectedProduct = products.find(p => p.p_id == value);
                             if (selectedProduct) {
                                 row.querySelector('.price-input').value = selectedProduct.p_standard_price || 0;
+                                // 更新尺寸選單
+                                updateSizeSelect(row, selectedProduct.p_size);
                             } else {
                                 row.querySelector('.price-input').value = 0;
+                                updateSizeSelect(row, '');
                             }
                             
                             // 顯示圖片選擇區
                             showImageSelector(row, value);
                         } else {
                             row.querySelector('.price-input').value = 0;
+                            updateSizeSelect(row, '');
                             hideImageSelector(row);
                         }
 
@@ -684,6 +691,47 @@ $productCategories = $productCategories ?? [];
             document.querySelectorAll('.item-row').forEach(row => {
                 calculateItemAmount(row);
             });
+        }
+
+        /**
+         * 更新尺寸選單
+         */
+        function updateSizeSelect(row, sizeString) {
+            const sizeSelect = row.querySelector('.size-select');
+            if (!sizeSelect) return;
+
+            const currentValue = sizeSelect.value;
+            
+            // 清空選單
+            sizeSelect.innerHTML = '<option value="">請選擇尺寸</option>';
+            
+            if (!sizeString || sizeString.trim() === '') {
+                return;
+            }
+            
+            // 分割尺寸字串（用中文頓號"、"分隔）
+            const sizes = sizeString.split('、').map(s => s.trim()).filter(s => s !== '');
+            
+            if (sizes.length === 0) {
+                return;
+            }
+            
+            // 添加尺寸選項
+            sizes.forEach(size => {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size;
+                // 如果之前選擇的值還存在，保持選中
+                if (size === currentValue) {
+                    option.selected = true;
+                }
+                sizeSelect.appendChild(option);
+            });
+            
+            // 如果只有一個尺寸，自動選中
+            if (sizes.length === 1) {
+                sizeSelect.value = sizes[0];
+            }
         }
 
         function bindEvents() {
@@ -850,6 +898,7 @@ $productCategories = $productCategories ?? [];
                 option.value = product.p_id;
                 option.dataset.price = product.p_standard_price;
                 option.dataset.category = product.p_pc_id || '';
+                option.dataset.size = product.p_size || '';
                 option.textContent = product.p_name;
                 productSelect.appendChild(option);
             });

@@ -136,12 +136,13 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-4" style="width: 80px;">圖片</th>
-                                    <th>商品資訊</th>
-                                    <th class="text-center" style="width: 100px;">數量</th>
-                                    <th class="text-end" style="width: 120px;">單價</th>
-                                    <th class="text-center" style="width: 100px;">折扣</th>
-                                    <th class="text-end pe-4" style="width: 150px;">金額</th>
+                                    <th class="ps-4" style="width: 8%;">圖片</th>
+                                    <th style="width: 32%;">商品資訊</th>
+                                    <th class="text-center" style="width: 12%;">尺寸</th>
+                                    <th class="text-center" style="width: 10%;">數量</th>
+                                    <th class="text-end" style="width: 12%;">單價</th>
+                                    <th class="text-center" style="width: 10%;">折扣</th>
+                                    <th class="text-end pe-4" style="width: 16%;">金額</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -183,6 +184,11 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td class="text-center">
+                                                <span class="text-dark small fw-bold">
+                                                    <?= esc($item['qi_size'] ?: '-') ?>
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
                                                 <span class="badge bg-light text-dark border fs-6">
                                                     <?= $item['qi_quantity'] ?>
                                                 </span>
@@ -200,7 +206,7 @@
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6" class="text-center py-4 text-muted">無商品項目</td>
+                                        <td colspan="7" class="text-center py-4 text-muted">無商品項目</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

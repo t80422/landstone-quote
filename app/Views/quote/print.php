@@ -223,8 +223,8 @@
         }
 
         .items-table .img-cell img {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
             border: 1px solid #ddd;
         }
@@ -566,6 +566,9 @@
                                     <div class="product-name"><?= esc($item['p_name']) ?></div>
                                     <?php if ($colorSpec): ?>
                                         <div class="product-spec">顏色/花色: <?= esc($colorSpec) ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($item['qi_size']): ?>
+                                        <div class="product-spec">尺寸: <?= esc($item['qi_size']) ?></div>
                                     <?php endif; ?>
                                 </td>
                                 <td class="img-cell">

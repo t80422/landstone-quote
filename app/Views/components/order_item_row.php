@@ -76,9 +76,10 @@ $placeholder = base_url('images/placeholder.png');
 <tr class="item-row" 
     data-shipped-qty="<?= $shippedQty ?>"
     data-product-id="<?= $selectedProductId ?>" 
-    data-image-id="<?= $item['oi_pi_id'] ?? '' ?>">
+    data-image-id="<?= $item['oi_pi_id'] ?? '' ?>"
+    data-selected-size="<?= esc($item['oi_size'] ?? '') ?>">
     <!-- 商品圖片預覽 -->
-    <td style="width: 8%;" class="align-middle">
+    <td style="width: 10%;" class="align-middle">
         <input type="hidden" name="items[<?= $index ?>][oi_id]" value="<?= esc($item['oi_id']) ?>">
         <input type="hidden" name="items[<?= $index ?>][oi_pi_id]" class="image-id-input" value="<?= esc($item['oi_pi_id']) ?>" required>
         <div class="ratio ratio-1x1 border rounded overflow-hidden bg-light shadow-sm">
@@ -91,7 +92,7 @@ $placeholder = base_url('images/placeholder.png');
         </div>
     </td>
     <!-- 商品選擇 -->
-    <td style="width: 22%;" class="align-middle">
+    <td style="width: 30%;" class="align-middle">
         <div class="d-flex flex-column gap-2">
             <select class="form-select form-select-sm category-select" data-index="<?= $index ?>" title="商品分類">
                 <option value="">全部分類</option>
@@ -110,6 +111,7 @@ $placeholder = base_url('images/placeholder.png');
                     <option value="<?= $product['p_id'] ?>"
                         data-price="<?= $product['p_standard_price'] ?>"
                         data-category="<?= $product['p_pc_id'] ?? '' ?>"
+                        data-size="<?= esc($product['p_size'] ?? '') ?>"
                         <?= ($selectedProductId == $product['p_id']) ? 'selected' : '' ?>>
                         <?= esc($product['p_name']) ?>
                     </option>
@@ -124,8 +126,22 @@ $placeholder = base_url('images/placeholder.png');
             </div>
         </div>
         <?php if ($hasShipped): ?>
-            <small class="text-muted">已出貨：<?= $shippedQty ?></small>
+            <div class="mt-1">
+                <small class="text-muted">已出貨：<?= $shippedQty ?></small>
+            </div>
         <?php endif; ?>
+    </td>
+    <!-- 尺寸選擇 -->
+    <td style="width: 10%;" class="align-middle">
+        <select class="form-select form-select-sm size-select"
+            name="items[<?= $index ?>][oi_size]"
+            title="尺寸"
+            required>
+            <option value="">請選擇尺寸</option>
+            <?php if (!empty($item['oi_size'])): ?>
+                <option value="<?= esc($item['oi_size']) ?>" selected><?= esc($item['oi_size']) ?></option>
+            <?php endif; ?>
+        </select>
     </td>
     <td style="width: 7%;" class="align-middle">
         <input type="number" class="form-control form-control-sm quantity-input text-center"

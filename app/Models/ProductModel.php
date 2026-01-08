@@ -88,7 +88,6 @@ class ProductModel extends Model
             $builder->groupStart()
                 ->like('p.p_code', $keyword)
                 ->orLike('p.p_name', $keyword)
-                ->orLike('p.p_supplier', $keyword)
                 ->orLike('pc.pc_name', $keyword)
                 ->groupEnd();
         }

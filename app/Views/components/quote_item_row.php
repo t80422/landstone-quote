@@ -68,7 +68,10 @@ if (!empty($item['qi_pi_id']) && !empty($selectedProductId) && !empty($item['pi_
 }
 $placeholder = base_url('images/placeholder.png');
 ?>
-<tr class="item-row" data-product-id="<?= $selectedProductId ?>" data-image-id="<?= $item['qi_pi_id'] ?? '' ?>">
+<tr class="item-row" 
+    data-product-id="<?= $selectedProductId ?>" 
+    data-image-id="<?= $item['qi_pi_id'] ?? '' ?>"
+    data-selected-size="<?= esc($item['qi_size'] ?? '') ?>">
     <!-- 商品圖片預覽 -->
     <td style="width: 8%;" class="align-middle">
         <input type="hidden" name="items[<?= $index ?>][qi_id]" value="<?= esc($item['qi_id']) ?>">
@@ -102,6 +105,7 @@ $placeholder = base_url('images/placeholder.png');
                     <option value="<?= $product['p_id'] ?>"
                         data-price="<?= $product['p_standard_price'] ?>"
                         data-category="<?= $product['p_pc_id'] ?? '' ?>"
+                        data-size="<?= esc($product['p_size'] ?? '') ?>"
                         <?= ($selectedProductId == $product['p_id']) ? 'selected' : '' ?>>
                         <?= esc($product['p_name']) ?>
                     </option>
@@ -115,6 +119,18 @@ $placeholder = base_url('images/placeholder.png');
                 </div>
             </div>
         </div>
+    </td>
+    <!-- 尺寸選擇 -->
+    <td style="width: 10%;" class="align-middle">
+        <select class="form-select form-select-sm size-select"
+            name="items[<?= $index ?>][qi_size]"
+            title="尺寸"
+            required>
+            <option value="">請選擇尺寸</option>
+            <?php if (!empty($item['qi_size'])): ?>
+                <option value="<?= esc($item['qi_size']) ?>" selected><?= esc($item['qi_size']) ?></option>
+            <?php endif; ?>
+        </select>
     </td>
     <td style="width: 7%;" class="align-middle">
         <input type="number" class="form-control form-control-sm quantity-input text-center"
