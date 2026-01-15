@@ -157,6 +157,7 @@ $placeholder = base_url('images/placeholder.png');
     </td>
     <td style="width: 10%;" class="align-middle">
         <input type="text" class="form-control form-control-sm amount-display text-end bg-light fw-bold"
+            name="items[<?= $index ?>][qi_amount]"
             value="0"
             title="小計金額"
             readonly>

@@ -169,6 +169,7 @@ $placeholder = base_url('images/placeholder.png');
     </td>
     <td style="width: 10%;" class="align-middle">
         <input type="text" class="form-control form-control-sm amount-display text-end bg-light fw-bold"
+            name="items[<?= $index ?>][oi_amount]"
             value="<?= $item['oi_amount'] ?? 0 ?>"
             title="小計金額"
             readonly>
