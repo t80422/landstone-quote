@@ -16,6 +16,14 @@
             }
         }
     }
+    
+    // 定義 SVG placeholder（避免 404 錯誤）
+    $placeholderImage = 'data:image/svg+xml;base64,' . base64_encode('
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+            <rect width="100" height="100" fill="#f0f0f0"/>
+            <text x="50" y="50" font-family="Arial" font-size="12" fill="#999" text-anchor="middle" dominant-baseline="middle">無圖片</text>
+        </svg>
+    ');
     ?>
     <style>
         * {
@@ -115,84 +123,31 @@
 
         /* 客戶與單據資訊 */
         .info-section {
-            display: flex;
+            margin-bottom: 10px;
         }
 
-        .info-left {
-            flex: 0 0 70%;
-            padding: 10px;
-        }
-
-        .info-right {
-            flex: 1;
-            padding: 10px;
-        }
-
-        .info-label {
-            font-weight: bold;
-            color: #666;
-            font-size: 10pt;
-        }
-
-        /* 客戶資料 Grid 佈局 */
-        .client-info-grid {
-            display: grid;
-            /* 欄寬設定：[標籤 1] [內容 1] [標籤 2] [內容 2] */
-            grid-template-columns: 80px 100px 50px 210px;
-            column-gap: 10px;
-            /* 欄間距 */
-            row-gap: 8px;
-            /* 列間距 */
-            align-items: center;
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
             font-size: 11pt;
         }
 
-        .grid-item {
-            display: contents;
-            /* 讓子元素直接參與 grid 佈局（如果需要的話），但這裡主要當 wrapper 或直接放內容 */
+        .info-table td {
+            padding: 5px 8px;
+            vertical-align: middle;
         }
 
-        .client-info-grid label {
-            color: #666;
+        .info-table .label {
+            color: #333;
             font-weight: bold;
             text-align: justify;
             text-align-last: justify;
-            white-space: nowrap;
         }
 
-        .client-info-grid span {
+        .info-table .value {
             font-weight: bold;
-            color: #333;
+            color: #000;
             word-break: break-all;
-        }
-
-        /* 跨欄樣式：佔據後方 3 格（整行內容） */
-        .span-3 {
-            grid-column: span 3;
-        }
-
-        /* 單據詳細 Grid 佈局 */
-        .details-info-grid {
-            display: grid;
-            /* 欄寬設定：[標籤] [內容] */
-            grid-template-columns: 80px 1fr;
-            column-gap: 15px;
-            row-gap: 8px;
-            align-items: center;
-            font-size: 11pt;
-        }
-
-        .details-info-grid label {
-            color: #666;
-            font-weight: bold;
-            text-align: justify;
-            text-align-last: justify;
-            white-space: nowrap;
-        }
-
-        .details-info-grid span {
-            font-weight: bold;
-            color: #333;
         }
 
         /* 商品明細表格 */
@@ -473,48 +428,28 @@
             <!-- 客戶與單據資訊（只在第一頁顯示） -->
             <?php if ($isFirstPage): ?>
                 <div class="info-section first-page-only">
-                    <div class="info-left">
-                        <div class="info-label">客戶資料 (CLIENT)</div>
-                        <div class="client-info-grid">
-                            <!-- 第一行 -->
-                            <label>客戶名稱：</label>
-                            <span class="span-3"><?= esc($data['customer']['c_name'] ?? '') ?></span>
-
-                            <!-- 第二行 -->
-                            <label>聯絡人：</label>
-                            <span><?= esc($data['contact']['cc_name'] ?? '') ?></span>
-                            <label>統編：</label>
-                            <span><?= esc($data['customer']['c_tax_id'] ?? '') ?></span>
-
-                            <!-- 第三行 -->
-                            <label>市話：</label>
-                            <span><?= esc($data['customer']['c_phone'] ?? '') ?></span>
-                            <label>手機：</label>
-                            <span><?= esc($data['contact']['cc_phone'] ?? '') ?></span>
-
-                            <!-- 第四行 -->
-                            <label>傳真：</label>
-                            <span><?= esc($data['customer']['c_fax'] ?? '') ?></span>
-                            <label>Email：</label>
-                            <span><?= esc($data['contact']['cc_email'] ?? '') ?></span>
-
-                            <!-- 第五行 -->
-                            <label>地址：</label>
-                            <span class="span-3"><?= esc($data['customer']['c_city'] ?? '') ?> <?= esc($data['customer']['c_address'] ?? '') ?></span>
-
-                            <!-- 第六行 -->
-                            <label>送貨地址：</label>
-                            <span class="span-3"><?= esc($data['q_delivery_city'] ?? '') ?> <?= esc($data['q_delivery_address'] ?? '') ?></span>
-                        </div>
-                    </div>
-                    <div class="info-right">
-                        <div class="info-label">單據詳細 (DETAILS)</div>
-                        <div class="details-info-grid">
-                            <label>報價日期：</label>
-                            <span class="value"><?= esc($data['q_date']) ?></span>
-
-                            <label>有效期限：</label>
-                            <span class="value">
+                    <table class="info-table">
+                        <colgroup>
+                            <col style="width: 14%;">
+                            <col style="width: 20%;">
+                            <col style="width: 14%;">
+                            <col style="width: 20%;">
+                            <col style="width: 14%;">
+                            <col style="width: 18%;">
+                        </colgroup>
+                        <tr>
+                            <td class="label">客戶名稱：</td>
+                            <td class="value" colspan="3"><?= esc($data['customer']['c_name'] ?? '') ?></td>
+                            <td class="label">報價日期：</td>
+                            <td class="value"><?= esc($data['q_date']) ?></td>
+                        </tr>
+                        <tr>
+                            <td class="label">聯絡人：</td>
+                            <td class="value"><?= esc($data['contact']['cc_name'] ?? '') ?></td>
+                            <td class="label">統編：</td>
+                            <td class="value"><?= esc($data['customer']['c_tax_id'] ?? '') ?></td>
+                            <td class="label">有效期限：</td>
+                            <td class="value">
                                 <?php
                                 if (!empty($data['q_valid_date'])) {
                                     $validDate = new DateTime($data['q_valid_date']);
@@ -525,12 +460,31 @@
                                     echo '-';
                                 }
                                 ?>
-                            </span>
-
-                            <label>經辦人員：</label>
-                            <span class="value"></span>
-                        </div>
-                    </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">市話：</td>
+                            <td class="value"><?= esc($data['customer']['c_phone'] ?? '') ?></td>
+                            <td class="label">手機：</td>
+                            <td class="value"><?= esc($data['contact']['cc_phone'] ?? '') ?></td>
+                            <td class="label">經辦人員：</td>
+                            <td class="value"><?= esc($data['q_vendor'] ?? '') ?></td>
+                        </tr>
+                        <tr>
+                            <td class="label">傳真：</td>
+                            <td class="value"><?= esc($data['customer']['c_fax'] ?? '') ?></td>
+                            <td class="label">Email：</td>
+                            <td class="value" colspan="3"><?= esc($data['contact']['cc_email'] ?? '') ?></td>
+                        </tr>
+                        <tr>
+                            <td class="label">客戶地址：</td>
+                            <td class="value" colspan="5"><?= esc($data['customer']['c_city'] ?? '') ?> <?= esc($data['customer']['c_address'] ?? '') ?></td>
+                        </tr>
+                        <tr>
+                            <td class="label">送貨地址：</td>
+                            <td class="value" colspan="5"><?= esc($data['q_delivery_city'] ?? '') ?> <?= esc($data['q_delivery_address'] ?? '') ?></td>
+                        </tr>
+                    </table>
                 </div>
             <?php endif; ?>
 
@@ -553,7 +507,7 @@
                         <?php foreach ($currentItems as $item): ?>
                             <?php
                             // 處理圖片路徑（使用 product_images）
-                            $imagePath = base_url('assets/images/placeholder.png');
+                            $imagePath = $placeholderImage;
                             if (!empty($item['pi_name']) && !empty($item['pi_p_id'])) {
                                 $imagePath = base_url('uploads/products/' . $item['pi_p_id'] . '/' . $item['pi_name']);
                             }
@@ -572,7 +526,7 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="img-cell">
-                                    <img src="<?= esc($imagePath) ?>" alt="" onerror="this.src='<?= base_url('assets/images/placeholder.png') ?>'">
+                                    <img src="<?= esc($imagePath) ?>" alt="" onerror="this.src='<?= $placeholderImage ?>'">
                                 </td>
                                 <td class="number-cell"><?= $item['qi_quantity'] ?></td>
                                 <td class="price-cell"><?= number_format($item['qi_unit_price'], 0) ?></td>
