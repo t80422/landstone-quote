@@ -151,30 +151,39 @@ class QuoteModel extends Model
                 $quoteData['q_cc_id'] = null;
             }
 
+            // 驗證至少有一個有效的商品項目
+            $validItemCount = 0;
+            foreach ($items as $item) {
+                if (!empty($item['qi_pi_id']) && !empty($item['qi_quantity'])) {
+                    $validItemCount++;
+                }
+            }
+
+            if ($validItemCount === 0) {
+                throw new \Exception('至少需要新增一個有效的商品項目');
+            }
+
+            log_message('debug', print_r($quoteData, true));
             if ($quoteId) {
-                // 更新報價單
+                // 更新報價單（直接使用前端傳來的金額）
                 $this->update($quoteId, $quoteData);
 
                 // 刪除舊的項目
                 $quoteItemModel->where('qi_q_id', $quoteId)->delete();
             } else {
-                // 新增報價單
+                // 新增報價單（直接使用前端傳來的金額）
                 $quoteId = $this->insert($quoteData);
             }
 
-            // 計算並新增項目
-            $calculatedTotals = $this->calculateAndInsertItems($quoteId, $items, $quoteData);
+            // 新增項目（直接使用前端傳來的金額）
+            foreach ($items as $item) {
+                if (empty($item['qi_pi_id']) || empty($item['qi_quantity'])) {
+                    continue;
+                }
 
-            if (!$calculatedTotals['success']) {
-                throw new \Exception($calculatedTotals['message']);
+                $item['qi_q_id'] = $quoteId;
+                $quoteItemModel->insert($item);
             }
-
-            // 更新報價單金額
-            $this->update($quoteId, [
-                'q_subtotal' => $calculatedTotals['subtotal'],
-                'q_tax_amount' => $calculatedTotals['taxAmount'],
-                'q_total_amount' => $calculatedTotals['totalAmount'],
-            ]);
 
             $db->transComplete();
 
@@ -201,63 +210,6 @@ class QuoteModel extends Model
         }
     }
 
-    /**
-     * 計算並新增報價單項目
-     * 
-     * @param int $quoteId 報價單 ID
-     * @param array $items 項目陣列
-     * @param array $quoteData 報價單資料（含折扣、稅率）
-     * @return array ['success' => bool, 'message' => string, 'subtotal' => float, 'taxAmount' => float, 'totalAmount' => float]
-     */
-    private function calculateAndInsertItems(int $quoteId, array $items, array $quoteData): array
-    {
-        $quoteItemModel = new QuoteItemModel();
-        $subtotal = 0;
-
-        foreach ($items as $item) {
-            if (empty($item['qi_pi_id']) || empty($item['qi_quantity'])) {
-                continue;
-            }
-
-            $item['qi_q_id'] = $quoteId;
-
-            // 計算單項金額
-            $quantity = floatval($item['qi_quantity']);
-            $unitPrice = floatval($item['qi_unit_price']);
-            $discount = floatval($item['qi_discount'] ?? 0);
-
-            $amount = $quantity * $unitPrice * (1 - $discount / 100);
-            $item['qi_amount'] = $amount;
-            $quoteItemModel->insert($item);
-            $subtotal += $amount;
-        }
-
-        if ($subtotal == 0) {
-            return [
-                'success' => false,
-                'message' => '至少需要新增一個有效的商品項目',
-                'subtotal' => 0,
-                'taxAmount' => 0,
-                'totalAmount' => 0,
-            ];
-        }
-
-        // 計算整單折扣和稅額
-        $discount = floatval($quoteData['q_discount'] ?? 0);
-        $taxRate = floatval($quoteData['q_tax_rate'] ?? 5) / 100;
-
-        $discountedSubtotal = $subtotal * (1 - $discount / 100);
-        $taxAmount = $discountedSubtotal * $taxRate;
-        $totalAmount = $discountedSubtotal + $taxAmount;
-
-        return [
-            'success' => true,
-            'message' => '',
-            'subtotal' => $subtotal,
-            'taxAmount' => $taxAmount,
-            'totalAmount' => $totalAmount,
-        ];
-    }
 
     /**
      * 驗證項目資料

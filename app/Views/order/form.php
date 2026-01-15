@@ -547,10 +547,17 @@ $productCategories = $productCategories ?? [];
                                     </td>
                                 </tr>
                                 <tr class="table-primary">
-                                    <td class="text-end fw-bold fs-5">訂單總金額：</td>
-                                    <td class="text-end fw-bold fs-5 text-primary">
-                                        <span id="totalDisplay">NT$ <?= number_format($data['o_total_amount'] ?? 0) ?></span>
-                                        <input type="hidden" name="o_total_amount" id="totalInput" value="<?= $data['o_total_amount'] ?? 0 ?>">
+                                    <td class="text-end fw-bold fs-5 align-middle">訂單總金額：</td>
+                                    <td class="text-end">
+                                        <div class="input-group input-group-lg justify-content-end">
+                                            <span class="input-group-text bg-transparent border-0 fw-bold fs-5 text-primary">NT$</span>
+                                            <input type="number" 
+                                                   class="form-control form-control-lg text-end fw-bold fs-5 text-primary border-0 bg-transparent p-0" 
+                                                   name="o_total_amount" 
+                                                   id="totalInput" 
+                                                   value="<?= old('o_total_amount', $data['o_total_amount'] ?? 0) ?>" 
+                                                   style="max-width: 200px;">
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
@@ -763,10 +770,11 @@ $productCategories = $productCategories ?? [];
         }
 
         function initCalculations() {
+            // 初始化時只計算商品項目金額，不重新計算總金額
+            // 這樣可以保留編輯模式下用戶手動調整的總金額
             document.querySelectorAll('.item-row').forEach(row => {
-                calculateItemAmount(row);
+                calculateItemAmount(row, false);
             });
-            calculateTotal();
         }
 
         function bindEvents() {
@@ -1143,7 +1151,7 @@ $productCategories = $productCategories ?? [];
             return products.filter(product => String(product.p_pc_id || '') === String(categoryId));
         }
 
-        function calculateItemAmount(row) {
+        function calculateItemAmount(row, updateTotal = true) {
             const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
             const unitPrice = parseFloat(row.querySelector('.price-input').value) || 0;
             const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
@@ -1151,7 +1159,9 @@ $productCategories = $productCategories ?? [];
             const amount = quantity * unitPrice * (1 - discount / 100);
             row.querySelector('.amount-display').value = amount.toFixed(0);
 
-            calculateTotal();
+            if (updateTotal) {
+                calculateTotal();
+            }
         }
 
         function calculateTotal() {
@@ -1189,9 +1199,6 @@ $productCategories = $productCategories ?? [];
             });
             document.getElementById('taxInput').value = taxAmount.toFixed(0);
 
-            document.getElementById('totalDisplay').textContent = 'NT$ ' + totalAmount.toLocaleString('zh-TW', {
-                minimumFractionDigits: 0
-            });
             document.getElementById('totalInput').value = totalAmount.toFixed(0);
         }
 
