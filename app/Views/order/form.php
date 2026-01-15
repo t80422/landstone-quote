@@ -502,8 +502,8 @@ $productCategories = $productCategories ?? [];
                                 <tr>
                                     <td class="text-end fw-bold">小計：</td>
                                     <td class="text-end">
-                                        <span id="subtotalDisplay">NT$ <?= number_format($data['o_subtotal'] ?? 0) ?></span>
-                                        <input type="hidden" name="o_subtotal" id="subtotalInput" value="<?= $data['o_subtotal'] ?? 0 ?>">
+                                        <span id="subtotalDisplay">NT$ <?= number_format(old('o_subtotal', $data['o_subtotal'] ?? 0)) ?></span>
+                                        <input type="hidden" name="o_subtotal" id="subtotalInput" value="<?= old('o_subtotal', $data['o_subtotal'] ?? 0) ?>">
                                     </td>
                                 </tr>
                                 <tr>
@@ -542,8 +542,8 @@ $productCategories = $productCategories ?? [];
                                 <tr>
                                     <td class="text-end fw-bold">稅額：</td>
                                     <td class="text-end">
-                                        <span id="taxDisplay">NT$ <?= number_format($data['o_tax_amount'] ?? 0) ?></span>
-                                        <input type="hidden" name="o_tax_amount" id="taxInput" value="<?= $data['o_tax_amount'] ?? 0 ?>">
+                                        <span id="taxDisplay">NT$ <?= number_format(old('o_tax_amount', $data['o_tax_amount'] ?? 0)) ?></span>
+                                        <input type="hidden" name="o_tax_amount" id="taxInput" value="<?= old('o_tax_amount', $data['o_tax_amount'] ?? 0) ?>">
                                     </td>
                                 </tr>
                                 <tr class="table-primary">

@@ -375,8 +375,8 @@ $productCategories = $productCategories ?? [];
                                 <tr>
                                     <td class="text-end fw-bold">小計：</td>
                                     <td class="text-end">
-                                        <span id="subtotalDisplay">NT$ 0</span>
-                                        <input type="hidden" name="q_subtotal" id="subtotalInput" value="0">
+                                        <span id="subtotalDisplay">NT$ <?= number_format(old('q_subtotal', $data['q_subtotal'] ?? 0)) ?></span>
+                                        <input type="hidden" name="q_subtotal" id="subtotalInput" value="<?= old('q_subtotal', $data['q_subtotal'] ?? 0) ?>">
                                     </td>
                                 </tr>
                                 <tr>
@@ -415,8 +415,8 @@ $productCategories = $productCategories ?? [];
                                 <tr>
                                     <td class="text-end fw-bold">稅額：</td>
                                     <td class="text-end">
-                                        <span id="taxDisplay">NT$ 0</span>
-                                        <input type="hidden" name="q_tax_amount" id="taxInput" value="0">
+                                        <span id="taxDisplay">NT$ <?= number_format(old('q_tax_amount', $data['q_tax_amount'] ?? 0)) ?></span>
+                                        <input type="hidden" name="q_tax_amount" id="taxInput" value="<?= old('q_tax_amount', $data['q_tax_amount'] ?? 0) ?>">
                                     </td>
                                 </tr>
                                 <tr class="table-primary">
