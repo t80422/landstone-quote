@@ -468,7 +468,7 @@
                             <td class="label">手機：</td>
                             <td class="value"><?= esc($data['contact']['cc_phone'] ?? '') ?></td>
                             <td class="label">經辦人員：</td>
-                            <td class="value"><?= esc($data['q_vendor'] ?? '') ?></td>
+                            <td class="value"></td>
                         </tr>
                         <tr>
                             <td class="label">傳真：</td>
@@ -610,11 +610,9 @@
                     <!-- 注意事項 -->
                     <div class="notes">
                         <h4>注意事項：</h4>
-                        <ol>
-                            <li>本報價僅為材料費，不包含運費、搬運、施工安裝及垃圾清運等任何工程費用。</li>
-                            <li>不同生產批號之產品可能存在微小色差，建築於同一空間使用同一批號之材料，訂購時應按實際尺寸一次訂足。</li>
-                            <li>交期將於訂金確認收取後另行通知。</li>
-                        </ol>
+                        <?php if(!empty($data['q_notes'])): ?>
+                            <?= nl2br(esc($data['q_notes'])) ?>
+                        <?php endif; ?>
                     </div>
 
                     <!-- 簽名區 -->
